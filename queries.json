@@ -1,0 +1,16 @@
+[
+    {"vendor": "DICOM", "product": "DICOM Server", "queries": [
+        "DICOM FINDSCU", 
+        "DICOM -FINDSCU",
+        "\"Content-Type: application/dicom\"",
+        "\"DICOM Server Response\"",
+        "DICOM port:104",
+        "DICOM port:11112",
+        "port:2761",
+        "port:2762"], "script": "", "confidence": "firm"},
+    {"vendor": "PMOD Technologies", "product": "PMOD Dicom Server", "queries": ["port:4000 DHT Nodes", "port:4030 DHT Nodes"], "script": "", "confidence": "Tentative"},
+    {"vendor": "GE Healthcare", "product": "NM General Purpose 600 Series", "queries": ["port:4006"], "script": "", "confidence": "Tentative"},
+    {"vendor": "Orthanc", "product": "Orthanc Server", "queries": ["title:\"Orthanc Explorer\"", "port:4242"], "script": "", "confidence": "Certain"},
+    {"vendor": "Xinapse Systems", "product": "DICOM Storage Server", "queries": ["port:4560"], "script": "", "confidence": "Tentative"},
+    {"vendor": "DICOM Grid", "product": "DICOM Grid Gateway", "queries": ["port:4560", "port:8161"], "script": "", "confidence": "Tentative"}
+]

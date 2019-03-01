@@ -1,9 +1,11 @@
 # Custom
-grindervenv/
+*venv*/
+.vscode/
 results/
 queries_test.json
 .DS_Store
 markers.js
+database.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

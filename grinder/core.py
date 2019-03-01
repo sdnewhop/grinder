@@ -11,7 +11,9 @@ from grinder.defaultvalues import DefaultValues
 from grinder.errors import GrinderCoreSearchError, GrinderCoreBatchSearchError, \
     GrinderCoreProductQueriesError, GrinderCoreHostShodanResultsError, GrinderCoreUpdateMapMarkersError, \
     GrinderCoreSaveResultsError, GrinderCoreCountUniqueProductsError, GrinderCoreConvertToContinentsError, \
-    GrinderCoreCreatePlotError, GrinderCoreIsHostExistedError, GrinderCoreLoadResultsFromFile
+    GrinderCoreCreatePlotError, GrinderCoreIsHostExistedError, GrinderCoreLoadResultsFromFileError, \
+    GrinderCoreInitDatabaseCallError, GrinderCoreCloseDatabaseError, GrinderCoreUpdateEndTimeDatabaseError, \
+    GrinderCoreUpdateResultsCountDatabaseError
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
 from grinder.plots import GrinderPlots
@@ -85,7 +87,7 @@ class GrinderCore:
         self.continents = continents
         return self.continents
 
-    @exception_handler(expected_exception=GrinderCoreLoadResultsFromFile)
+    @exception_handler(expected_exception=GrinderCoreLoadResultsFromFileError)
     def load_results_from_file(self, load_dir=DefaultValues.RESULTS_DIRECTORY,
                                load_file=DefaultValues.JSON_RESULTS_FILE,
                                load_json_dir=DefaultValues.JSON_RESULTS_DIRECTORY):
@@ -168,16 +170,23 @@ class GrinderCore:
         if not self.__is_host_existed(shodan_result_as_dict.get('ip_str ')):
             self.shodan_processed_results.append(shodan_result_as_dict)
 
-    def __init_database(self):
+    @exception_handler(expected_exception=GrinderCoreInitDatabaseCallError)
+    def __init_database(self) -> None:
         self.db = GrinderDatabase()
         self.db.create_db()
         self.db.initiate_scan()
 
-    def __close_database(self):
+    @exception_handler(expected_exception=GrinderCoreCloseDatabaseError)
+    def __close_database(self) -> None:
         self.db.close()
 
-    def __update_end_time_database(self):
+    @exception_handler(expected_exception=GrinderCoreUpdateEndTimeDatabaseError)
+    def __update_end_time_database(self) -> None:
         self.db.update_end_time()
+    
+    @exception_handler(expected_exception=GrinderCoreUpdateResultsCountDatabaseError)
+    def __update_results_count(self, total_products: int, total_results: int) -> None:
+        self.db.update_results_count(total_products, total_results)
 
     def __save_to_database(self, query: str):
         results_by_query = list(filter(lambda host: host.get('query') == query, self.shodan_processed_results))
@@ -210,5 +219,6 @@ class GrinderCore:
         for product_info in queries:
             self.process_current_product_queries(product_info)
         self.__update_end_time_database()
+        self.__update_results_count(total_products=len(queries), total_results=len(self.shodan_processed_results))
         self.__close_database()
         return self.shodan_processed_results

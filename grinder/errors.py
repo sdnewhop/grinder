@@ -128,7 +128,27 @@ class GrinderCoreIsHostExistedError(GrinderCoreException):
         super().__init__(error_args)
 
 
-class GrinderCoreLoadResultsFromFile(GrinderCoreException):
+class GrinderCoreLoadResultsFromFileError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreInitDatabaseCallError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreCloseDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreUpdateEndTimeDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreUpdateResultsCountDatabaseError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 

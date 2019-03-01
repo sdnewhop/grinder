@@ -32,7 +32,9 @@ class GrinderDatabase:
                     scan_date TEXT,
                     scan_start_time TEXT,
                     scan_end_time TEXT,
-                    scan_duration TEXT
+                    scan_duration TEXT,
+                    scan_total_products INT,
+                    scan_total_results INT
                 )
                 '''
             )
@@ -88,11 +90,31 @@ class GrinderDatabase:
                 '''
                 UPDATE scan_information
                     SET scan_end_time = ?,
-                        scan_duration =?
+                        scan_duration = ?
                     WHERE id = ?
                 ''', (
                     str(self.scan_end_time.time().strftime('%H:%M:%S')),
                     str(self.scan_duration),
+                    current_scan_id
+                )
+            )
+    
+    def update_results_count(self, total_products: int, total_results: int) -> None:
+        with self.connection as db_connection:
+            current_scan_id = db_connection.execute(
+                '''
+                SELECT max(id) FROM scan_information
+                '''
+            ).fetchone()[0]
+            db_connection.execute(
+                '''
+                UPDATE scan_information
+                    SET scan_total_products = ?,
+                        scan_total_results = ?
+                    WHERE id = ?
+                ''', (
+                    total_products,
+                    total_results,
                     current_scan_id
                 )
             )

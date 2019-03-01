@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 
 from typing import NamedTuple
+
 from enforce import runtime_validation
 
 from grinder.continents import GrinderContinents
+from grinder.dbhandling import GrinderDatabase
 from grinder.decorators import exception_handler, timer
 from grinder.defaultvalues import DefaultValues
 from grinder.errors import GrinderCoreSearchError, GrinderCoreBatchSearchError, \
     GrinderCoreProductQueriesError, GrinderCoreHostShodanResultsError, GrinderCoreUpdateMapMarkersError, \
     GrinderCoreSaveResultsError, GrinderCoreCountUniqueProductsError, GrinderCoreConvertToContinentsError, \
-    GrinderCoreCreatePlotError, GrinderCoreIsHostExistedError
+    GrinderCoreCreatePlotError, GrinderCoreIsHostExistedError, GrinderCoreLoadResultsFromFile
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
 from grinder.plots import GrinderPlots
 from grinder.shodanconnector import ShodanConnector
 from grinder.utils import GrinderUtils
-from grinder.dbhandling import GrinderDatabase
 
 
 class HostInfo(NamedTuple):
@@ -29,7 +30,8 @@ class HostInfo(NamedTuple):
     lng: str
     country: str
 
-#@runtime_validation
+
+@runtime_validation
 class GrinderCore:
     shodan_results: list = []
     shodan_processed_results: list = []
@@ -40,6 +42,7 @@ class GrinderCore:
         self.fixed_entities_count: list = []
         self.continents: dict = {}
 
+        self.filemanager = GrinderFileManager()
         self.db = None
 
         self.api_key = api_key or DefaultValues.API_KEY
@@ -57,11 +60,11 @@ class GrinderCore:
         return self.shodan_results
 
     @exception_handler(expected_exception=GrinderCoreUpdateMapMarkersError)
-    def update_map_markers(self, search_results=None, enabled=True) -> None:
+    def update_map_markers(self, search_results=None) -> None:
         if search_results is None:
             search_results = self.shodan_processed_results
-        MapMarkers().update_markers(search_results, enabled)
-    
+        MapMarkers().update_markers(search_results)
+
     @exception_handler(expected_exception=GrinderCoreCreatePlotError)
     def create_plots(self) -> None:
         plots = GrinderPlots()
@@ -82,41 +85,52 @@ class GrinderCore:
         self.continents = continents
         return self.continents
 
+    @exception_handler(expected_exception=GrinderCoreLoadResultsFromFile)
+    def load_results_from_file(self, load_dir=DefaultValues.RESULTS_DIRECTORY,
+                               load_file=DefaultValues.JSON_RESULTS_FILE,
+                               load_json_dir=DefaultValues.JSON_RESULTS_DIRECTORY):
+        self.shodan_processed_results = self.filemanager.load_data_from_file(load_dir=load_dir,
+                                                                               load_file=load_file,
+                                                                               load_json_dir=load_json_dir)
+        return self.shodan_processed_results
+
     @exception_handler(expected_exception=GrinderCoreSaveResultsError)
     def save_results(self, dest_dir=DefaultValues.RESULTS_DIRECTORY) -> None:
         if not self.shodan_processed_results:
             return
         if self.shodan_processed_results:
-            GrinderFileManager.write_results_json(self, self.shodan_processed_results, 
-                dest_dir=dest_dir, json_file=DefaultValues.JSON_RESULTS_FILE)
-            GrinderFileManager.write_results_csv(self, self.shodan_processed_results,  
-                dest_dir=dest_dir, csv_file=DefaultValues.CSV_RESULTS_FILE)
-            GrinderFileManager.write_results_txt(self, self.shodan_processed_results,  
-                dest_dir=dest_dir, txt_file=DefaultValues.TXT_RESULTS_FILE)
+            self.filemanager.write_results_json(self.shodan_processed_results,
+                                                  dest_dir=dest_dir, json_file=DefaultValues.JSON_RESULTS_FILE)
+            self.filemanager.write_results_csv(self.shodan_processed_results,
+                                                 dest_dir=dest_dir, csv_file=DefaultValues.CSV_RESULTS_FILE)
+            self.filemanager.write_results_txt(self.shodan_processed_results,
+                                                 dest_dir=dest_dir, txt_file=DefaultValues.TXT_RESULTS_FILE)
 
         if self.continents:
-            GrinderFileManager.write_results_json(self, self.continents, 
-                dest_dir=dest_dir, json_file=DefaultValues.JSON_CONTINENTS_FILE)
-            GrinderFileManager.write_results_csv(self, self.continents,  
-                dest_dir=dest_dir, csv_file=DefaultValues.CSV_CONTINENTS_FILE)
-            GrinderFileManager.write_results_txt(self, self.continents,  
-                dest_dir=dest_dir, txt_file=DefaultValues.TXT_CONTINENTS_FILE)
+            self.filemanager.write_results_json(self.continents,
+                                                  dest_dir=dest_dir, json_file=DefaultValues.JSON_CONTINENTS_FILE)
+            self.filemanager.write_results_csv(self.continents,
+                                                 dest_dir=dest_dir, csv_file=DefaultValues.CSV_CONTINENTS_FILE)
+            self.filemanager.write_results_txt(self.continents,
+                                                 dest_dir=dest_dir, txt_file=DefaultValues.TXT_CONTINENTS_FILE)
 
-        for entity in self.all_entities_count:
-            GrinderFileManager.write_results_json(self, entity.get('results'), 
-                dest_dir=dest_dir, json_file=f'{entity.get("entity")}.json')
-            GrinderFileManager.write_results_csv(self, entity.get('results'), 
-                dest_dir=dest_dir, csv_file=f'{entity.get("entity")}.csv')
-            GrinderFileManager.write_results_txt(self, entity.get('results'), 
-                dest_dir=dest_dir, txt_file=f'{entity.get("entity")}.txt')
+        if self.all_entities_count:
+            for entity in self.all_entities_count:
+                self.filemanager.write_results_json(entity.get('results'),
+                                                      dest_dir=dest_dir, json_file=f'{entity.get("entity")}.json')
+                self.filemanager.write_results_csv(entity.get('results'),
+                                                     dest_dir=dest_dir, csv_file=f'{entity.get("entity")}.csv')
+                self.filemanager.write_results_txt(entity.get('results'),
+                                                     dest_dir=dest_dir, txt_file=f'{entity.get("entity")}.txt')
 
-        for entity in self.fixed_entities_count:
-            GrinderFileManager.write_results_json(self, entity.get('results'), 
-                dest_dir=dest_dir, json_file=f'fixed_{entity.get("entity")}.json')
-            GrinderFileManager.write_results_csv(self, entity.get('results'), 
-                dest_dir=dest_dir, csv_file=f'fixed_{entity.get("entity")}.csv')
-            GrinderFileManager.write_results_txt(self, entity.get('results'), 
-                dest_dir=dest_dir, txt_file=f'fixed_{entity.get("entity")}.txt')
+        if self.fixed_entities_count:
+            for entity in self.fixed_entities_count:
+                self.filemanager.write_results_json(entity.get('results'),
+                                                      dest_dir=dest_dir, json_file=f'fixed_{entity.get("entity")}.json')
+                self.filemanager.write_results_csv(entity.get('results'),
+                                                     dest_dir=dest_dir, csv_file=f'fixed_{entity.get("entity")}.csv')
+                self.filemanager.write_results_txt(entity.get('results'),
+                                                     dest_dir=dest_dir, txt_file=f'fixed_{entity.get("entity")}.txt')
 
     @exception_handler(expected_exception=GrinderCoreIsHostExistedError)
     def __is_host_existed(self, ip: str) -> bool or None:
@@ -130,7 +144,7 @@ class GrinderCore:
             search_results = self.shodan_processed_results
         list_of_products = [current_product.get(entity_name) for current_product in search_results]
         utils = GrinderUtils()
-        utils.count_entities(list_of_products, max_entities, entity_name)
+        utils.count_entities(list_of_products, max_entities)
 
         self.all_entities_count.append({'entity': entity_name, 'results': utils.get_all_count_results()})
         self.fixed_entities_count.append({'entity': entity_name, 'results': utils.get_fixed_max_count_results()})
@@ -158,10 +172,10 @@ class GrinderCore:
         self.db = GrinderDatabase()
         self.db.create_db()
         self.db.initiate_scan()
-    
+
     def __close_database(self):
         self.db.close()
-    
+
     def __update_end_time_database(self):
         self.db.update_end_time()
 
@@ -191,7 +205,7 @@ class GrinderCore:
     def batch_search(self, queries_file: str) -> list:
         queries_file = queries_file or DefaultValues.QUERIES_FILE
         print(f'File with queries: {queries_file}')
-        queries = GrinderFileManager().get_queries(queries_file=queries_file)
+        queries = self.filemanager.get_queries(queries_file=queries_file)
         self.__init_database()
         for product_info in queries:
             self.process_current_product_queries(product_info)

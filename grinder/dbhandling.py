@@ -4,9 +4,10 @@ import sqlite3
 from datetime import datetime
 from json import dumps as json_dumps
 
-from grinder.defaultvalues import DefaultDatabaseValues
-from grinder.errors import GrinderDatabaseOpenError, GrinderDatabaseCreateError, GrinderDatabaseInitialScanError, GrinderDatabaseAddScanDataError, GrinderDatabaseCloseError, GrinderDatabaseUpdateTimeError
 from grinder.decorators import exception_handler
+from grinder.defaultvalues import DefaultDatabaseValues
+from grinder.errors import GrinderDatabaseOpenError, GrinderDatabaseCreateError, GrinderDatabaseInitialScanError, \
+    GrinderDatabaseAddScanDataError, GrinderDatabaseCloseError, GrinderDatabaseUpdateTimeError
 
 
 class GrinderDatabase:
@@ -96,9 +97,9 @@ class GrinderDatabase:
                 )
             )
 
-
     @exception_handler(expected_exception=GrinderDatabaseAddScanDataError)
-    def add_scan_data(self, vendor: str, product: str, query: str, script: str, confidence: str, results_count: int, results: dict) -> None:
+    def add_scan_data(self, vendor: str, product: str, query: str, script: str, confidence: str, results_count: int,
+                      results: dict) -> None:
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(
                 '''

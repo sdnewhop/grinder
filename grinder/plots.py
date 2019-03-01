@@ -2,10 +2,11 @@
 
 from matplotlib import pyplot as plot
 
-from grinder.defaultvalues import DefaultPlotValues, DefaultValues
-from grinder.filemanager import GrinderFileManager
 from grinder.decorators import exception_handler
-from grinder.errors import GrinderPlotsAdjustAutopctError, GrinderPlotsCreatePieChartError, GrinderPlotsSavePieChartError
+from grinder.defaultvalues import DefaultPlotValues, DefaultValues
+from grinder.errors import GrinderPlotsAdjustAutopctError, GrinderPlotsCreatePieChartError, \
+    GrinderPlotsSavePieChartError
+from grinder.filemanager import GrinderFileManager
 
 
 class GrinderPlots:
@@ -28,9 +29,7 @@ class GrinderPlots:
         return percent_and_count
 
     @exception_handler(expected_exception=GrinderPlotsCreatePieChartError)
-    def create_pie_chart(self, results: dict, suptitle: str, figure_id=None) -> None:
-        if not figure_id:
-            figure_id = self.results_figure_id
+    def create_pie_chart(self, results: dict, suptitle: str) -> None:
         values = [value for value in results.values()]
         keys = [key for key in results.keys()]
 

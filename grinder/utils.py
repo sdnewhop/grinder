@@ -8,7 +8,7 @@ class GrinderUtils:
         self.dict_with_all_results: dict = {}
         self.dict_with_fixed_max_results: dict = {}
 
-    def count_entities(self, results: dict, max_entities: int, entity_name: str) -> None:
+    def count_entities(self, results: list, max_entities: int) -> None:
         number_of_entities: dict = Counter(results)
         entities_sorted_by_value = dict(sorted(number_of_entities.items(), key=lambda x: x[1], reverse=True))
 

@@ -133,6 +133,16 @@ class GrinderCoreLoadResultsFromFileError(GrinderCoreException):
         super().__init__(error_args)
 
 
+class GrinderCoreLoadResultsFromDbError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreLoadResultsError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
 class GrinderCoreInitDatabaseCallError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
@@ -214,5 +224,15 @@ class GrinderDatabaseCloseError(GrinderDatabaseException):
 
 
 class GrinderDatabaseUpdateTimeError(GrinderDatabaseException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderDatabaseLoadResultsError(GrinderDatabaseException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderDatabaseUpdateResultsCountError(GrinderDatabaseException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)

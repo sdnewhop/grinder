@@ -3,11 +3,13 @@
 import sqlite3
 from datetime import datetime
 from json import dumps as json_dumps
+from json import loads as json_loads
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultDatabaseValues
 from grinder.errors import GrinderDatabaseOpenError, GrinderDatabaseCreateError, GrinderDatabaseInitialScanError, \
-    GrinderDatabaseAddScanDataError, GrinderDatabaseCloseError, GrinderDatabaseUpdateTimeError
+    GrinderDatabaseAddScanDataError, GrinderDatabaseCloseError, GrinderDatabaseUpdateTimeError, \
+    GrinderDatabaseLoadResultsError, GrinderDatabaseUpdateResultsCountError
 
 
 class GrinderDatabase:
@@ -98,7 +100,8 @@ class GrinderDatabase:
                     current_scan_id
                 )
             )
-    
+
+    @exception_handler(expected_exception=GrinderDatabaseUpdateResultsCountError)
     def update_results_count(self, total_products: int, total_results: int) -> None:
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(
@@ -152,6 +155,23 @@ class GrinderDatabase:
                     json_dumps(results)
                 )
             )
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_last_results(self):
+        with self.connection as db_connection:
+            sql_results = db_connection.execute(
+                '''
+                SELECT results FROM scan_data
+                WHERE scan_information_id = (
+                    SELECT max(id) FROM scan_information
+                    WHERE scan_total_results != 0
+                    )
+                AND results != '[]'
+                '''
+            ).fetchall()
+            results_parsed = [json_loads(item[0]) for item in sql_results]
+            results_combined = [result for query_result in results_parsed for result in query_result]
+            return results_combined
 
     @exception_handler(expected_exception=GrinderDatabaseCloseError)
     def close(self):

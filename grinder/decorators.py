@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import sys
 from functools import wraps
 from os import path, makedirs
-from sys import exit
 from time import time
 
 
@@ -12,10 +12,10 @@ def exception_handler(expected_exception):
             try:
                 return function(*args, **kwargs)
             except KeyboardInterrupt:
-                print('Bye!')
-                exit(1)
-            except Exception as e:
-                raise expected_exception(e) from e
+                print('Keyboard Interrupt Detected. Operation aborted. Bye!')
+                sys.exit(1)
+            except Exception as unexp_error:
+                raise expected_exception(unexp_error) from unexp_error
 
         return func_wrapper
 

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     args = interface.parse_args()
 
     core = GrinderCore(api_key=args.shodan_key)
-    search_results = core.batch_search(queries_file=args.queries_file) if args.run else core.load_results_from_file()
+    search_results = core.batch_search(queries_file=args.queries_file) if args.run else core.load_results()
     print(f'Total results: {len(search_results)}')
 
     if args.count_unique:

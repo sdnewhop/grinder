@@ -48,12 +48,25 @@ class GrinderDatabase:
                     scan_information_id INTEGER,
                     vendor TEXT,
                     product TEXT,
-                    query TEXT,
                     script TEXT,
                     confidence TEXT,
-                    results_count INT,
+
+                    FOREIGN KEY (scan_information_id) REFERENCES scan_information(id)
+                )
+                '''
+            )
+            db_connection.execute(
+                '''
+                CREATE TABLE IF NOT EXISTS
+                shodan_results(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    scan_data_id INTEGER,
+                    scan_information_id INTEGER,
+                    query TEXT,
+                    results_count INTEGER,
                     results TEXT,
 
+                    FOREIGN KEY (scan_data_id) REFERENCES scan_data(id),
                     FOREIGN KEY (scan_information_id) REFERENCES scan_information(id)
                 )
                 '''
@@ -123,7 +136,7 @@ class GrinderDatabase:
             )
 
     @exception_handler(expected_exception=GrinderDatabaseAddScanDataError)
-    def add_scan_data(self, vendor: str, product: str, query: str, script: str, confidence: str, results_count: int,
+    def add_shodan_scan_data(self, vendor: str, product: str, query: str, script: str, confidence: str, results_count: int,
                       results: dict) -> None:
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(
@@ -138,19 +151,36 @@ class GrinderDatabase:
                     scan_information_id,
                     vendor,
                     product,
-                    query,
                     script,
-                    confidence,
-                    results_count,
-                    results
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    confidence
+                ) VALUES (?, ?, ?, ?, ?)
                 ''', (
                     current_scan_id,
                     vendor,
                     product,
-                    query,
                     script,
-                    confidence,
+                    confidence
+                )
+            )
+            current_scan_data_id = db_connection.execute(
+                '''
+                SELECT max(id) FROM scan_data
+                '''
+            ).fetchone()[0]
+            db_connection.execute(
+                '''
+                INSERT OR REPLACE INTO
+                shodan_results(
+                    scan_data_id,
+                    scan_information_id,
+                    query,
+                    results_count,
+                    results
+                ) VALUES (?, ?, ?, ?, ?)
+                ''', (
+                    current_scan_data_id,
+                    current_scan_id,
+                    query,
                     results_count,
                     json_dumps(results)
                 )
@@ -161,7 +191,7 @@ class GrinderDatabase:
         with self.connection as db_connection:
             sql_results = db_connection.execute(
                 '''
-                SELECT results FROM scan_data
+                SELECT results FROM shodan_results
                 WHERE scan_information_id = (
                     SELECT max(id) FROM scan_information
                     WHERE scan_total_results != 0

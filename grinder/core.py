@@ -36,7 +36,7 @@ class HostInfo(NamedTuple):
 
 @runtime_validation
 class GrinderCore:
-    shodan_results: list = []
+    shodan_raw_results: list = []
     shodan_processed_results: list = []
 
     def __init__(self, api_key: str) -> None:
@@ -57,11 +57,11 @@ class GrinderCore:
     def shodan_search(self, query: str) -> list:
         shodan = ShodanConnector(self.api_key)
         shodan.search(query)
-        self.shodan_results = shodan.get_results()
+        self.shodan_raw_results = shodan.get_results()
         print(f'│ Shodan results count: {shodan.get_shodan_count()}')
         print(f'│ Real results count: {shodan.get_real_count()}')
         print(f'└ ', end='')
-        return self.shodan_results
+        return self.shodan_raw_results
 
     @exception_handler(expected_exception=GrinderCoreUpdateMapMarkersError)
     def update_map_markers(self, search_results=None) -> None:
@@ -223,7 +223,7 @@ class GrinderCore:
     def __save_to_database(self, query: str):
         results_by_query = list(filter(lambda host: host.get('query') == query, self.shodan_processed_results))
         results_count = len(results_by_query) if results_by_query else None
-        self.db.add_scan_data(vendor=self.product_info.get('vendor'),
+        self.db.add_shodan_scan_data(vendor=self.product_info.get('vendor'),
                               product=self.product_info.get('product'),
                               query=query,
                               script=self.product_info.get('script'),

@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
 
-class ShodanGathererException(Exception):
+class ShodanConnectorException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
         self.error_args = error_args
 
     def __str__(self):
-        return str(self.error_args)
+        return f'Error occured in Shodan Connector module: {self.error_args}'
+
+
+class CensysConnectorException(Exception):
+    def __init__(self, error_args: Exception):
+        super().__init__(self)
+        self.error_args = error_args
+
+    def __str__(self):
+        return f'Error occured in Censys Connector module: {self.error_args}'
 
 
 class GrinderFileManagerException(Exception):
@@ -15,7 +24,7 @@ class GrinderFileManagerException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return str(self.error_args)
+        return f'Error occured in Grinder Filemanager module: {self.error_args}'
 
 
 class GrinderCoreException(Exception):
@@ -24,7 +33,7 @@ class GrinderCoreException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return str(self.error_args)
+        return f'Error occured in Grinder Core module: {self.error_args}'
 
 
 class GrinderInterfaceException(Exception):
@@ -33,7 +42,7 @@ class GrinderInterfaceException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return str(self.error_args)
+        return f'Error occured in Grinder Interface module: {self.error_args}'
 
 
 class GrinderContinentsException(Exception):
@@ -42,7 +51,7 @@ class GrinderContinentsException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return str(self.error_args)
+        return f'Error occured in Grinder Continents module: {self.error_args}'
 
 
 class GrinderPlotsException(Exception):
@@ -51,7 +60,7 @@ class GrinderPlotsException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return str(self.error_args)
+        return f'Error occured in Grinder Plots module: {self.error_args}'
 
 
 class GrinderDatabaseException(Exception):
@@ -60,15 +69,30 @@ class GrinderDatabaseException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return str(self.error_args)
+        return f'Error occured in Grinder Database module: {self.error_args}'
 
 
-class ShodanGathererInitError(ShodanGathererException):
+class ShodanConnectorInitError(ShodanConnectorException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 
 
-class ShodanGathererSearchError(ShodanGathererException):
+class ShodanConnectorSearchError(ShodanConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class CensysConnectorInitError(CensysConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class CensysConnectorSearchError(CensysConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class CensysConnectorGetResultsError(CensysConnectorException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 
@@ -94,6 +118,11 @@ class GrinderCoreProductQueriesError(GrinderCoreException):
 
 
 class GrinderCoreHostShodanResultsError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreHostCensysResultsError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 
@@ -234,5 +263,10 @@ class GrinderDatabaseLoadResultsError(GrinderDatabaseException):
 
 
 class GrinderDatabaseUpdateResultsCountError(GrinderDatabaseException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderDatabaseAddBasicScanDataError(GrinderDatabaseException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)

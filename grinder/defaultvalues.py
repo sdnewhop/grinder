@@ -2,7 +2,11 @@
 
 
 class DefaultValues:
-    API_KEY: str = 'YOUR_DEFAULT_API_KEY'
+    SHODAN_API_KEY: str = 'YOUR_DEFAULT_API_KEY'
+    CENSYS_API_ID: str = 'YOUR_CENSYS_API_ID'
+    CENSYS_API_SECRET: str = 'YOUR_CENSYS_API_SECRET'
+    CENSYS_DEFAULT_RESULTS: int = 1000
+
     QUERIES_FILE: str = 'queries_test.json'
     MARKERS_DIRECTORY: str = 'map'
 

@@ -20,17 +20,26 @@ class GrinderInterface:
             exit(1)
 
     @exception_handler(expected_exception=GrinderInterfaceLoadEnvironmentKeyError)
-    def load_key_from_env(self) -> str:
+    def load_shodan_key_from_env(self) -> str:
         key = environ.get('SHODAN_API_KEY')
         if not key:
             exit(1)
         return key
+    
+    def load_censys_keys_from_env(self) -> tuple:
+        key_id = environ.get('CENSYS_API_ID')
+        key_secret = environ.get('CENSYS_API_SECRET')
+        if not (key_id or key_secret):
+            exit(1)
+        return key_id, key_secret
 
     @exception_handler(expected_exception=GrinderInterfaceParseArgsError)
     def parse_args(self) -> Namespace:
         if len(argv) == 1:
             print(f'Usage: {argv[0]} -h for help')
-        parser = ArgumentParser(description='Batch collect Shodan results from multiple queries.')
+        parser = ArgumentParser(description='''
+            The Grinder framework was created to automatically enumerate and fingerprint 
+            different hosts on the Internet using different back-end systems''')
         parser.add_argument('-r', '--run', action='store_true', default=False, help='Run scanning')
         parser.add_argument('-u', '--update-markers', action='store_true', default=False, help='Update map markers')
         parser.add_argument('-q', '--queries-file', action='store', default='queries.json',
@@ -38,9 +47,18 @@ class GrinderInterface:
         parser.add_argument('-sk', '--shodan-key', action='store', default=None, help='Shodan API key')
         parser.add_argument('-cu', '--count-unique', action='store_true', default=False, help='Count unique entities')
         parser.add_argument('-cp', '--create-plots', action='store_true', default=False, help='Create graphic plots')
+        parser.add_argument('-ci', '--censys-id', action='store', default=None, help='Censys API ID key')
+        parser.add_argument('-cs', '--censys-secret', action='store', default=None, help='Censys API SECRET key')
+        parser.add_argument('-cm', '--censys-max', action='store', type=int, default=None, help='Censys default maximum results quantity')
         self.args = parser.parse_args()
         if not self.args.shodan_key:
-            self.args.shodan_key = self.load_key_from_env()
+            self.args.shodan_key = self.load_shodan_key_from_env()
+        if not (self.args.censys_id or self.args.censys_secret):
+            self.args.censys_id, self.args.censys_secret = self.load_censys_keys_from_env()
+        print(f'Shodan API key: {self.args.shodan_key}')
+        print(f'Censys API ID: {self.args.censys_id}')
+        print(f'Censys API SECRET: {self.args.censys_secret}')
+        
         return self.args
 
     @exception_handler(expected_exception=GrinderInterfaceGetShodanKeyError)

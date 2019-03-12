@@ -10,7 +10,10 @@ if __name__ == "__main__":
     interface.check_python_version()
     args = interface.parse_args()
 
-    core = GrinderCore(api_key=args.shodan_key)
+    core = GrinderCore(shodan_api_key=args.shodan_key,
+                       censys_api_id=args.censys_id,
+                       censys_api_secret=args.censys_secret)
+    core.set_censys_max_results(args.censys_max)
     search_results = core.batch_search(queries_file=args.queries_file) if args.run else core.load_results()
     print(f'Total results: {len(search_results)}')
 

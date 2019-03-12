@@ -48,10 +48,8 @@ class GrinderDatabase:
                     scan_information_id INTEGER,
                     vendor TEXT,
                     product TEXT,
-                    query TEXT,
                     script TEXT,
                     confidence TEXT,
-                    source TEXT,
 
                     FOREIGN KEY (scan_information_id) REFERENCES scan_information(id)
                 )
@@ -64,6 +62,7 @@ class GrinderDatabase:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     scan_data_id INTEGER,
                     scan_information_id INTEGER,
+                    query TEXT,
                     results_count INTEGER,
                     results TEXT,
 
@@ -152,19 +151,15 @@ class GrinderDatabase:
                     scan_information_id,
                     vendor,
                     product,
-                    query,
                     script,
-                    confidence,
-                    source
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    confidence
+                ) VALUES (?, ?, ?, ?, ?)
                 ''', (
                     current_scan_id,
                     vendor,
                     product,
-                    query,
                     script,
-                    confidence,
-                    'Shodan'
+                    confidence
                 )
             )
             current_scan_data_id = db_connection.execute(
@@ -178,12 +173,14 @@ class GrinderDatabase:
                 shodan_results(
                     scan_data_id,
                     scan_information_id,
+                    query,
                     results_count,
                     results
-                ) VALUES (?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?)
                 ''', (
                     current_scan_data_id,
                     current_scan_id,
+                    query,
                     results_count,
                     json_dumps(results)
                 )

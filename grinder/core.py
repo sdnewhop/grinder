@@ -105,7 +105,7 @@ class GrinderCore:
         censys = CensysConnector(api_id=self.censys_api_id, api_secret=self.censys_api_secret)
         censys.search(query, results_count)
         self.censys_raw_results = censys.get_results()
-        print(f'| Censys results count: {censys.get_results_count()}')
+        print(f'│ Censys results count: {censys.get_results_count()}')
         print(f'└ ', end='')
         return self.censys_raw_results
 

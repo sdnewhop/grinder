@@ -88,16 +88,23 @@ class GrinderCore:
         print(f'└ ', end='')
         return self.shodan_raw_results
 
-    def set_censys_max_results(self, results_count):
+    def set_censys_max_results(self, results_count: int) -> None:
+        """
+        Set maximum results quantity for Censys queries (1000 is maximum for free API plan)
+
+        :param results_count (int): maximum results quantity
+        :return None:
+        """
         self.censys_results_count = results_count
 
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)
-    def censys_search(self, query: str, results_count=None):
+    def censys_search(self, query: str, results_count=None) -> list:
         """
         Search in censys database
 
         :param query (str): search query for censys
+        :param results_count (int): maximum results quantity
         :return list: raw censys results in list
         """
         if not results_count:

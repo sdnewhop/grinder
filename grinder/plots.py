@@ -20,7 +20,7 @@ class GrinderPlots:
                                              dest_dir=DefaultValues.RESULTS_DIRECTORY)
 
     @exception_handler(expected_exception=GrinderPlotsAdjustAutopctError)
-    def adjust_autopct(self, values: list):
+    def __adjust_autopct(self, values: list):
         def percent_and_count(pct):
             total = sum(values)
             val = int(round(pct * total / 100.0))
@@ -30,6 +30,8 @@ class GrinderPlots:
 
     @exception_handler(expected_exception=GrinderPlotsCreatePieChartError)
     def create_pie_chart(self, results: dict, suptitle: str) -> None:
+        if not results.values():
+            return
         values = [value for value in results.values()]
         keys = [key for key in results.keys()]
 
@@ -41,7 +43,7 @@ class GrinderPlots:
         explode[list(values).index(max_value)] = 0.1
 
         plot.pie(values, labels=keys,
-                 autopct=self.adjust_autopct(values),
+                 autopct=self.__adjust_autopct(values),
                  explode=explode,
                  textprops={'fontsize': DefaultPlotValues.PLOT_LABEL_FONT_SIZE})
         plot.axis('equal')

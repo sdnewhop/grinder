@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from shodan import Shodan
+from shodan.exception import APIError, APITimeout
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
@@ -17,8 +18,11 @@ class ShodanConnector:
 
     @exception_handler(expected_exception=ShodanConnectorSearchError)
     def search(self, query: str) -> None:
-        self.results = list(self.api.search_cursor(query))
-        self.shodan_results_count = self.api.count(query).get('total')
+        try:
+            self.results = list(self.api.search_cursor(query))
+            self.shodan_results_count = self.api.count(query).get('total')
+        except (APIError, APITimeout) as api_error:
+            print(f'Shodan API error: {api_error}')
         self.real_results_count = len(list(self.results))
 
     def get_results(self) -> list:

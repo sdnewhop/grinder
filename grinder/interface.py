@@ -4,6 +4,7 @@ from argparse import ArgumentParser, Namespace
 from os import environ
 from sys import version_info, argv, exit
 
+from grinder.defaultvalues import DefaultValues
 from grinder.decorators import exception_handler
 from grinder.errors import GrinderInterfaceLoadEnvironmentKeyError, GrinderInterfaceParseArgsError, \
     GrinderInterfaceGetShodanKeyError
@@ -21,17 +22,10 @@ class GrinderInterface:
 
     @exception_handler(expected_exception=GrinderInterfaceLoadEnvironmentKeyError)
     def load_shodan_key_from_env(self) -> str:
-        key = environ.get('SHODAN_API_KEY')
-        if not key:
-            exit(1)
-        return key
+        return environ.get('SHODAN_API_KEY')
     
     def load_censys_keys_from_env(self) -> tuple:
-        key_id = environ.get('CENSYS_API_ID')
-        key_secret = environ.get('CENSYS_API_SECRET')
-        if not (key_id or key_secret):
-            exit(1)
-        return key_id, key_secret
+        return environ.get('CENSYS_API_ID'), environ.get('CENSYS_API_SECRET')
 
     @exception_handler(expected_exception=GrinderInterfaceParseArgsError)
     def parse_args(self) -> Namespace:
@@ -55,9 +49,10 @@ class GrinderInterface:
             self.args.shodan_key = self.load_shodan_key_from_env()
         if not (self.args.censys_id or self.args.censys_secret):
             self.args.censys_id, self.args.censys_secret = self.load_censys_keys_from_env()
-        print(f'Shodan API key: {self.args.shodan_key}')
-        print(f'Censys API ID: {self.args.censys_id}')
-        print(f'Censys API SECRET: {self.args.censys_secret}')
+
+        print(f'Shodan API key: {self.args.shodan_key or DefaultValues.SHODAN_API_KEY}')
+        print(f'Censys API ID: {self.args.censys_id or DefaultValues.CENSYS_API_ID}')
+        print(f'Censys API SECRET: {self.args.censys_secret or DefaultValues.CENSYS_API_SECRET}')
         
         return self.args
 

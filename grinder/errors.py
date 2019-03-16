@@ -18,6 +18,24 @@ class CensysConnectorException(Exception):
         return f'Error occured in Censys Connector module: {self.error_args}'
 
 
+class NmapConnectorException(Exception):
+    def __init__(self, error_args: Exception):
+        super().__init__(self)
+        self.error_args = error_args
+
+    def __str__(self):
+        return f'Error occured in Nmap Connector module: {self.error_args}'
+
+
+class NmapProcessingManagerException(Exception):
+    def __init__(self, error_args: Exception):
+        super().__init__(self)
+        self.error_args = error_args
+
+    def __str__(self):
+        return f'Error occured in Nmap Processing Manager module: {self.error_args}'
+
+
 class GrinderFileManagerException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
@@ -93,6 +111,36 @@ class CensysConnectorSearchError(CensysConnectorException):
 
 
 class CensysConnectorGetResultsError(CensysConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class NmapConnectorInitError(NmapConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class NmapConnectorScanError(NmapConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class NmapConnectorGetResultsCountError(NmapConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class NmapConnectorGetResultsError(NmapConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class NmapProcessingRunError(NmapProcessingManagerException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class NmapProcessingManagerOrganizeProcessesError(NmapProcessingManagerException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 

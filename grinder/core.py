@@ -5,6 +5,7 @@ Other modules must be wrapped here for proper usage.
 """
 
 from typing import NamedTuple
+from sys import exit
 
 #from enforce import runtime_validation
 from termcolor import cprint
@@ -447,7 +448,11 @@ class GrinderCore:
         """
         queries_file = queries_file or DefaultValues.QUERIES_FILE
         print(f'File with queries: {queries_file}')
-        queries = self.filemanager.get_queries(queries_file=queries_file)
+        try:
+            queries = self.filemanager.get_queries(queries_file=queries_file)
+        except GrinderFileManagerOpenError:
+            print('Oops! File with queries was not found. Create it or set name properly. Exit.')
+            exit(1)
 
         self.__init_database()
 

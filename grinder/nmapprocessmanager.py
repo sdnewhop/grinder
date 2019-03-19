@@ -1,15 +1,16 @@
 #!/usr/bin/python3
 
-from os import system
 from multiprocessing import Process, JoinableQueue, Manager
+from os import system
 
-from grinder.nmapconnector import NmapConnector
-from grinder.errors import NmapProcessingRunError, NmapProcessingManagerOrganizeProcessesError
 from grinder.decorators import exception_handler
+from grinder.errors import NmapProcessingRunError, NmapProcessingManagerOrganizeProcessesError
+from grinder.nmapconnector import NmapConnector
 
 
 class NmapProcessingResults():
     RESULTS = Manager().dict({})
+
 
 class NmapProcessing(Process):
     def __init__(self, queue: JoinableQueue, arguments: str, ports: str, sudo: bool):
@@ -30,6 +31,7 @@ class NmapProcessing(Process):
             if results.get(host).values():
                 NmapProcessingResults.RESULTS.update({host: results.get(host)})
             self.queue.task_done()
+
 
 class NmapProcessingManager():
     def __init__(self, hosts: list, ports=None, sudo=False, arguments='-Pn -A', workers=5):
@@ -52,13 +54,12 @@ class NmapProcessingManager():
 
     def start(self):
         self.organize_processes()
-    
-    def get_results(self):
+
+    def get_results(self) -> dict:
         return NmapProcessingResults.RESULTS
-    
-    def get_results_count(self):
+
+    def get_results_count(self) -> int:
         return len(NmapProcessingResults.RESULTS)
 
     def __del__(self):
         system('stty sane')
-        

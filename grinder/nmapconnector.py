@@ -1,14 +1,16 @@
 #!/usr/bin/python3
 
-import nmap
+from nmap import PortScanner
 
 from grinder.decorators import exception_handler
-from grinder.errors import NmapConnectorInitError, NmapConnectorScanError, NmapConnectorGetResultsError, NmapConnectorGetResultsCountError
+from grinder.errors import NmapConnectorInitError, NmapConnectorScanError, NmapConnectorGetResultsError, \
+    NmapConnectorGetResultsCountError
+
 
 class NmapConnector:
     @exception_handler(expected_exception=NmapConnectorInitError)
     def __init__(self):
-        self.nm = nmap.PortScanner()
+        self.nm = PortScanner()
         self.results: dict = {}
 
     @exception_handler(expected_exception=NmapConnectorScanError)

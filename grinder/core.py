@@ -4,11 +4,13 @@ Basic core module for grinder. All functions from
 Other modules must be wrapped here for proper usage.
 """
 
+from sys import exit
 from typing import NamedTuple
 
-#from enforce import runtime_validation
+# from enforce import runtime_validation
 from termcolor import cprint
 
+from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
 from grinder.dbhandling import GrinderDatabase
 from grinder.decorators import exception_handler, timer
@@ -23,10 +25,8 @@ from grinder.errors import GrinderCoreSearchError, GrinderCoreBatchSearchError, 
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
 from grinder.plots import GrinderPlots
-from grinder.utils import GrinderUtils
-
 from grinder.shodanconnector import ShodanConnector
-from grinder.censysconnector import CensysConnector
+from grinder.utils import GrinderUtils
 
 
 class HostInfo(NamedTuple):
@@ -45,7 +45,7 @@ class HostInfo(NamedTuple):
     country: str
 
 
-#@runtime_validation
+# @runtime_validation
 class GrinderCore:
     """
     This is basic module class for all functional calls
@@ -318,7 +318,7 @@ class GrinderCore:
         shodan_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(shodan_result_as_dict.get('ip')):
             self.shodan_processed_results.append(shodan_result_as_dict)
-    
+
     @exception_handler(expected_exception=GrinderCoreHostCensysResultsError)
     def parse_current_host_censys_results(self, current_host: dict, query: str) -> None:
         if not (current_host.get('lat') and current_host.get('lng')):
@@ -337,7 +337,6 @@ class GrinderCore:
         censys_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(censys_result_as_dict.get('ip')):
             self.censys_processed_results.append(censys_result_as_dict)
-        
 
     @exception_handler(expected_exception=GrinderCoreInitDatabaseCallError)
     def __init_database(self) -> None:
@@ -427,16 +426,16 @@ class GrinderCore:
             for current_host in shodan_hostlist_results:
                 self.parse_current_host_shodan_results(current_host, query)
             self.__shodan_save_to_database(query)
-        
+
         for query in product_info.get('censys_queries'):
             cprint(f'Current Censys query is: {query}', 'blue', attrs=['bold'])
             censys_hostlist_results = self.censys_search(query)
             for current_host in censys_hostlist_results:
                 self.parse_current_host_censys_results(current_host, query)
             self.__censys_save_to_database(query)
-        
+
         self.combined_results = self.shodan_processed_results + self.censys_processed_results
-        
+
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)
     def batch_search(self, queries_file: str) -> list:
@@ -447,7 +446,11 @@ class GrinderCore:
         """
         queries_file = queries_file or DefaultValues.QUERIES_FILE
         print(f'File with queries: {queries_file}')
-        queries = self.filemanager.get_queries(queries_file=queries_file)
+        try:
+            queries = self.filemanager.get_queries(queries_file=queries_file)
+        except GrinderFileManagerOpenError:
+            print('Oops! File with queries was not found. Create it or set name properly. Exit.')
+            exit(1)
 
         self.__init_database()
 

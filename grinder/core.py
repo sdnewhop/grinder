@@ -51,10 +51,12 @@ class GrinderCore:
     This is basic module class for all functional calls
     """
     shodan_raw_results: list = []
-    shodan_processed_results: list = []
     censys_raw_results: list = []
-    censys_processed_results: list = []
-    combined_results: list = []
+
+    shodan_processed_results: dict = {}
+    censys_processed_results: dict = {}
+
+    combined_results: dict = {}
 
     def __init__(self, shodan_api_key: str = '', censys_api_id: str = '', censys_api_secret: str = '') -> None:
         self.product_info: dict = {}
@@ -75,7 +77,8 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreSearchError)
     def shodan_search(self, query: str) -> list:
         """
-        Search in shodan database
+        Search in shodan database with ShodanConnector
+        module.
 
         :param query (str): search query for shodan
         :return list: raw shodan results in list
@@ -101,7 +104,8 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreSearchError)
     def censys_search(self, query: str, results_count=None) -> list:
         """
-        Search in censys database
+        Search in censys database with CensysConnector
+        module.
 
         :param query (str): search query for censys
         :param results_count (int): maximum results quantity
@@ -121,11 +125,12 @@ class GrinderCore:
         """
         Update map markers in JavaScript map
 
-        :param search_results (list): processed results in list
+        :param search_results (dict): processed results in dict
         :return None:
         """
+        cprint('Updating current map markers...', 'blue', attrs=['bold'])
         if search_results is None:
-            search_results = self.combined_results
+            search_results = list(self.combined_results.values())
         MapMarkers().update_markers(search_results)
 
     @exception_handler(expected_exception=GrinderCoreCreatePlotError)
@@ -135,6 +140,7 @@ class GrinderCore:
 
         :return None:
         """
+        cprint('Create graphical plots...', 'blue', attrs=['bold'])
         plots = GrinderPlots()
         for entity in self.all_entities_count:
             plots.create_pie_chart(entity.get('results'), entity.get('entity'))
@@ -146,16 +152,20 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreConvertToContinentsError)
     def count_continents(self) -> dict:
         """
-        Count unique continents based on country
+        Count unique continents based on country. This method is custom
+        because we need to convert our countries to continents before
+        we put it in analysis.
 
         :return dict: dictionary {'country':Count of products in that country}
         """
+        cprint('Count unique continents...', 'blue', attrs=['bold'])
         continents: dict = {}
         for entity in self.all_entities_count:
             if not entity.get('entity') == 'country':
                 continue
             continents = GrinderContinents.convert_continents(entity.get('results'))
         self.continents = continents
+        self.all_entities_count.append({'entity': 'continents', 'results': self.continents})
         return self.continents
 
     @exception_handler(expected_exception=GrinderCoreLoadResultsFromFileError)
@@ -174,6 +184,7 @@ class GrinderCore:
             self.combined_results = self.filemanager.load_data_from_file(load_dir=load_dir,
                                                                          load_file=load_file,
                                                                          load_json_dir=load_json_dir)
+            self.combined_results = {host.get('ip'):host for host in self.combined_results}
             print('Results of latest scan was successfully loaded from json file.')
             return self.combined_results
         except GrinderFileManagerOpenError:
@@ -188,6 +199,7 @@ class GrinderCore:
         """
         try:
             self.combined_results = self.db.load_last_results()
+            self.combined_results = {host.get('ip'):host for host in self.combined_results}
             print('Results of latest scan was successfully loaded from database.')
             return self.combined_results
         except GrinderDatabaseLoadResultsError:
@@ -210,29 +222,19 @@ class GrinderCore:
         :param dest_dir (str): directory to save results
         :return None:
         """
+        cprint('Save all results...', 'blue', attrs=['bold'])
         if not self.combined_results:
             return
         if self.combined_results:
-            self.filemanager.write_results_json(self.combined_results,
+            self.filemanager.write_results_json(list(self.combined_results.values()),
                                                 dest_dir=dest_dir,
                                                 json_file=DefaultValues.JSON_RESULTS_FILE)
-            self.filemanager.write_results_csv(self.combined_results,
+            self.filemanager.write_results_csv(list(self.combined_results.values()),
                                                dest_dir=dest_dir,
                                                csv_file=DefaultValues.CSV_RESULTS_FILE)
-            self.filemanager.write_results_txt(self.combined_results,
+            self.filemanager.write_results_txt(list(self.combined_results.values()),
                                                dest_dir=dest_dir,
                                                txt_file=DefaultValues.TXT_RESULTS_FILE)
-
-        if self.continents:
-            self.filemanager.write_results_json(self.continents,
-                                                dest_dir=dest_dir,
-                                                json_file=DefaultValues.JSON_CONTINENTS_FILE)
-            self.filemanager.write_results_csv(self.continents,
-                                               dest_dir=dest_dir,
-                                               csv_file=DefaultValues.CSV_CONTINENTS_FILE)
-            self.filemanager.write_results_txt(self.continents,
-                                               dest_dir=dest_dir,
-                                               txt_file=DefaultValues.TXT_CONTINENTS_FILE)
 
         if self.all_entities_count:
             for entity in self.all_entities_count:
@@ -261,17 +263,12 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreIsHostExistedError)
     def __is_host_existed(self, ip: str) -> bool:
         """
-        Check if current host is existed in current results
+        Check if current host is existed in current results. 
 
-        :param ip (str): ip of host
+        :param ip (str): host ip
         :return bool: answer to question "Is current host already scanned?"
         """
-        existed_shodan_ip_list = [exist_host.get('ip') for exist_host in self.shodan_processed_results]
-        existed_censys_ip_list = [exist_host.get('ip') for exist_host in self.censys_processed_results]
-        existed_ip_list = existed_shodan_ip_list + existed_censys_ip_list
-        if ip in existed_ip_list:
-            return True
-        return False
+        return (self.shodan_processed_results.get(ip) or self.censys_processed_results.get(ip))
 
     @exception_handler(expected_exception=GrinderCoreCountUniqueProductsError)
     def count_unique_entities(self, entity_name, search_results=None, max_entities=5) -> None:
@@ -279,12 +276,13 @@ class GrinderCore:
         Count every unique entity (like country, protocol, port, etc.)
 
         :param entity_name (str): name of entity ('country', 'proto', etc.)
-        :param search_results (list): results to count from
+        :param search_results (dict): results to count from
         :param max_entities (int): max entities in count
         :return None:
         """
+        cprint(f'Count unique {entity_name}...', 'blue', attrs=['bold'])
         if not search_results:
-            search_results = self.combined_results
+            search_results = list(self.combined_results.values())
         list_of_entities = [current_product.get(entity_name) for current_product in search_results]
 
         utils = GrinderUtils()
@@ -296,10 +294,11 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreHostShodanResultsError)
     def parse_current_host_shodan_results(self, current_host: dict, query: str) -> None:
         """
-        Parse raw results from shodan
+        Parse raw results from shodan. Results were received from
+        ShodanConnector module.
 
         :param current_host (dict): current host information
-        :param query (str): current query where we find this host
+        :param query (str): current active query on which we found this host
         :return None:
         """
         if not (current_host.get('location').get('latitude') and current_host.get('location').get('latitude')):
@@ -317,10 +316,19 @@ class GrinderCore:
         )
         shodan_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(shodan_result_as_dict.get('ip')):
-            self.shodan_processed_results.append(shodan_result_as_dict)
+            self.shodan_processed_results.update({shodan_result_as_dict.get('ip'): shodan_result_as_dict})
+
 
     @exception_handler(expected_exception=GrinderCoreHostCensysResultsError)
     def parse_current_host_censys_results(self, current_host: dict, query: str) -> None:
+        """
+        Parse raw results from censys. Results were received from
+        CensysConnector module.
+
+        :param current_host (dict): current host information
+        :param query (str): current active query on which we found this host
+        :return None:
+        """
         if not (current_host.get('lat') and current_host.get('lng')):
             return
         host_info = HostInfo(
@@ -336,12 +344,13 @@ class GrinderCore:
         )
         censys_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(censys_result_as_dict.get('ip')):
-            self.censys_processed_results.append(censys_result_as_dict)
+            self.censys_processed_results.update({censys_result_as_dict.get('ip'): censys_result_as_dict})
 
     @exception_handler(expected_exception=GrinderCoreInitDatabaseCallError)
     def __init_database(self) -> None:
         """
-        Initialize database
+        Initialize database in case of first-time using. Here we are create
+        database and put basic structures in it.
 
         :return None:
         """
@@ -378,6 +387,11 @@ class GrinderCore:
         self.db.update_results_count(total_products, total_results)
 
     def __add_product_data_to_database(self) -> None:
+        """
+        Add basic information from json file with queries into database.
+
+        :return None:
+        """
         self.db.add_basic_scan_data(vendor=self.product_info.get('vendor'),
                                     product=self.product_info.get('product'),
                                     script=self.product_info.get('script'),
@@ -390,7 +404,7 @@ class GrinderCore:
         :param query (str): current search query
         :return None:
         """
-        results_by_query = list(filter(lambda host: host.get('query') == query, self.shodan_processed_results))
+        results_by_query = list(filter(lambda host: host.get('query') == query, self.shodan_processed_results.values()))
         results_count = len(results_by_query) if results_by_query else None
         self.db.add_shodan_scan_data(query=query,
                                      results_count=results_count,
@@ -403,7 +417,7 @@ class GrinderCore:
         :param query (str): current search query
         :return None:
         """
-        results_by_query = list(filter(lambda host: host.get('query') == query, self.censys_processed_results))
+        results_by_query = list(filter(lambda host: host.get('query') == query, self.censys_processed_results.values()))
         results_count = len(results_by_query) if results_by_query else None
         self.db.add_censys_scan_data(query=query,
                                      results_count=results_count,
@@ -412,53 +426,85 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreProductQueriesError)
     def process_current_product_queries(self, product_info: dict) -> None:
         """
-        Do some actions with current product in input datalist
+        Process current product information from input json file with
+        queries and other information. This is the basic wrapper for all
+        searches in different backend systems - in this function we
+        adds information about product in database, search hosts
+        with queries and parse them after that.
 
-        :param product_info (dict): all information about currnet product including queries etc.
+        :param product_info (dict): all information about current product 
+            including queries, vendor, confidence etc.
         :return None:
         """
         self.product_info = product_info
         self.__add_product_data_to_database()
 
+        # Shodan queries processor
         for query in product_info.get('shodan_queries'):
             cprint(f'Current Shodan query is: {query}', 'blue', attrs=['bold'])
-            shodan_hostlist_results = self.shodan_search(query)
-            for current_host in shodan_hostlist_results:
+            shodan_raw_results = self.shodan_search(query)
+            for current_host in shodan_raw_results:
                 self.parse_current_host_shodan_results(current_host, query)
             self.__shodan_save_to_database(query)
 
+        # Censys queries processor
         for query in product_info.get('censys_queries'):
             cprint(f'Current Censys query is: {query}', 'blue', attrs=['bold'])
-            censys_hostlist_results = self.censys_search(query)
-            for current_host in censys_hostlist_results:
+            censys_raw_results = self.censys_search(query)
+            for current_host in censys_raw_results:
                 self.parse_current_host_censys_results(current_host, query)
             self.__censys_save_to_database(query)
 
-        self.combined_results = self.shodan_processed_results + self.censys_processed_results
+        # Merge all search results into one dictionary
+        # This dictionary looks like:
+        # {
+        #     ip: {
+        #         product,
+        #         vendor,
+        #         query
+        #         ...
+        #         },
+        #     ...
+        # }
+        self.combined_results = {**self.shodan_processed_results, **self.censys_processed_results}
+
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)
-    def batch_search(self, queries_file: str) -> list:
+    def batch_search(self, queries_filename: str) -> dict:
         """
-        Run batch search for all products from input json product list
-        :param queries_file (str): name of json file with input data
-        :return list: all processed results from search
+        Run batch search for all products from input json product list. Here 
+        we are try to load JSON file with queries for different search systems,
+        also we initialize our database (if it was not initialized earlier), 
+        and after that we process every product in queries file (parsing, 
+        processing, etc.). Basically it is the main search method in module.
+
+        :param queries_filename (str): name of json file with input data
+            such as queries (shodan_queries, censys_queries)
+        :return dict: all processed results from searches in format like
+            {
+                host_ip: {
+                    host_information
+                    ...
+                    } 
+                ...
+            }
         """
-        queries_file = queries_file or DefaultValues.QUERIES_FILE
-        print(f'File with queries: {queries_file}')
+        queries_filename = queries_filename or DefaultValues.QUERIES_FILE
+        print(f'File with queries: {queries_filename}')
+
         try:
-            queries = self.filemanager.get_queries(queries_file=queries_file)
+            queries_file = self.filemanager.get_queries(queries_file=queries_filename)
         except GrinderFileManagerOpenError:
-            print('Oops! File with queries was not found. Create it or set name properly. Exit.')
-            exit(1)
+            print('Oops! File with queries was not found. Create it or set name properly.')
 
         self.__init_database()
 
-        for product_info in queries:
+        for product_info in queries_file:
             self.process_current_product_queries(product_info)
 
         self.__update_end_time_database()
-        self.__update_results_count(total_products=len(queries), total_results=len(self.combined_results))
+        self.__update_results_count(total_products=len(queries_file), total_results=len(self.combined_results))
         self.__close_database()
 
         return self.combined_results

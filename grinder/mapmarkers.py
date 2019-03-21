@@ -9,7 +9,7 @@ class MapMarkers:
     def __init__(self):
         pass
 
-    def update_markers(self, results: dict, map_directory=None) -> None:
+    def update_markers(self, results: list, map_directory=None) -> None:
         if not map_directory:
             map_directory = DefaultValues.MARKERS_DIRECTORY
         with open(f'{map_directory}/maps/markers.js', mode='w') as js_markers:

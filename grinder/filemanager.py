@@ -23,10 +23,10 @@ class GrinderFileManager:
             return loads(saved_results.read())
 
     @staticmethod
-    def csv_dict_fix(results_to_write: dict) -> list:
+    def csv_dict_fix(results_to_write: dict, field_name: str) -> list:
         dict_to_list_dictpairs: list = []
         for item in results_to_write.items():
-            dict_to_list_dictpairs.append({'product': item[0], 'count': item[1]})
+            dict_to_list_dictpairs.append({field_name.split(".csv")[0] : item[0], 'count': item[1]})
         return dict_to_list_dictpairs
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
@@ -46,7 +46,7 @@ class GrinderFileManager:
             return
         with open(f'{dest_dir}/{csv_dir}/{csv_file}', mode='w') as result_csv_file:
             if isinstance(results_to_write, dict):
-                results_to_write = GrinderFileManager.csv_dict_fix(results_to_write)
+                results_to_write = GrinderFileManager.csv_dict_fix(results_to_write, csv_file)
             writer = DictWriter(result_csv_file, fieldnames=results_to_write[0].keys())
             writer.writeheader()
             for row in results_to_write:

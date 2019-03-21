@@ -31,6 +31,7 @@ class GrinderInterface:
     def parse_args(self) -> Namespace:
         if len(argv) == 1:
             print(f'Usage: {argv[0]} -h for help')
+            exit(1)
         parser = ArgumentParser(description='''
             The Grinder framework was created to automatically enumerate and fingerprint 
             different hosts on the Internet using different back-end systems''')
@@ -49,11 +50,10 @@ class GrinderInterface:
             self.args.shodan_key = self.load_shodan_key_from_env()
         if not (self.args.censys_id or self.args.censys_secret):
             self.args.censys_id, self.args.censys_secret = self.load_censys_keys_from_env()
-
-        print(f'Shodan API key: {self.args.shodan_key or DefaultValues.SHODAN_API_KEY}')
-        print(f'Censys API ID: {self.args.censys_id or DefaultValues.CENSYS_API_ID}')
-        print(f'Censys API SECRET: {self.args.censys_secret or DefaultValues.CENSYS_API_SECRET}')
-        
+        if self.args.run:
+            print(f'Shodan API key: {self.args.shodan_key or DefaultValues.SHODAN_API_KEY}')
+            print(f'Censys API ID: {self.args.censys_id or DefaultValues.CENSYS_API_ID}')
+            print(f'Censys API SECRET: {self.args.censys_secret or DefaultValues.CENSYS_API_SECRET}')
         return self.args
 
     @exception_handler(expected_exception=GrinderInterfaceGetShodanKeyError)

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
+import sys
+
 from grinder.asciiart import AsciiOpener
 from grinder.core import GrinderCore
+from grinder.errors import GrinderCoreBatchSearchError, GrinderCoreLoadResultsError
 from grinder.interface import GrinderInterface
 
 if __name__ == "__main__":
@@ -14,7 +17,13 @@ if __name__ == "__main__":
                        censys_api_id=args.censys_id,
                        censys_api_secret=args.censys_secret)
     core.set_censys_max_results(args.censys_max)
-    search_results = core.batch_search(queries_file=args.queries_file) if args.run else core.load_results()
+
+    try:
+        search_results = core.batch_search(queries_filename=args.queries_file) if args.run else core.load_results()
+    except (GrinderCoreBatchSearchError, GrinderCoreLoadResultsError):
+        print('Unexpected error occured at batch search method.')
+        sys.exit(1)
+
     print(f'Total results: {len(search_results)}')
 
     if args.count_unique:

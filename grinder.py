@@ -38,3 +38,4 @@ if __name__ == "__main__":
     if args.create_plots:
         core.create_plots()
     core.save_results()
+    core.nmap_scan(arguments='-Pn')

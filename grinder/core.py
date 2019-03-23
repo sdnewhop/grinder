@@ -27,6 +27,7 @@ from grinder.mapmarkers import MapMarkers
 from grinder.plots import GrinderPlots
 from grinder.shodanconnector import ShodanConnector
 from grinder.utils import GrinderUtils
+from grinder.nmapprocessmanager import NmapProcessingManager
 
 
 class HostInfo(NamedTuple):
@@ -468,6 +469,16 @@ class GrinderCore:
         # }
         self.combined_results = {**self.shodan_processed_results, **self.censys_processed_results}
 
+    def nmap_scan(self, hosts=None, ports='80,443', sudo=False, arguments='-Pn -A', workers=10):
+        cprint('Start Nmap scanning', 'blue', attrs=['bold'])
+        if not hosts:
+            hosts = list(self.combined_results.keys())
+        nm = NmapProcessingManager(hosts=hosts, ports=ports, sudo=sudo, arguments=arguments, workers=workers)
+        nm.start()
+        nm.get_results_count()
+        nmap_results = nm.get_results()
+        for host in nmap_results.keys():
+            self.combined_results[host]['nmap_info'] = nmap_results[host]
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)

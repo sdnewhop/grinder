@@ -16,9 +16,10 @@ class GrinderUtils:
         if max_entities < real_max_entities:
             real_max_entities = max_entities
 
-        self.dict_with_all_results = {key: entities_sorted_by_value[key] for key in list(entities_sorted_by_value)}
+        # Check if current counted value in dict doesn't have key == None
+        self.dict_with_all_results = {key: entities_sorted_by_value[key] for key in list(entities_sorted_by_value) if key is not None}
         self.dict_with_fixed_max_results = {key: entities_sorted_by_value[key] for key in
-                                            list(entities_sorted_by_value)[:real_max_entities]}
+                                            list(entities_sorted_by_value)[:real_max_entities] if key is not None}
 
     def get_all_count_results(self) -> dict:
         return self.dict_with_all_results

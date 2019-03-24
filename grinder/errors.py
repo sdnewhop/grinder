@@ -240,6 +240,36 @@ class GrinderCoreUpdateResultsCountDatabaseError(GrinderCoreException):
         super().__init__(error_args)
 
 
+class GrinderCoreSetCensysMaxResultsError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreAddProductDataToDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreShodanSaveToDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreCensysSaveToDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreSaveResultsToDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreNmapScanError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
 class GrinderInterfaceLoadEnvironmentKeyError(GrinderInterfaceException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)

@@ -16,7 +16,9 @@ if __name__ == "__main__":
     core = GrinderCore(shodan_api_key=args.shodan_key,
                        censys_api_id=args.censys_id,
                        censys_api_secret=args.censys_secret)
-    core.set_censys_max_results(args.censys_max)
+
+    if args.censys_max:
+        core.set_censys_max_results(args.censys_max)
 
     try:
         search_results = core.batch_search(queries_filename=args.queries_file) if args.run else core.load_results()
@@ -37,7 +39,7 @@ if __name__ == "__main__":
         core.update_map_markers()
     if args.create_plots:
         core.create_plots()
-    if args.nmap_scan:
+    if (args.nmap_scan and args.run):
         core.nmap_scan(arguments='-Pn', ports='22,80,443')
     if args.run:
         core.save_results_to_database()

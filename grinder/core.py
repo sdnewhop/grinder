@@ -44,6 +44,7 @@ class HostInfo(NamedTuple):
     lat: str
     lng: str
     country: str
+    nmap_scan: dict
 
 
 # @runtime_validation
@@ -64,7 +65,7 @@ class GrinderCore:
         self.all_entities_count: list = []
         self.fixed_entities_count: list = []
         self.continents: dict = {}
-
+        self.queries_file: dict = {}
         self.censys_results_count: int = None
 
         self.filemanager = GrinderFileManager()
@@ -224,6 +225,8 @@ class GrinderCore:
         :return None:
         """
         cprint('Save all results...', 'blue', attrs=['bold'])
+        # Update combined results if we use nmap scan or something
+        self.combined_results = {**self.shodan_processed_results, **self.censys_processed_results}
         if not self.combined_results:
             return
         if self.combined_results:
@@ -314,6 +317,7 @@ class GrinderCore:
             lat=current_host.get('location').get('latitude'),
             lng=current_host.get('location').get('longitude'),
             country=current_host.get('location').get('country_name'),
+            nmap_scan=None
         )
         shodan_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(shodan_result_as_dict.get('ip')):
@@ -341,7 +345,8 @@ class GrinderCore:
             ip=current_host.get('ip'),
             lat=current_host.get('lat'),
             lng=current_host.get('lng'),
-            country=current_host.get('country')
+            country=current_host.get('country'),
+            nmap_scan=None
         )
         censys_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(censys_result_as_dict.get('ip')):
@@ -424,6 +429,17 @@ class GrinderCore:
                                      results_count=results_count,
                                      results=results_by_query)
 
+    def save_results_to_database(self):
+        for product_info in self.queries_file:
+            for query in product_info.get('shodan_queries'):
+                self.__shodan_save_to_database(query)
+            for query in product_info.get('censys_queries'):
+                self.__censys_save_to_database(query)
+        
+        self.__update_end_time_database()
+        self.__update_results_count(total_products=len(self.queries_file), total_results=len(self.combined_results))
+        self.__close_database()
+
     @exception_handler(expected_exception=GrinderCoreProductQueriesError)
     def process_current_product_queries(self, product_info: dict) -> None:
         """
@@ -446,7 +462,6 @@ class GrinderCore:
             shodan_raw_results = self.shodan_search(query)
             for current_host in shodan_raw_results:
                 self.parse_current_host_shodan_results(current_host, query)
-            self.__shodan_save_to_database(query)
 
         # Censys queries processor
         for query in product_info.get('censys_queries'):
@@ -454,7 +469,6 @@ class GrinderCore:
             censys_raw_results = self.censys_search(query)
             for current_host in censys_raw_results:
                 self.parse_current_host_censys_results(current_host, query)
-            self.__censys_save_to_database(query)
 
         # Merge all search results into one dictionary
         # This dictionary looks like:
@@ -469,16 +483,25 @@ class GrinderCore:
         # }
         self.combined_results = {**self.shodan_processed_results, **self.censys_processed_results}
 
-    def nmap_scan(self, hosts=None, ports='80,443', sudo=False, arguments='-Pn -A', workers=10):
+    def nmap_scan(self, ports='80,443', sudo=False, arguments='-Pn -A', workers=10):
         cprint('Start Nmap scanning', 'blue', attrs=['bold'])
-        if not hosts:
-            hosts = list(self.combined_results.keys())
-        nm = NmapProcessingManager(hosts=hosts, ports=ports, sudo=sudo, arguments=arguments, workers=workers)
-        nm.start()
-        nm.get_results_count()
-        nmap_results = nm.get_results()
-        for host in nmap_results.keys():
-            self.combined_results[host]['nmap_info'] = nmap_results[host]
+        # if not hosts:
+        #     hosts = list(self.combined_results.keys())
+        if not self.shodan_processed_results:
+            shodan_hosts = self.db.load_last_shodan_results()
+            self.shodan_processed_results = {host.get('ip'):host for host in shodan_hosts}
+        if not self.censys_processed_results:
+            censys_hosts = self.db.load_last_censys_results()
+            self.censys_processed_results = {host.get('ip'):host for host in censys_hosts}
+        all_hosts = list(self.shodan_processed_results.keys()) + list(self.censys_processed_results.keys())
+        nmap_scan = NmapProcessingManager(hosts=all_hosts, ports=ports, sudo=sudo, arguments=arguments, workers=workers)
+        nmap_scan.start()
+        nmap_results = nmap_scan.get_results()
+
+        for host in self.shodan_processed_results.keys():
+            self.shodan_processed_results[host]['nmap_scan'] = nmap_results.get(host)
+        for host in self.censys_processed_results.keys():
+            self.censys_processed_results[host]['nmap_scan'] = nmap_results.get(host)
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)
@@ -505,17 +528,13 @@ class GrinderCore:
         print(f'File with queries: {queries_filename}')
 
         try:
-            queries_file = self.filemanager.get_queries(queries_file=queries_filename)
+            self.queries_file = self.filemanager.get_queries(queries_file=queries_filename)
         except GrinderFileManagerOpenError:
             print('Oops! File with queries was not found. Create it or set name properly.')
-
+        
         self.__init_database()
-
-        for product_info in queries_file:
+        
+        for product_info in self.queries_file:
             self.process_current_product_queries(product_info)
-
-        self.__update_end_time_database()
-        self.__update_results_count(total_products=len(queries_file), total_results=len(self.combined_results))
-        self.__close_database()
 
         return self.combined_results

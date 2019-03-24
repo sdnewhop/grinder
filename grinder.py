@@ -37,5 +37,8 @@ if __name__ == "__main__":
         core.update_map_markers()
     if args.create_plots:
         core.create_plots()
+    if args.nmap_scan:
+        core.nmap_scan(arguments='-Pn', ports='22,80,443')
+    if args.run:
+        core.save_results_to_database()
     core.save_results()
-    core.nmap_scan(arguments='-Pn')

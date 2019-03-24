@@ -265,6 +265,38 @@ class GrinderDatabase:
             results_combined = [result for query_result in results_parsed for result in query_result]
             return results_combined
 
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_last_shodan_results(self):
+        with self.connection as db_connection:
+            sql_results = db_connection.execute(
+                '''
+                SELECT results FROM shodan_results
+                WHERE scan_information_id = (
+                    SELECT max(id) FROM scan_information
+                    WHERE scan_total_results != 0
+                    )
+                AND results != '[]'
+                '''
+            ).fetchall()
+            results_parsed = [json_loads(item[0]) for item in sql_results]
+            return [result for query_result in results_parsed for result in query_result]
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_last_censys_results(self):
+        with self.connection as db_connection:
+            sql_results = db_connection.execute(
+                '''
+                SELECT results FROM censys_results
+                WHERE scan_information_id = (
+                    SELECT max(id) FROM scan_information
+                    WHERE scan_total_results != 0
+                    )
+                AND results != '[]'
+                '''
+            ).fetchall()
+            results_parsed = [json_loads(item[0]) for item in sql_results]
+            return [result for query_result in results_parsed for result in query_result]
+
     @exception_handler(expected_exception=GrinderDatabaseCloseError)
     def close(self):
         self.connection.close()

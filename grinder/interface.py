@@ -45,6 +45,7 @@ class GrinderInterface:
         parser.add_argument('-ci', '--censys-id', action='store', default=None, help='Censys API ID key')
         parser.add_argument('-cs', '--censys-secret', action='store', default=None, help='Censys API SECRET key')
         parser.add_argument('-cm', '--censys-max', action='store', type=int, default=None, help='Censys default maximum results quantity')
+        parser.add_argument('-nm', '--nmap-scan', action='store_true', default=False, help='Initiate Nmap scanning')
         self.args = parser.parse_args()
         if not self.args.shodan_key:
             self.args.shodan_key = self.load_shodan_key_from_env()

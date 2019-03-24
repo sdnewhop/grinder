@@ -1,14 +1,17 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from multiprocessing import Process, JoinableQueue, Manager
 from os import system
 
 from grinder.decorators import exception_handler
-from grinder.errors import NmapProcessingRunError, NmapProcessingManagerOrganizeProcessesError
+from grinder.errors import (
+    NmapProcessingRunError,
+    NmapProcessingManagerOrganizeProcessesError,
+)
 from grinder.nmapconnector import NmapConnector
 
 
-class NmapProcessingResults():
+class NmapProcessingResults:
     RESULTS = Manager().dict({})
 
 
@@ -25,18 +28,22 @@ class NmapProcessing(Process):
         while True:
             host = self.queue.get()
             nm = NmapConnector()
-            nm.scan(host=host, arguments=self.arguments, ports=self.ports, sudo=self.sudo)
+            nm.scan(
+                host=host, arguments=self.arguments, ports=self.ports, sudo=self.sudo
+            )
             results = nm.get_results()
-            print(f' ■ Current scan host: {host}')
+            print(f" ■ Current scan host: {host}")
             if results.get(host).values():
                 NmapProcessingResults.RESULTS.update({host: results.get(host)})
-                #print(f'Results: {results.get(host)}')
-                print(f' ■ Done host: {host}')
+                # print(f'Results: {results.get(host)}')
+                print(f" ■ Done host: {host}")
             self.queue.task_done()
 
 
-class NmapProcessingManager():
-    def __init__(self, hosts: list, ports=None, sudo=False, arguments='-Pn -A', workers=5):
+class NmapProcessingManager:
+    def __init__(
+        self, hosts: list, ports=None, sudo=False, arguments="-Pn -A", workers=5
+    ):
         self.hosts = hosts
         self.workers = workers
         self.arguments = arguments
@@ -64,4 +71,4 @@ class NmapProcessingManager():
         return len(NmapProcessingResults.RESULTS)
 
     def __del__(self):
-        system('stty sane')
+        system("stty sane")

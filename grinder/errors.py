@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
+
 class ShodanConnectorException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Shodan Connector module: {self.error_args}'
+        return f"Error occured in Shodan Connector module: {self.error_args}"
 
 
 class CensysConnectorException(Exception):
@@ -15,7 +16,7 @@ class CensysConnectorException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Censys Connector module: {self.error_args}'
+        return f"Error occured in Censys Connector module: {self.error_args}"
 
 
 class NmapConnectorException(Exception):
@@ -24,7 +25,7 @@ class NmapConnectorException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Nmap Connector module: {self.error_args}'
+        return f"Error occured in Nmap Connector module: {self.error_args}"
 
 
 class NmapProcessingManagerException(Exception):
@@ -33,7 +34,7 @@ class NmapProcessingManagerException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Nmap Processing Manager module: {self.error_args}'
+        return f"Error occured in Nmap Processing Manager module: {self.error_args}"
 
 
 class GrinderFileManagerException(Exception):
@@ -42,7 +43,7 @@ class GrinderFileManagerException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Grinder Filemanager module: {self.error_args}'
+        return f"Error occured in Grinder Filemanager module: {self.error_args}"
 
 
 class GrinderCoreException(Exception):
@@ -51,7 +52,7 @@ class GrinderCoreException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Grinder Core module: {self.error_args}'
+        return f"Error occured in Grinder Core module: {self.error_args}"
 
 
 class GrinderInterfaceException(Exception):
@@ -60,7 +61,7 @@ class GrinderInterfaceException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Grinder Interface module: {self.error_args}'
+        return f"Error occured in Grinder Interface module: {self.error_args}"
 
 
 class GrinderContinentsException(Exception):
@@ -69,7 +70,7 @@ class GrinderContinentsException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Grinder Continents module: {self.error_args}'
+        return f"Error occured in Grinder Continents module: {self.error_args}"
 
 
 class GrinderPlotsException(Exception):
@@ -78,7 +79,7 @@ class GrinderPlotsException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Grinder Plots module: {self.error_args}'
+        return f"Error occured in Grinder Plots module: {self.error_args}"
 
 
 class GrinderDatabaseException(Exception):
@@ -87,7 +88,7 @@ class GrinderDatabaseException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        return f'Error occured in Grinder Database module: {self.error_args}'
+        return f"Error occured in Grinder Database module: {self.error_args}"
 
 
 class ShodanConnectorInitError(ShodanConnectorException):
@@ -236,6 +237,36 @@ class GrinderCoreUpdateEndTimeDatabaseError(GrinderCoreException):
 
 
 class GrinderCoreUpdateResultsCountDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreSetCensysMaxResultsError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreAddProductDataToDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreShodanSaveToDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreCensysSaveToDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreSaveResultsToDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreNmapScanError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 

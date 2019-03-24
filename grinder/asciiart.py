@@ -11,4 +11,4 @@ class AsciiOpener:
     @staticmethod
     def print_opener() -> None:
         init(strip=not stdout.isatty())
-        cprint(figlet_format('GRINDER', font='cosmike'), 'blue', attrs=['bold'])
+        cprint(figlet_format("GRINDER", font="cosmike"), "blue", attrs=["bold"])

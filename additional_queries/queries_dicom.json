@@ -1,5 +1,5 @@
 [
-    {"vendor": "DICOM", "product": "DICOM Server", "queries": [
+    {"vendor": "DICOM", "product": "DICOM Server", "shodan_queries": [
         "DICOM FINDSCU", 
         "DICOM -FINDSCU",
         "\"Content-Type: application/dicom\"",
@@ -7,10 +7,10 @@
         "DICOM port:104",
         "DICOM port:11112",
         "port:2761",
-        "port:2762"], "script": "", "confidence": "firm"},
-    {"vendor": "PMOD Technologies", "product": "PMOD Dicom Server", "queries": ["port:4000 DHT Nodes", "port:4030 DHT Nodes"], "script": "", "confidence": "Tentative"},
-    {"vendor": "GE Healthcare", "product": "NM General Purpose 600 Series", "queries": ["port:4006"], "script": "", "confidence": "Tentative"},
-    {"vendor": "Orthanc", "product": "Orthanc Server", "queries": ["title:\"Orthanc Explorer\"", "port:4242"], "script": "", "confidence": "Certain"},
-    {"vendor": "Xinapse Systems", "product": "DICOM Storage Server", "queries": ["port:4560"], "script": "", "confidence": "Tentative"},
-    {"vendor": "DICOM Grid", "product": "DICOM Grid Gateway", "queries": ["port:4560", "port:8161"], "script": "", "confidence": "Tentative"}
+        "port:2762"], "censys_queries": [], "script": "", "confidence": "firm"},
+    {"vendor": "PMOD Technologies", "product": "PMOD Dicom Server", "shodan_queries": ["port:4000 DHT Nodes", "port:4030 DHT Nodes"], "censys_queries": [], "script": "", "confidence": "Tentative"},
+    {"vendor": "GE Healthcare", "product": "NM General Purpose 600 Series", "shodan_queries": ["port:4006"], "censys_queries": [], "script": "", "confidence": "Tentative"},
+    {"vendor": "Orthanc", "product": "Orthanc Server", "shodan_queries": ["title:\"Orthanc Explorer\"", "port:4242"], "censys_queries": [], "script": "", "confidence": "Certain"},
+    {"vendor": "Xinapse Systems", "product": "DICOM Storage Server", "shodan_queries": ["port:4560"], "censys_queries": [], "script": "", "confidence": "Tentative"},
+    {"vendor": "DICOM Grid", "product": "DICOM Grid Gateway", "shodan_queries": ["port:4560", "port:8161"], "censys_queries": [], "script": "", "confidence": "Tentative"}
 ]

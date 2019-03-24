@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from censys.ipv4 import CensysIPv4
 from censys.base import CensysRateLimitExceededException, CensysJSONDecodeException, CensysNotFoundException, CensysUnauthorizedException

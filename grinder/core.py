@@ -4,7 +4,6 @@ Basic core module for grinder. All functions from
 Other modules must be wrapped here for proper usage.
 """
 
-from sys import exit
 from typing import NamedTuple
 
 # from enforce import runtime_validation
@@ -26,10 +25,10 @@ from grinder.errors import GrinderCoreSearchError, GrinderCoreBatchSearchError, 
     GrinderCoreCensysSaveToDatabaseError, GrinderCoreSaveResultsToDatabaseError, GrinderCoreNmapScanError
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
+from grinder.nmapprocessmanager import NmapProcessingManager
 from grinder.plots import GrinderPlots
 from grinder.shodanconnector import ShodanConnector
 from grinder.utils import GrinderUtils
-from grinder.nmapprocessmanager import NmapProcessingManager
 
 
 class HostInfo(NamedTuple):
@@ -54,6 +53,7 @@ class GrinderCore:
     """
     This is basic module class for all functional calls
     """
+
     def __init__(self, shodan_api_key: str = '', censys_api_id: str = '', censys_api_secret: str = '') -> None:
         self.shodan_processed_results: dict = {}
         self.censys_processed_results: dict = {}
@@ -182,7 +182,7 @@ class GrinderCore:
             self.combined_results = self.filemanager.load_data_from_file(load_dir=load_dir,
                                                                          load_file=load_file,
                                                                          load_json_dir=load_json_dir)
-            self.combined_results = {host.get('ip'):host for host in self.combined_results}
+            self.combined_results = {host.get('ip'): host for host in self.combined_results}
             print('Results of latest scan was successfully loaded from json file.')
             return self.combined_results
         except GrinderFileManagerOpenError:
@@ -320,7 +320,6 @@ class GrinderCore:
         if not self.__is_host_existed(shodan_result_as_dict.get('ip')):
             self.shodan_processed_results.update({shodan_result_as_dict.get('ip'): shodan_result_as_dict})
 
-
     @exception_handler(expected_exception=GrinderCoreHostCensysResultsError)
     def __parse_current_host_censys_results(self, current_host: dict, query: str, product_info: dict) -> None:
         """
@@ -443,7 +442,7 @@ class GrinderCore:
                 self.__shodan_save_to_database(query)
             for query in product_info.get('censys_queries'):
                 self.__censys_save_to_database(query)
-        
+
         self.__update_end_time_database()
         self.__update_results_count(total_products=len(self.queries_file), total_results=len(self.combined_results))
         self.__close_database()
@@ -543,9 +542,9 @@ class GrinderCore:
             self.queries_file = self.filemanager.get_queries(queries_file=queries_filename)
         except GrinderFileManagerOpenError:
             print('Oops! File with queries was not found. Create it or set name properly.')
-        
+
         self.__init_database()
-        
+
         for product_info in self.queries_file:
             self.__process_current_product_queries(product_info)
 

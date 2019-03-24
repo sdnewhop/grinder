@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from censys.base import CensysRateLimitExceededException, CensysJSONDecodeException, CensysNotFoundException, \
+    CensysUnauthorizedException
 from censys.ipv4 import CensysIPv4
-from censys.base import CensysRateLimitExceededException, CensysJSONDecodeException, CensysNotFoundException, CensysUnauthorizedException
 
-from grinder.defaultvalues import DefaultValues
 from grinder.decorators import exception_handler
+from grinder.defaultvalues import DefaultValues
 from grinder.errors import CensysConnectorGetResultsError, CensysConnectorInitError, CensysConnectorSearchError
 
 
@@ -20,11 +21,11 @@ class CensysConnector:
         self.results: list = []
         self.censys_results_count: int = 0
         self.search_fields = ['ip',
-               'location.country',
-               'location.latitude',
-               'location.longitude',
-               'ports',
-               'protocols']
+                              'location.country',
+                              'location.latitude',
+                              'location.longitude',
+                              'ports',
+                              'protocols']
         self.convert_dict = {
             'ip': 'ip',
             'location.country': 'country',
@@ -38,7 +39,8 @@ class CensysConnector:
     def search(self, query: str, max_records=1000) -> None:
         try:
             self.results = list(self.api.search(query, fields=self.search_fields, max_records=max_records))
-        except (CensysRateLimitExceededException, CensysJSONDecodeException, CensysNotFoundException, CensysUnauthorizedException) as api_error:
+        except (CensysRateLimitExceededException, CensysJSONDecodeException, CensysNotFoundException,
+                CensysUnauthorizedException) as api_error:
             print(f'Censys API error: {api_error}')
         except AttributeError as api_not_defined:
             print(f'Censys API was not initialized: {api_not_defined}')

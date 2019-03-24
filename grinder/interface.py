@@ -4,8 +4,8 @@ from argparse import ArgumentParser, Namespace
 from os import environ
 from sys import version_info, argv, exit
 
-from grinder.defaultvalues import DefaultValues
 from grinder.decorators import exception_handler
+from grinder.defaultvalues import DefaultValues
 from grinder.errors import GrinderInterfaceLoadEnvironmentKeyError, GrinderInterfaceParseArgsError, \
     GrinderInterfaceGetShodanKeyError
 
@@ -23,7 +23,7 @@ class GrinderInterface:
     @exception_handler(expected_exception=GrinderInterfaceLoadEnvironmentKeyError)
     def load_shodan_key_from_env(self) -> str:
         return environ.get('SHODAN_API_KEY')
-    
+
     def load_censys_keys_from_env(self) -> tuple:
         return environ.get('CENSYS_API_ID'), environ.get('CENSYS_API_SECRET')
 
@@ -44,7 +44,8 @@ class GrinderInterface:
         parser.add_argument('-cp', '--create-plots', action='store_true', default=False, help='Create graphic plots')
         parser.add_argument('-ci', '--censys-id', action='store', default=None, help='Censys API ID key')
         parser.add_argument('-cs', '--censys-secret', action='store', default=None, help='Censys API SECRET key')
-        parser.add_argument('-cm', '--censys-max', action='store', type=int, default=None, help='Censys default maximum results quantity')
+        parser.add_argument('-cm', '--censys-max', action='store', type=int, default=None,
+                            help='Censys default maximum results quantity')
         parser.add_argument('-nm', '--nmap-scan', action='store_true', default=False, help='Initiate Nmap scanning')
         self.args = parser.parse_args()
         if not self.args.shodan_key:

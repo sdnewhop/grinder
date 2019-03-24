@@ -30,7 +30,7 @@ class NmapProcessing(Process):
             print(f' ■ Current scan host: {host}')
             if results.get(host).values():
                 NmapProcessingResults.RESULTS.update({host: results.get(host)})
-                #print(f'Results: {results.get(host)}')
+                # print(f'Results: {results.get(host)}')
                 print(f' ■ Done host: {host}')
             self.queue.task_done()
 

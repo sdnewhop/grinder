@@ -263,7 +263,7 @@ class GrinderDatabase:
             ).fetchall()
             results_parsed = [json_loads(item[0]) for item in sql_results]
             results_combined = [result for query_result in results_parsed for result in query_result]
-            return {host.get('ip'):host for host in results_combined}
+            return {host.get('ip'): host for host in results_combined}
 
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_last_shodan_results(self):
@@ -280,7 +280,7 @@ class GrinderDatabase:
             ).fetchall()
             results_parsed = [json_loads(item[0]) for item in sql_results]
             results_combined = [result for query_result in results_parsed for result in query_result]
-            return {host.get('ip'):host for host in results_combined}
+            return {host.get('ip'): host for host in results_combined}
 
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_last_censys_results(self):
@@ -297,7 +297,7 @@ class GrinderDatabase:
             ).fetchall()
             results_parsed = [json_loads(item[0]) for item in sql_results]
             results_combined = [result for query_result in results_parsed for result in query_result]
-            return {host.get('ip'):host for host in results_combined}
+            return {host.get('ip'): host for host in results_combined}
 
     @exception_handler(expected_exception=GrinderDatabaseCloseError)
     def close(self):

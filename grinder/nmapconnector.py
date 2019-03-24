@@ -3,8 +3,12 @@
 from nmap import PortScanner
 
 from grinder.decorators import exception_handler
-from grinder.errors import NmapConnectorInitError, NmapConnectorScanError, NmapConnectorGetResultsError, \
-    NmapConnectorGetResultsCountError
+from grinder.errors import (
+    NmapConnectorInitError,
+    NmapConnectorScanError,
+    NmapConnectorGetResultsError,
+    NmapConnectorGetResultsCountError,
+)
 
 
 class NmapConnector:

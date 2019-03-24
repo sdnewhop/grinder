@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-from pycountry_convert import \
-    country_alpha2_to_continent_code as code_to_continent
-from pycountry_convert import \
-    country_name_to_country_alpha2 as country_to_code
+from pycountry_convert import country_alpha2_to_continent_code as code_to_continent
+from pycountry_convert import country_name_to_country_alpha2 as country_to_code
 
 from grinder.decorators import exception_handler
 from grinder.errors import GrinderContinentsConvertError
@@ -20,7 +18,7 @@ class GrinderContinents:
             "EU": "Europe",
             "NA": "North America",
             "OC": "Oceania",
-            "SA": "South and Central America"
+            "SA": "South and Central America",
         }
 
         continents: dict = {}

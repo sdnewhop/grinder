@@ -23,6 +23,8 @@ if __name__ == "__main__":
         core.set_censys_max_results(args.censys_max)
     if args.confidence:
         core.set_confidence(args.confidence)
+    if args.vendors:
+        core.set_vendors(args.vendors)
 
     try:
         search_results = (

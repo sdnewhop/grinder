@@ -41,6 +41,7 @@ from grinder.errors import (
     GrinderCoreCensysSaveToDatabaseError,
     GrinderCoreSaveResultsToDatabaseError,
     GrinderCoreNmapScanError,
+    GrinderCoreFilterQueriesError,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -94,6 +95,7 @@ class GrinderCore:
         self.censys_api_secret = censys_api_secret or DefaultValues.CENSYS_API_SECRET
 
         self.confidence = None
+        self.vendors = None
 
         self.filemanager = GrinderFileManager()
         self.db = GrinderDatabase()
@@ -602,6 +604,7 @@ class GrinderCore:
         :param sudo (bool): sudo if needed
         :param arguments (str): Nmap arguments
         :param workers (int): number of Nmap workers
+        :return None:
         """
         cprint("Start Nmap scanning", "blue", attrs=["bold"])
         if not self.shodan_processed_results:
@@ -626,22 +629,83 @@ class GrinderCore:
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["nmap_scan"] = nmap_results.get(host)
 
-    def set_confidence(self, confidence) -> None:
+    def set_confidence(self, confidence: str) -> None:
+        """
+        Set confidence level for search
+
+        :param confidence (str): confidence level
+        :return None:
+        """
         self.confidence = confidence
-    
+
+    def set_vendors(self, vendors: list) -> None:
+        """
+        Set list of vendors to search for
+
+        :param vendors (list): list of vendors
+        :return None:
+        """
+        self.vendors = vendors
+
+    @exception_handler(expected_exception=GrinderCoreFilterQueriesError)
     def __filter_queries_by_confidence(self) -> None:
+        """
+        Filter queries by confidence
+
+        :return None:
+        """
         if not self.confidence:
             return
-        if not self.confidence.lower() in ['firm', 'certain', 'tentative']:
-            print('Confidence level is not valid')
+        if not self.confidence.lower() in ["firm", "certain", "tentative"]:
+            print("Confidence level is not valid")
             return
-        self.queries_file = list(filter(lambda product: product.get('confidence').lower() == self.confidence.lower(), self.queries_file))
+        self.queries_file = list(
+            filter(
+                lambda product: product.get("confidence").lower()
+                == self.confidence.lower(),
+                self.queries_file,
+            )
+        )
         if not self.queries_file:
-            print('Queries with equal confidence level not found')
+            print("Queries with equal confidence level not found")
+            return
+
+    @exception_handler(expected_exception=GrinderCoreFilterQueriesError)
+    def __filter_queries_by_vendors(self) -> None:
+        """
+        Filter queries by vendors
+
+        :return None:
+        """
+        if not self.vendors:
+            return
+        vendors_from_queries = list(
+            map(lambda product: product.get("vendor"), self.queries_file)
+        )
+        valid_vendors = list(
+            filter(
+                lambda product: str(product).lower()
+                in map(str.lower, vendors_from_queries),
+                self.vendors,
+            )
+        )
+        if not valid_vendors:
+            print("Vendors not found in queries file")
+            return
+        self.vendors = valid_vendors
+        self.queries_file = list(
+            filter(
+                lambda product: product.get("vendor").lower()
+                in map(str.lower, valid_vendors),
+                self.queries_file,
+            )
+        )
+        if not self.queries_file:
+            print("Defined vendors not found in queries file")
             return
 
     @timer
-    #@exception_handler(expected_exception=GrinderCoreBatchSearchError)
+    @exception_handler(expected_exception=GrinderCoreBatchSearchError)
     def batch_search(self, queries_filename: str) -> dict:
         """
         Run batch search for all products from input JSON product list file.
@@ -672,8 +736,9 @@ class GrinderCore:
             print(
                 "Oops! File with queries was not found. Create it or set name properly."
             )
-        
+
         self.__filter_queries_by_confidence()
+        self.__filter_queries_by_vendors()
         self.__init_database()
 
         for product_info in self.queries_file:

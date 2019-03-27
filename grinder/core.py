@@ -4,10 +4,10 @@ Basic core module for grinder. All functions from
 Other modules must be wrapped here for proper usage.
 """
 
-from typing import NamedTuple
+from typing import NamedTuple, List
+from termcolor import cprint
 
 # from enforce import runtime_validation
-from termcolor import cprint
 
 from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
@@ -41,6 +41,7 @@ from grinder.errors import (
     GrinderCoreCensysSaveToDatabaseError,
     GrinderCoreSaveResultsToDatabaseError,
     GrinderCoreNmapScanError,
+    GrinderCoreFilterQueriesError,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -92,6 +93,10 @@ class GrinderCore:
         self.shodan_api_key = shodan_api_key or DefaultValues.SHODAN_API_KEY
         self.censys_api_id = censys_api_id or DefaultValues.CENSYS_API_ID
         self.censys_api_secret = censys_api_secret or DefaultValues.CENSYS_API_SECRET
+
+        self.confidence: str = ""
+        self.vendors = List[str]
+        self.max_entities: int = 6
 
         self.filemanager = GrinderFileManager()
         self.db = GrinderDatabase()
@@ -332,9 +337,18 @@ class GrinderCore:
             ip
         ) or self.censys_processed_results.get(ip)
 
+    def set_unique_entities_quantity(self, max_entitities):
+        """
+        Set maximum limit of unique entities for count
+
+        :param max_entities (int): number of entities
+        :return Nones:
+        """
+        self.max_entities = max_entitities
+
     @exception_handler(expected_exception=GrinderCoreCountUniqueProductsError)
     def count_unique_entities(
-        self, entity_name, search_results=None, max_entities=5
+        self, entity_name, search_results=None, max_entities=None
     ) -> None:
         """
         Count every unique entity (like country, protocol, port, etc.)
@@ -344,6 +358,8 @@ class GrinderCore:
         :param max_entities (int): max entities in count
         :return None:
         """
+        if not max_entities:
+            max_entities = self.max_entities
         cprint(f"Count unique {entity_name}...", "blue", attrs=["bold"])
         if not search_results:
             search_results = list(self.combined_results.values())
@@ -600,6 +616,7 @@ class GrinderCore:
         :param sudo (bool): sudo if needed
         :param arguments (str): Nmap arguments
         :param workers (int): number of Nmap workers
+        :return None:
         """
         cprint("Start Nmap scanning", "blue", attrs=["bold"])
         if not self.shodan_processed_results:
@@ -623,6 +640,85 @@ class GrinderCore:
             self.shodan_processed_results[host]["nmap_scan"] = nmap_results.get(host)
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["nmap_scan"] = nmap_results.get(host)
+
+    def set_confidence(self, confidence: str) -> None:
+        """
+        Set confidence level for search
+
+        :param confidence (str): confidence level
+        :return None:
+        """
+        self.confidence = confidence
+
+    def set_vendors(self, vendors: List[str]) -> None:
+        """
+        Set list of vendors to search for
+
+        :param vendors (list): list of vendors
+        :return None:
+        """
+        self.vendors = vendors
+
+    @exception_handler(expected_exception=GrinderCoreFilterQueriesError)
+    def __filter_queries_by_confidence(self) -> None:
+        """
+        Filter queries by confidence
+
+        :return None:
+        """
+        if not self.confidence:
+            return
+        if not self.confidence.lower() in ["firm", "certain", "tentative"]:
+            print("Confidence level is not valid")
+            return
+        self.queries_file = list(
+            filter(
+                lambda product: product.get("confidence").lower()
+                == self.confidence.lower(),
+                self.queries_file,
+            )
+        )
+        if not self.queries_file:
+            print("Queries with equal confidence level not found")
+            return
+
+    @exception_handler(expected_exception=GrinderCoreFilterQueriesError)
+    def __filter_queries_by_vendors(self) -> None:
+        """
+        Filter queries by vendors
+
+        :return None:
+        """
+
+        # Make list of all existed products
+        if not self.vendors:
+            return
+        vendors_from_queries = list(
+            map(lambda product: product.get("vendor"), self.queries_file)
+        )
+
+        # Search vendors from CLI in list of all existed products
+        founded_vendors = [
+            existed_vendor
+            for existed_vendor in vendors_from_queries
+            for needed_vendor in self.vendors
+            if needed_vendor.lower() in existed_vendor.lower()
+        ]
+        if not founded_vendors:
+            print("Vendors not found in queries file")
+            self.queries_file = []
+            return
+
+        self.vendors = founded_vendors
+
+        # Choose right products
+        self.queries_file = list(
+            filter(
+                lambda product: product.get("vendor").lower()
+                in map(str.lower, founded_vendors),
+                self.queries_file,
+            )
+        )
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)
@@ -656,7 +752,13 @@ class GrinderCore:
             print(
                 "Oops! File with queries was not found. Create it or set name properly."
             )
+            return self.combined_results
 
+        self.__filter_queries_by_confidence()
+        self.__filter_queries_by_vendors()
+        if not self.queries_file:
+            print("Filter method is not valid.")
+            return self.combined_results
         self.__init_database()
 
         for product_info in self.queries_file:

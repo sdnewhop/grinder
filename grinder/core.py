@@ -93,6 +93,8 @@ class GrinderCore:
         self.censys_api_id = censys_api_id or DefaultValues.CENSYS_API_ID
         self.censys_api_secret = censys_api_secret or DefaultValues.CENSYS_API_SECRET
 
+        self.confidence = None
+
         self.filemanager = GrinderFileManager()
         self.db = GrinderDatabase()
 
@@ -624,8 +626,22 @@ class GrinderCore:
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["nmap_scan"] = nmap_results.get(host)
 
+    def set_confidence(self, confidence) -> None:
+        self.confidence = confidence
+    
+    def __filter_queries_by_confidence(self) -> None:
+        if not self.confidence:
+            return
+        if not self.confidence.lower() in ['firm', 'certain', 'tentative']:
+            print('Confidence level is not valid')
+            return
+        self.queries_file = list(filter(lambda product: product.get('confidence').lower() == self.confidence.lower(), self.queries_file))
+        if not self.queries_file:
+            print('Queries with equal confidence level not found')
+            return
+
     @timer
-    @exception_handler(expected_exception=GrinderCoreBatchSearchError)
+    #@exception_handler(expected_exception=GrinderCoreBatchSearchError)
     def batch_search(self, queries_filename: str) -> dict:
         """
         Run batch search for all products from input JSON product list file.
@@ -656,7 +672,8 @@ class GrinderCore:
             print(
                 "Oops! File with queries was not found. Create it or set name properly."
             )
-
+        
+        self.__filter_queries_by_confidence()
         self.__init_database()
 
         for product_info in self.queries_file:

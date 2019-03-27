@@ -11,7 +11,7 @@ The Grinder framework was created to automatically enumerate and fingerprint dif
 ## Setup and configure environment
 1. Clone the repository
 ```
-https://github.com/sdnewhop/grinder
+git clone https://github.com/sdnewhop/grinder
 ```
 2. Create virtual environment
 ```
@@ -26,7 +26,7 @@ which pip
 ```
 4. Install project requirements in virtual environment
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 5. Run the script
 ```
@@ -46,15 +46,44 @@ export CENSYS_API_SECRET=YOUR_CENSYS_API_SECRET_HERE
 ```
 deactivate
 ```
+## Usage
+```
+usage: grinder.py [-h] [-r] [-u] [-q QUERIES_FILE] [-sk SHODAN_KEY] [-cu]
+                  [-cp] [-ci CENSYS_ID] [-cs CENSYS_SECRET] [-cm CENSYS_MAX]
+                  [-nm]
+
+The Grinder framework was created to automatically enumerate and fingerprint
+different hosts on the Internet using different back-end systems
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -r, --run             Run scanning
+  -u, --update-markers  Update map markers
+  -q QUERIES_FILE, --queries-file QUERIES_FILE
+                        JSON File with Shodan queries
+  -sk SHODAN_KEY, --shodan-key SHODAN_KEY
+                        Shodan API key
+  -cu, --count-unique   Count unique entities
+  -cp, --create-plots   Create graphic plots
+  -ci CENSYS_ID, --censys-id CENSYS_ID
+                        Censys API ID key
+  -cs CENSYS_SECRET, --censys-secret CENSYS_SECRET
+                        Censys API SECRET key
+  -cm CENSYS_MAX, --censys-max CENSYS_MAX
+                        Censys default maximum results quantity
+  -nm, --nmap-scan      Initiate Nmap scanning
+
+```
+
 ## Tests
 You can run tests from root grinder directory with command
 ```
 pytest
 ```
-## Run
-Basic usage
+## Examples
+Run an enumeration with Nmap scanning, where maximum Censys results is 555 hosts per query, update map markers, count unique entities and create plots
 ```
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q queries.json -cu -cp -r
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q queries.json -cu -cp -cm 555 -nm -r 
 ```
 For more options and help use
 ```

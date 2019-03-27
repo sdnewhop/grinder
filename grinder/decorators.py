@@ -2,7 +2,7 @@
 
 import sys
 from functools import wraps
-from os import path, makedirs
+from os import path, makedirs, system
 from time import time
 
 
@@ -12,7 +12,11 @@ def exception_handler(expected_exception):
             try:
                 return function(*args, **kwargs)
             except KeyboardInterrupt:
-                print('Keyboard Interrupt Detected. Operation aborted. Bye!')
+                print("Keyboard Interrupt Detected. Operation aborted. Bye!")
+                system("stty sane")
+                sys.exit(1)
+            except SystemExit:
+                system("stty sane")
                 sys.exit(1)
             except Exception as unexp_error:
                 raise expected_exception(unexp_error) from unexp_error
@@ -38,7 +42,9 @@ def create_results_directory(directory: str = None):
 def create_subdirectory(subdirectory: str, rootdirectory: str = None):
     def real_decorator(function):
         def func_wrapper(*args, **kwargs):
-            full_results_path = f"./{kwargs.get('dest_dir') or rootdirectory}/{subdirectory}"
+            full_results_path = (
+                f"./{kwargs.get('dest_dir') or rootdirectory}/{subdirectory}"
+            )
             if not path.exists(full_results_path):
                 makedirs(full_results_path)
             return function(*args, **kwargs)

@@ -4,10 +4,10 @@ Basic core module for grinder. All functions from
 Other modules must be wrapped here for proper usage.
 """
 
-from typing import NamedTuple
-
-# from enforce import runtime_validation
+from typing import NamedTuple, List
 from termcolor import cprint
+
+#from enforce import runtime_validation
 
 from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
@@ -69,7 +69,7 @@ class HostInfo(NamedTuple):
     nmap_scan: dict
 
 
-# @runtime_validation
+#@runtime_validation
 class GrinderCore:
     """
     This is basic module class for all functional calls
@@ -95,7 +95,7 @@ class GrinderCore:
         self.censys_api_secret = censys_api_secret or DefaultValues.CENSYS_API_SECRET
 
         self.confidence = None
-        self.vendors = None
+        self.vendors = List[str]
 
         self.filemanager = GrinderFileManager()
         self.db = GrinderDatabase()
@@ -638,7 +638,7 @@ class GrinderCore:
         """
         self.confidence = confidence
 
-    def set_vendors(self, vendors: list) -> None:
+    def set_vendors(self, vendors: List[str]) -> None:
         """
         Set list of vendors to search for
 
@@ -677,32 +677,36 @@ class GrinderCore:
 
         :return None:
         """
+
+        # Make list of all existed products
         if not self.vendors:
             return
         vendors_from_queries = list(
             map(lambda product: product.get("vendor"), self.queries_file)
         )
-        valid_vendors = list(
-            filter(
-                lambda product: str(product).lower()
-                in map(str.lower, vendors_from_queries),
-                self.vendors,
-            )
-        )
-        if not valid_vendors:
+
+        # Search vendors from CLI in list of all existed products
+        founded_vendors = [
+            existed_vendor
+            for existed_vendor in vendors_from_queries
+            for needed_vendor in self.vendors
+            if needed_vendor.lower() in existed_vendor.lower()
+        ]
+        if not founded_vendors:
             print("Vendors not found in queries file")
+            self.queries_file = []
             return
-        self.vendors = valid_vendors
+
+        self.vendors = founded_vendors
+
+        # Choose right products
         self.queries_file = list(
             filter(
                 lambda product: product.get("vendor").lower()
-                in map(str.lower, valid_vendors),
+                in map(str.lower, founded_vendors),
                 self.queries_file,
             )
         )
-        if not self.queries_file:
-            print("Defined vendors not found in queries file")
-            return
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)
@@ -736,9 +740,13 @@ class GrinderCore:
             print(
                 "Oops! File with queries was not found. Create it or set name properly."
             )
+            return self.combined_results
 
         self.__filter_queries_by_confidence()
         self.__filter_queries_by_vendors()
+        if not self.queries_file:
+            print("Filter method is not valid.")
+            return self.combined_results
         self.__init_database()
 
         for product_info in self.queries_file:

@@ -21,6 +21,10 @@ if __name__ == "__main__":
 
     if args.censys_max:
         core.set_censys_max_results(args.censys_max)
+    if args.confidence:
+        core.set_confidence(args.confidence)
+    if args.vendors:
+        core.set_vendors(args.vendors)
 
     try:
         search_results = (
@@ -33,6 +37,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print(f"Total results: {len(search_results)}")
+    if not search_results:
+        sys.exit(1)
 
     if args.count_unique:
         core.count_unique_entities("product")

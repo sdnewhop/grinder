@@ -99,6 +99,20 @@ class GrinderInterface:
             default=False,
             help="Initiate Nmap scanning",
         )
+        parser.add_argument(
+            "-c",
+            "--confidence",
+            action="store",
+            default=None,
+            help="Set confidence level",
+        )
+        parser.add_argument(
+            "-v",
+            "--vendors",
+            nargs="*",
+            default=[],
+            help="Set list of vendors to search from queries file",
+        )
         self.args = parser.parse_args()
         if not self.args.shodan_key:
             self.args.shodan_key = self.load_shodan_key_from_env()

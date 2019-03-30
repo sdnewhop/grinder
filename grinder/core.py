@@ -7,7 +7,7 @@ Other modules must be wrapped here for proper usage.
 from typing import NamedTuple, List
 from termcolor import cprint
 
-#from enforce import runtime_validation
+# from enforce import runtime_validation
 
 from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
@@ -69,7 +69,7 @@ class HostInfo(NamedTuple):
     nmap_scan: dict
 
 
-#@runtime_validation
+# @runtime_validation
 class GrinderCore:
     """
     This is basic module class for all functional calls
@@ -94,8 +94,9 @@ class GrinderCore:
         self.censys_api_id = censys_api_id or DefaultValues.CENSYS_API_ID
         self.censys_api_secret = censys_api_secret or DefaultValues.CENSYS_API_SECRET
 
-        self.confidence = None
+        self.confidence: str = ""
         self.vendors = List[str]
+        self.max_entities: int = 6
 
         self.filemanager = GrinderFileManager()
         self.db = GrinderDatabase()
@@ -336,9 +337,18 @@ class GrinderCore:
             ip
         ) or self.censys_processed_results.get(ip)
 
+    def set_unique_entities_quantity(self, max_entitities):
+        """
+        Set maximum limit of unique entities for count
+
+        :param max_entities (int): number of entities
+        :return Nones:
+        """
+        self.max_entities = max_entitities
+
     @exception_handler(expected_exception=GrinderCoreCountUniqueProductsError)
     def count_unique_entities(
-        self, entity_name, search_results=None, max_entities=5
+        self, entity_name, search_results=None, max_entities=None
     ) -> None:
         """
         Count every unique entity (like country, protocol, port, etc.)
@@ -348,6 +358,8 @@ class GrinderCore:
         :param max_entities (int): max entities in count
         :return None:
         """
+        if not max_entities:
+            max_entities = self.max_entities
         cprint(f"Count unique {entity_name}...", "blue", attrs=["bold"])
         if not search_results:
             search_results = list(self.combined_results.values())

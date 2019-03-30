@@ -113,6 +113,14 @@ class GrinderInterface:
             default=[],
             help="Set list of vendors to search from queries file",
         )
+        parser.add_argument(
+            "-ml",
+            "--max-limit",
+            action="store",
+            type=int,
+            default=None,
+            help="Maximum number of unique entities in plots and results",
+        )
         self.args = parser.parse_args()
         if not self.args.shodan_key:
             self.args.shodan_key = self.load_shodan_key_from_env()

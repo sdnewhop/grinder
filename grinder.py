@@ -40,6 +40,8 @@ if __name__ == "__main__":
     if not search_results:
         sys.exit(1)
 
+    if args.max_limit:
+        core.set_unique_entities_quantity(args.max_limit)
     if args.count_unique:
         core.count_unique_entities("product")
         core.count_unique_entities("vendor")

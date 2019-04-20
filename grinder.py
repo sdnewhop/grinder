@@ -36,9 +36,10 @@ if __name__ == "__main__":
         print("Unexpected error occured at batch search method.")
         sys.exit(1)
 
-    print(f"Total results: {len(search_results)}")
     if not search_results:
         sys.exit(1)
+
+    print(f"Total results: {len(search_results)}")
 
     if args.max_limit:
         core.set_unique_entities_quantity(args.max_limit)

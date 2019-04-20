@@ -100,6 +100,14 @@ class GrinderInterface:
             help="Initiate Nmap scanning",
         )
         parser.add_argument(
+            "-nw",
+            "--nmap-workers",
+            action="store",
+            type=int,
+            default=10,
+            help="Number of Nmap workers to scan",
+        )
+        parser.add_argument(
             "-c",
             "--confidence",
             action="store",

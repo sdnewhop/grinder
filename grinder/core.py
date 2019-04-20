@@ -619,6 +619,7 @@ class GrinderCore:
         :return None:
         """
         cprint("Start Nmap scanning", "blue", attrs=["bold"])
+        cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])
         if not self.shodan_processed_results:
             self.shodan_processed_results = self.db.load_last_shodan_results()
         if not self.censys_processed_results:

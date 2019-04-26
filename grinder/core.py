@@ -66,6 +66,7 @@ class HostInfo(NamedTuple):
     lat: str
     lng: str
     country: str
+    vulnerabilities: dict
     nmap_scan: dict
 
 
@@ -404,6 +405,7 @@ class GrinderCore:
             lat=current_host.get("location").get("latitude"),
             lng=current_host.get("location").get("longitude"),
             country=current_host.get("location").get("country_name"),
+            vulnerabilities=dict(shodan_vulnerabilities=current_host.get("vulns")),
             nmap_scan=None,
         )
         shodan_result_as_dict = dict(host_info._asdict())
@@ -437,6 +439,7 @@ class GrinderCore:
             lat=current_host.get("lat"),
             lng=current_host.get("lng"),
             country=current_host.get("country"),
+            vulnerabilities=None,
             nmap_scan=None,
         )
         censys_result_as_dict = dict(host_info._asdict())

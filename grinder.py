@@ -32,8 +32,8 @@ if __name__ == "__main__":
             if args.run
             else core.load_results()
         )
-    except (GrinderCoreBatchSearchError, GrinderCoreLoadResultsError):
-        print("Unexpected error occured at batch search method.")
+    except (GrinderCoreBatchSearchError, GrinderCoreLoadResultsError) as batch_search_err:
+        print(f"Unexpected error occured at batch search method: {batch_search_err}")
         sys.exit(1)
 
     if not search_results:

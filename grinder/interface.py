@@ -108,6 +108,21 @@ class GrinderInterface:
             help="Number of Nmap workers to scan",
         )
         parser.add_argument(
+            "-vs",
+            "--vulners-scan",
+            action="store_true",
+            default=False,
+            help="Initiate Vulners API scanning",
+        )
+        parser.add_argument(
+            "-vw",
+            "--vulners-workers",
+            action="store",
+            type=int,
+            default=10,
+            help="Number of Vulners workers to scan",
+        )
+        parser.add_argument(
             "-c",
             "--confidence",
             action="store",

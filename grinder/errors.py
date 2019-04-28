@@ -146,6 +146,11 @@ class NmapProcessingManagerOrganizeProcessesError(NmapProcessingManagerException
         super().__init__(error_args)
 
 
+class GrinderCoreVulnersScanError(NmapProcessingManagerException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
 class GrinderFileManagerOpenError(GrinderFileManagerException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)

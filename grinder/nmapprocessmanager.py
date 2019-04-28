@@ -27,15 +27,17 @@ class NmapProcessing(Process):
     def run(self):
         while True:
             host = self.queue.get()
+            print(f" ■ Current scan host: {host}")
             nm = NmapConnector()
             nm.scan(
                 host=host, arguments=self.arguments, ports=self.ports, sudo=self.sudo
             )
             results = nm.get_results()
-            print(f" ■ Current scan host: {host}")
+            if not results.get(host):
+                self.queue.task_done()
+                return {}
             if results.get(host).values():
                 NmapProcessingResults.RESULTS.update({host: results.get(host)})
-                # print(f'Results: {results.get(host)}')
                 print(f" ■ Done host: {host}")
             self.queue.task_done()
 

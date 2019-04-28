@@ -33,3 +33,8 @@ class ShodanConnector:
 
     def get_real_count(self) -> int:
         return self.real_results_count
+
+    def get_vulnerabilities(self) -> dict:
+        return {
+            host["ip_str"]: host["vulns"] for host in self.results if host.get("vulns")
+        }

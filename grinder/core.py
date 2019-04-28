@@ -42,6 +42,7 @@ from grinder.errors import (
     GrinderCoreSaveResultsToDatabaseError,
     GrinderCoreNmapScanError,
     GrinderCoreFilterQueriesError,
+    GrinderCoreVulnersScanError,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -439,7 +440,7 @@ class GrinderCore:
             lat=current_host.get("lat"),
             lng=current_host.get("lng"),
             country=current_host.get("country"),
-            vulnerabilities=None,
+            vulnerabilities=dict(shodan_vulnerabilities=None),
             nmap_scan=None,
         )
         censys_result_as_dict = dict(host_info._asdict())
@@ -644,6 +645,55 @@ class GrinderCore:
             self.shodan_processed_results[host]["nmap_scan"] = nmap_results.get(host)
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["nmap_scan"] = nmap_results.get(host)
+
+    @exception_handler(expected_exception=GrinderCoreVulnersScanError)
+    def vulners_scan(
+        self, workers=1, host_timeout=300, vulners_path="/plugins/vulners.nse"
+    ):
+        print("Start Vulners API scan")
+        if not self.shodan_processed_results:
+            self.shodan_processed_results = self.db.load_last_shodan_results()
+        if not self.censys_processed_results:
+            self.censys_processed_results = self.db.load_last_censys_results()
+        all_hosts = list(
+            {**self.shodan_processed_results, **self.censys_processed_results}.keys()
+        )
+        vulners_scan = NmapProcessingManager(
+            hosts=all_hosts,
+            ports="",
+            sudo=False,
+            arguments=f"-sV --script=.{vulners_path} --host-timeout {int(host_timeout)*1000}ms",
+            workers=workers,
+        )
+        vulners_scan.start()
+
+        # Get all host vulns in one pack
+        hosts_vulners: dict = {}
+        results = vulners_scan.get_results()
+        for host in results:
+            host_vulners: list = []
+            tcp_protocol = results[host].get("tcp")
+            if not tcp_protocol:
+                continue
+            for port in tcp_protocol:
+                script_output = tcp_protocol[port].get("script")
+                if not script_output:
+                    continue
+                host_vulners.append(script_output.get("vulners"))
+            vulns = list(set(re.findall(r"CVE-\d+-\d+", str(host_vulners))))
+            vulns_with_urls = {
+                vuln: f"https://vulners.com/cve/{vuln}" for vuln in vulns
+            }
+            hosts_vulners.update({host: vulns_with_urls})
+
+        for host in self.shodan_processed_results.keys():
+            self.shodan_processed_results[host]["vulnerabilities"].update(
+                {"vulners_vulnerabilities": hosts_vulners.get(host)}
+            )
+        for host in self.censys_processed_results.keys():
+            self.censys_processed_results[host]["vulnerabilities"].update(
+                {"vulners_vulnerabilities": hosts_vulners.get(host)}
+            )
 
     def set_confidence(self, confidence: str) -> None:
         """

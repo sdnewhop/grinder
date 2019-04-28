@@ -97,7 +97,7 @@ class GrinderCore:
         self.censys_api_secret = censys_api_secret or DefaultValues.CENSYS_API_SECRET
 
         self.confidence: str = ""
-        self.vendors = List[str]
+        self.vendors: list = []
         self.max_entities: int = 6
 
         self.filemanager = GrinderFileManager()
@@ -743,7 +743,6 @@ class GrinderCore:
 
         :return None:
         """
-
         # Make list of all existed products
         if not self.vendors:
             return

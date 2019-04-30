@@ -6,6 +6,7 @@ Other modules must be wrapped here for proper usage.
 
 from typing import NamedTuple, List
 from termcolor import cprint
+from re import findall
 
 # from enforce import runtime_validation
 
@@ -648,7 +649,7 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreVulnersScanError)
     def vulners_scan(
-        self, workers=1, host_timeout=300, vulners_path="/plugins/vulners.nse"
+        self, sudo=False, ports="", workers=1, host_timeout=120, vulners_path="/plugins/vulners.nse"
     ):
         print("Start Vulners API scan")
         if not self.shodan_processed_results:
@@ -660,9 +661,9 @@ class GrinderCore:
         )
         vulners_scan = NmapProcessingManager(
             hosts=all_hosts,
-            ports="",
-            sudo=False,
-            arguments=f"-sV --script=.{vulners_path} --host-timeout {int(host_timeout)*1000}ms",
+            ports=ports,
+            sudo=sudo,
+            arguments=f"-Pn -sV --script=.{vulners_path} --host-timeout {int(host_timeout)*1000}ms",
             workers=workers,
         )
         vulners_scan.start()
@@ -680,7 +681,7 @@ class GrinderCore:
                 if not script_output:
                     continue
                 host_vulners.append(script_output.get("vulners"))
-            vulns = list(set(re.findall(r"CVE-\d+-\d+", str(host_vulners))))
+            vulns = list(set(findall(r"CVE-\d+-\d+", str(host_vulners))))
             vulns_with_urls = {
                 vuln: f"https://vulners.com/cve/{vuln}" for vuln in vulns
             }

@@ -37,6 +37,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if not search_results:
+        print(f"Results is empty.")
         sys.exit(1)
 
     print(f"Total results: {len(search_results)}")
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     if args.nmap_scan and args.run:
         core.nmap_scan(arguments="-Pn", ports="22,80,443", workers=args.nmap_workers)
     if args.vulners_scan:
-        core.vulners_scan(workers=args.vulners_workers)
+        core.vulners_scan(sudo=True, ports="22,80,443", workers=args.vulners_workers)
     if args.run:
         core.save_results_to_database()
     core.save_results()

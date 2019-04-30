@@ -11,4 +11,5 @@ def setup_module():
 
 
 def test_db_load_results():
-    assert isinstance(db.load_last_results(), list)
+    print(type(db.load_last_results()))
+    assert isinstance(db.load_last_results(), dict)

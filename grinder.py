@@ -37,7 +37,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if not search_results:
-        print(f"Results is empty.")
+        print(f"Results are empty.")
         sys.exit(1)
 
     print(f"Total results: {len(search_results)}")

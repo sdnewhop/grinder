@@ -196,7 +196,6 @@ class GrinderCore:
 
         :return dict: dictionary {'country':Count of products in that country}
         """
-        cprint("Count unique continents...", "blue", attrs=["bold"])
         continents: dict = {}
         for entity in self.entities_count_all:
             if not entity.get("entity") == "country":
@@ -204,6 +203,52 @@ class GrinderCore:
             continents = GrinderContinents.convert_continents(entity.get("results"))
         self.entities_count_all.append({"entity": "continents", "results": continents})
         return continents
+
+    def count_vulnerabilities(self, max_vulnerabilities=10) -> dict:
+        """
+        Count unique vulnerabilities from Shodan and Vulners.com API scan
+
+        :return dict: dictionary {'vulnerability': number of affected services}
+        """
+        full_cve_list: list = []
+        for host in self.combined_results.values():
+            shodan_cve_list: list = []
+            vulners_cve_list: list = []
+            host_vulnerabilities: list = []
+
+            vulnerabilities = host.get("vulnerabilities")
+            if not vulnerabilities:
+                continue
+
+            shodan_vulnerabilities = vulnerabilities.get("shodan_vulnerabilities")
+            if shodan_vulnerabilities:
+                shodan_cve_list = list(shodan_vulnerabilities.keys())
+
+            vulners_vulnerabilities = vulnerabilities.get("vulners_vulnerabilities")
+            if vulners_vulnerabilities:
+                vulners_cve_list = list(vulners_vulnerabilities.keys())
+
+            # If nothing was found from Shodan or Vulners for current host
+            if not (shodan_cve_list or vulners_cve_list):
+                continue
+
+            host_vulnerabilities = list(set(shodan_cve_list + vulners_cve_list))
+            if host_vulnerabilities:
+                full_cve_list.extend(host_vulnerabilities)
+
+        utils = GrinderUtils()
+        utils.count_entities(full_cve_list, max_vulnerabilities)
+
+        self.entities_count_all.append(
+            {"entity": "vulnerabilities", "results": utils.get_all_count_results()}
+        )
+        self.entities_count_limit.append(
+            {
+                "entity": "vulnerabilities",
+                "results": utils.get_fixed_max_count_results(),
+            }
+        )
+        return full_cve_list
 
     @exception_handler(expected_exception=GrinderCoreLoadResultsFromFileError)
     def load_results_from_file(
@@ -268,13 +313,18 @@ class GrinderCore:
         :return None:
         """
         cprint("Save all results...", "blue", attrs=["bold"])
-        # Update combined results if we use nmap scan or something
-        self.combined_results = {
-            **self.shodan_processed_results,
-            **self.censys_processed_results,
-        }
+        # If combined results is empty - try to refresh it
+        # from processed results (in case of successful scan)
+        if not self.combined_results:
+            self.combined_results = {
+                **self.shodan_processed_results,
+                **self.censys_processed_results,
+            }
+
+        # If all scan results were empty after refreshing
         if not self.combined_results:
             return
+
         if self.combined_results:
             self.filemanager.write_results_json(
                 list(self.combined_results.values()),
@@ -361,9 +411,15 @@ class GrinderCore:
         :param max_entities (int): max entities in count
         :return None:
         """
+        cprint(f"Count unique {entity_name}...", "blue", attrs=["bold"])
         if not max_entities:
             max_entities = self.max_entities
-        cprint(f"Count unique {entity_name}...", "blue", attrs=["bold"])
+        if entity_name == "vulnerabilities":
+            self.count_vulnerabilities(max_entities)
+            return
+        if entity_name == "continents":
+            self.count_continents()
+            return
         if not search_results:
             search_results = list(self.combined_results.values())
         list_of_entities = [
@@ -613,7 +669,7 @@ class GrinderCore:
         }
 
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
-    def nmap_scan(self, ports="80,443", sudo=False, arguments="-Pn -A", workers=10):
+    def nmap_scan(self, ports="80,443", sudo=False, arguments="-Pn -T4 -A --host-timeout 30", workers=10):
         """
         Initiate Nmap scan on hosts
 
@@ -649,9 +705,15 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreVulnersScanError)
     def vulners_scan(
-        self, sudo=False, ports="", workers=1, host_timeout=120, vulners_path="/plugins/vulners.nse"
+        self,
+        sudo=False,
+        ports="",
+        workers=1,
+        host_timeout=120,
+        vulners_path="/plugins/vulners.nse",
     ):
-        print("Start Vulners API scan")
+        cprint("Start Vulners API scanning", "blue", attrs=["bold"])
+        cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])
         if not self.shodan_processed_results:
             self.shodan_processed_results = self.db.load_last_shodan_results()
         if not self.censys_processed_results:

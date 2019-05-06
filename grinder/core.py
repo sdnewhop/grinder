@@ -97,7 +97,8 @@ class GrinderCore:
         self.censys_api_id = censys_api_id or DefaultValues.CENSYS_API_ID
         self.censys_api_secret = censys_api_secret or DefaultValues.CENSYS_API_SECRET
 
-        self.confidence: str = ""
+        self.vendor_confidence: str = ""
+        self.query_confidence: str = ""
         self.vendors: list = []
         self.max_entities: int = 6
 
@@ -557,7 +558,7 @@ class GrinderCore:
             vendor=product_info.get("vendor"),
             product=product_info.get("product"),
             script=product_info.get("script"),
-            confidence=product_info.get("confidence"),
+            vendor_confidence=product_info.get("vendor_confidence"),
         )
 
     @exception_handler(expected_exception=GrinderCoreShodanSaveToDatabaseError)
@@ -618,6 +619,25 @@ class GrinderCore:
             total_results=len(self.combined_results),
         )
         self.__close_database()
+    
+    def __is_query_confidence_valid(self, query_confidence: str) -> bool:
+        """
+        Check if current query confidence is valid
+
+        :param query_confidence (str): query confidence to check
+        :return None:
+        """
+        # If current query confidence level is not set - every query is ok
+        if not self.query_confidence:
+            return True
+        # If current query confidence is not valid by definition
+        if not self.query_confidence.lower() in ["firm", "certain", "tentative"]:
+            print("Confidence level for current query is not valid")
+            return False
+        if query_confidence.lower() == self.query_confidence.lower():
+            return True
+        return False
+
 
     @exception_handler(expected_exception=GrinderCoreProductQueriesError)
     def __process_current_product_queries(self, product_info: dict) -> None:
@@ -635,7 +655,10 @@ class GrinderCore:
         self.__add_product_data_to_database(product_info)
 
         # Shodan queries processor
-        for query in product_info.get("shodan_queries"):
+        for query_info in product_info.get("shodan_queries"):
+            if not self.__is_query_confidence_valid(query_info.get("query_confidence")):
+                continue
+            query = query_info.get("query")
             cprint(f"Current Shodan query is: {query}", "blue", attrs=["bold"])
             shodan_raw_results = self.shodan_search(query)
             for current_host in shodan_raw_results:
@@ -644,7 +667,10 @@ class GrinderCore:
                 )
 
         # Censys queries processor
-        for query in product_info.get("censys_queries"):
+        for query_info in product_info.get("censys_queries"):
+            if not self.__is_query_confidence_valid(query_info.get("query_confidence")):
+                continue
+            query = query_info.get("query")
             cprint(f"Current Censys query is: {query}", "blue", attrs=["bold"])
             censys_raw_results = self.censys_search(query)
             for current_host in censys_raw_results:
@@ -758,14 +784,23 @@ class GrinderCore:
                 {"vulners_vulnerabilities": hosts_vulners.get(host)}
             )
 
-    def set_confidence(self, confidence: str) -> None:
+    def set_vendor_confidence(self, confidence: str) -> None:
         """
-        Set confidence level for search
+        Set vendor confidence level for search
 
         :param confidence (str): confidence level
         :return None:
         """
-        self.confidence = confidence
+        self.vendor_confidence = confidence
+
+    def set_query_confidence(self, confidence: str) -> None:
+        """
+        Set query confidence level for search
+
+        :param confidence (str): confidence level
+        :return None:
+        """
+        self.query_confidence = confidence
 
     def set_vendors(self, vendors: List[str]) -> None:
         """
@@ -777,30 +812,31 @@ class GrinderCore:
         self.vendors = vendors
 
     @exception_handler(expected_exception=GrinderCoreFilterQueriesError)
-    def __filter_queries_by_confidence(self) -> None:
+    def __filter_queries_by_vendor_confidence(self) -> None:
         """
-        Filter queries by confidence
+        Filter queries by vendor confidence (not the same as query confidence)
 
         :return None:
         """
-        if not self.confidence:
+        if not self.vendor_confidence:
             return
-        if not self.confidence.lower() in ["firm", "certain", "tentative"]:
-            print("Confidence level is not valid")
+        if not self.vendor_confidence.lower() in ["firm", "certain", "tentative"]:
+            print("Confidence level for vendors is not valid")
             return
         self.queries_file = list(
             filter(
-                lambda product: product.get("confidence").lower()
-                == self.confidence.lower(),
+                lambda product: product.get("vendor_confidence").lower()
+                == self.vendor_confidence.lower(),
                 self.queries_file,
             )
         )
         if not self.queries_file:
-            print("Queries with equal confidence level not found")
+            print("Vendors with equal confidence level not found")
             return
 
     @exception_handler(expected_exception=GrinderCoreFilterQueriesError)
     def __filter_queries_by_vendors(self) -> None:
+        2/0
         """
         Filter queries by vendors
 
@@ -870,7 +906,7 @@ class GrinderCore:
             )
             return self.combined_results
 
-        self.__filter_queries_by_confidence()
+        self.__filter_queries_by_vendor_confidence()
         self.__filter_queries_by_vendors()
         if not self.queries_file:
             print("Filter method is not valid.")

@@ -21,23 +21,18 @@ if __name__ == "__main__":
 
     if args.censys_max:
         core.set_censys_max_results(args.censys_max)
-    if args.confidence:
-        core.set_confidence(args.confidence)
+    if args.vendor_confidence:
+        core.set_vendor_confidence(args.vendor_confidence)
+    if args.query_confidence:
+        core.set_query_confidence(args.query_confidence)
     if args.vendors:
         core.set_vendors(args.vendors)
 
-    try:
-        search_results = (
-            core.batch_search(queries_filename=args.queries_file)
-            if args.run
-            else core.load_results()
-        )
-    except (
-        GrinderCoreBatchSearchError,
-        GrinderCoreLoadResultsError,
-    ) as batch_search_err:
-        print(f"Unexpected error occured at batch search method: {batch_search_err}")
-        sys.exit(1)
+    search_results = (
+        core.batch_search(queries_filename=args.queries_file)
+        if args.run
+        else core.load_results()
+    )
 
     if not search_results:
         print(f"Results are empty.")

@@ -123,11 +123,18 @@ class GrinderInterface:
             help="Number of Vulners workers to scan",
         )
         parser.add_argument(
-            "-c",
-            "--confidence",
+            "-vc",
+            "--vendor-confidence",
             action="store",
             default=None,
-            help="Set confidence level",
+            help="Set confidence level for vendors",
+        )
+        parser.add_argument(
+            "-qc",
+            "--query-confidence",
+            action="store",
+            default=None,
+            help="Set confidence level for queries",
         )
         parser.add_argument(
             "-v",
@@ -152,6 +159,10 @@ class GrinderInterface:
                 self.load_censys_keys_from_env()
             )
         if self.args.run:
+            query_confidence_level = self.args.query_confidence or "all queries, any confidence"
+            vendor_confidence_level = self.args.vendor_confidence or "all vendors, any confidence"
+            vendors_list = self.args.vendors or "all vendors"
+
             print(
                 f"Shodan API key: {self.args.shodan_key or DefaultValues.SHODAN_API_KEY}"
             )
@@ -160,6 +171,15 @@ class GrinderInterface:
             )
             print(
                 f"Censys API SECRET: {self.args.censys_secret or DefaultValues.CENSYS_API_SECRET}"
+            )
+            print(
+                f"Query confidence level: {query_confidence_level}"
+            )
+            print(
+                f"Vendor confidence level: {vendor_confidence_level}"
+            )
+            print(
+                f"Vendors to scan: {vendors_list}"
             )
         return self.args
 

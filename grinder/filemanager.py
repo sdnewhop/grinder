@@ -53,7 +53,7 @@ class GrinderFileManager:
         if not results_to_write:
             return
         with open(f"{dest_dir}/{json_dir}/{json_file}", mode="w") as result_json_file:
-            result_json_file.write(dumps(results_to_write))
+            result_json_file.write(dumps(results_to_write, indent=4))
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     @create_results_directory()

@@ -32,7 +32,10 @@ if __name__ == "__main__":
             if args.run
             else core.load_results()
         )
-    except (GrinderCoreBatchSearchError, GrinderCoreLoadResultsError) as batch_search_err:
+    except (
+        GrinderCoreBatchSearchError,
+        GrinderCoreLoadResultsError,
+    ) as batch_search_err:
         print(f"Unexpected error occured at batch search method: {batch_search_err}")
         sys.exit(1)
 
@@ -50,15 +53,16 @@ if __name__ == "__main__":
         core.count_unique_entities("port")
         core.count_unique_entities("proto")
         core.count_unique_entities("country")
-        core.count_continents()
+        core.count_unique_entities("vulnerabilities")
+        core.count_unique_entities("continents")
     if args.update_markers:
         core.update_map_markers()
     if args.create_plots:
         core.create_plots()
     if args.nmap_scan and args.run:
-        core.nmap_scan(arguments="-Pn", ports="22,80,443", workers=args.nmap_workers)
+        core.nmap_scan(ports="22,80,443", workers=args.nmap_workers)
     if args.vulners_scan:
-        core.vulners_scan(sudo=True, ports="22,80,443", workers=args.vulners_workers)
+        core.vulners_scan(ports="22,80,443", workers=args.vulners_workers)
     if args.run:
         core.save_results_to_database()
     core.save_results()

@@ -93,6 +93,14 @@ class GrinderInterface:
             help="Censys default maximum results quantity",
         )
         parser.add_argument(
+            "-sm",
+            "--shodan-max",
+            action="store",
+            type=int,
+            default=None,
+            help="Shodan default maximum results quantity. ",
+        )
+        parser.add_argument(
             "-nm",
             "--nmap-scan",
             action="store_true",
@@ -151,6 +159,13 @@ class GrinderInterface:
             default=None,
             help="Maximum number of unique entities in plots and results",
         )
+        parser.add_argument(
+            "-d",
+            "--debug",
+            action="store_true",
+            default=False,
+            help="Show more information",
+        )
         self.args = parser.parse_args()
         if not self.args.shodan_key:
             self.args.shodan_key = self.load_shodan_key_from_env()
@@ -158,7 +173,7 @@ class GrinderInterface:
             self.args.censys_id, self.args.censys_secret = (
                 self.load_censys_keys_from_env()
             )
-        if self.args.run:
+        if self.args.run and self.args.debug:
             query_confidence_level = (
                 self.args.query_confidence or "all queries, any confidence"
             )
@@ -179,6 +194,8 @@ class GrinderInterface:
             print(f"Query confidence level: {query_confidence_level}")
             print(f"Vendor confidence level: {vendor_confidence_level}")
             print(f"Vendors to scan: {vendors_list}")
+            print(f"Shodan max results quantity: {self.args.shodan_max}")
+            print(f"Censys max results quantity: {self.args.censys_max}")
         return self.args
 
     @exception_handler(expected_exception=GrinderInterfaceGetShodanKeyError)

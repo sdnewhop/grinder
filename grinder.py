@@ -21,6 +21,9 @@ if __name__ == "__main__":
 
     if args.censys_max:
         core.set_censys_max_results(args.censys_max)
+    if args.shodan_max:
+        core.set_shodan_max_results(args.shodan_max)
+
     if args.vendor_confidence:
         core.set_vendor_confidence(args.vendor_confidence)
     if args.query_confidence:

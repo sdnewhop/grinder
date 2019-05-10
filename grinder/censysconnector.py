@@ -5,6 +5,7 @@ from censys.base import (
     CensysJSONDecodeException,
     CensysNotFoundException,
     CensysUnauthorizedException,
+    CensysException,
 )
 from censys.ipv4 import CensysIPv4
 
@@ -48,7 +49,9 @@ class CensysConnector:
         }
 
     @exception_handler(expected_exception=CensysConnectorSearchError)
-    def search(self, query: str, max_records=1000) -> None:
+    def search(
+        self, query: str, max_records=DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
+    ) -> None:
         try:
             self.results = list(
                 self.api.search(
@@ -64,6 +67,18 @@ class CensysConnector:
             print(f"Censys API error: {api_error}")
         except AttributeError as api_not_defined:
             print(f"Censys API was not initialized: {api_not_defined}")
+        except CensysException as too_much_results_required:
+            if "Only the first 1,000 search results are available" in str(
+                too_much_results_required
+            ):
+                print(
+                    "Only the first 1,000 search results are available. Retry search with 1,000 results limit."
+                )
+                self.search(
+                    query, max_records=DefaultValues.CENSYS_FREE_PLAN_RESULTS_QUANTITY
+                )
+            else:
+                print(f"Censys API core exception: {too_much_results_required}")
         self.censys_results_count = len(self.results)
 
     def get_raw_results(self) -> list:

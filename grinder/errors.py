@@ -253,6 +253,11 @@ class GrinderCoreSetCensysMaxResultsError(GrinderCoreException):
         super().__init__(error_args)
 
 
+class GrinderCoreSetShodanMaxResultsError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
 class GrinderCoreAddProductDataToDatabaseError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)

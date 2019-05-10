@@ -37,6 +37,7 @@ from grinder.errors import (
     GrinderCoreLoadResultsError,
     GrinderCoreHostCensysResultsError,
     GrinderCoreSetCensysMaxResultsError,
+    GrinderCoreSetShodanMaxResultsError,
     GrinderCoreAddProductDataToDatabaseError,
     GrinderCoreShodanSaveToDatabaseError,
     GrinderCoreCensysSaveToDatabaseError,
@@ -91,7 +92,9 @@ class GrinderCore:
         self.entities_count_all: list = []
         self.entities_count_limit: list = []
         self.queries_file: dict = {}
-        self.censys_results_limit: int = DefaultValues.CENSYS_DEFAULT_RESULTS
+
+        self.censys_results_limit: int = DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
+        self.shodan_results_limit: int = DefaultValues.SHODAN_DEFAULT_RESULTS_QUANTITY
 
         self.shodan_api_key = shodan_api_key or DefaultValues.SHODAN_API_KEY
         self.censys_api_id = censys_api_id or DefaultValues.CENSYS_API_ID
@@ -107,7 +110,7 @@ class GrinderCore:
 
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)
-    def shodan_search(self, query: str) -> list:
+    def shodan_search(self, query: str, results_count=None) -> list:
         """
         Search in shodan database with ShodanConnector
         module.
@@ -115,8 +118,13 @@ class GrinderCore:
         :param query (str): search query for shodan
         :return list: raw shodan results in list
         """
+        if not results_count:
+            results_count = (
+                self.shodan_results_limit
+                or DefaultValues.SHODAN_DEFAULT_RESULTS_QUANTITY
+            )
         shodan = ShodanConnector(api_key=self.shodan_api_key)
-        shodan.search(query)
+        shodan.search(query, results_count)
         shodan_raw_results = shodan.get_results()
         print(f"│ Shodan results count: {shodan.get_shodan_count()}")
         print(f"│ Real results count: {shodan.get_real_count()}")
@@ -133,6 +141,16 @@ class GrinderCore:
         """
         self.censys_results_limit = results_count
 
+    @exception_handler(expected_exception=GrinderCoreSetShodanMaxResultsError)
+    def set_shodan_max_results(self, results_count: int) -> None:
+        """
+        Set maximum results quantity for Shodan queries
+
+        :param results_count (int): maximum results quantity
+        :return None:
+        """
+        self.shodan_results_limit = results_count
+
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)
     def censys_search(self, query: str, results_count=None) -> list:
@@ -146,7 +164,8 @@ class GrinderCore:
         """
         if not results_count:
             results_count = (
-                self.censys_results_limit or DefaultValues.CENSYS_DEFAULT_RESULTS
+                self.censys_results_limit
+                or DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
             )
         censys = CensysConnector(
             api_id=self.censys_api_id, api_secret=self.censys_api_secret

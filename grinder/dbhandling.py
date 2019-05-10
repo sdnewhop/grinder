@@ -71,6 +71,7 @@ class GrinderDatabase:
                     scan_data_id INTEGER,
                     scan_information_id INTEGER,
                     query TEXT,
+                    query_confidence TEXT,
                     results_count INTEGER,
                     results TEXT,
 
@@ -87,6 +88,7 @@ class GrinderDatabase:
                     scan_data_id INTEGER,
                     scan_information_id INTEGER,
                     query TEXT,
+                    query_confidence TEXT,
                     results_count INTEGER,
                     results TEXT,
 
@@ -204,14 +206,16 @@ class GrinderDatabase:
                     scan_data_id,
                     scan_information_id,
                     query,
+                    query_confidence,
                     results_count,
                     results
-                ) VALUES (?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     current_scan_data_id,
                     current_scan_id,
-                    query,
+                    query.get("query"),
+                    query.get("query_confidence"),
                     results_count,
                     json_dumps(results),
                 ),
@@ -239,14 +243,16 @@ class GrinderDatabase:
                     scan_data_id,
                     scan_information_id,
                     query,
+                    query_confidence,
                     results_count,
                     results
-                ) VALUES (?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     current_scan_data_id,
                     current_scan_id,
-                    query,
+                    query.get("query"),
+                    query.get("query_confidence"),
                     results_count,
                     json_dumps(results),
                 ),

@@ -3,82 +3,130 @@
         "vendor":"DICOM",
         "product":"DICOM Server",
         "shodan_queries":[
-            "DICOM FINDSCU",
-            "DICOM -FINDSCU",
-            "\"Content-Type: application/dicom\"",
-            "\"DICOM Server Response\"",
-            "DICOM port:104",
-            "DICOM port:11112",
-            "port:2761",
-            "port:2762"
+            {
+                "query":"DICOM FINDSCU",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"DICOM -FINDSCU",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"\"Content-Type: application/dicom\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"\"DICOM Server Response\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"DICOM port:104",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"DICOM port:11112",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"port:2761",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"port:2762",
+                "query_confidence":"certain"
+            }
         ],
         "censys_queries":[
 
         ],
         "script":"",
-        "confidence":"firm"
+        "vendor_confidence":"firm"
     },
     {
         "vendor":"PMOD Technologies",
         "product":"PMOD Dicom Server",
         "shodan_queries":[
-            "port:4000 DHT Nodes",
-            "port:4030 DHT Nodes"
+            {
+                "query":"port:4000 DHT Nodes",
+                "query_confidence":"tentative"
+            },
+            {
+                "query":"port:4030 DHT Nodes",
+                "query_confidence":"tentative"
+            }
         ],
         "censys_queries":[
 
         ],
         "script":"",
-        "confidence":"Tentative"
+        "vendor_confidence":"tentative"
     },
     {
         "vendor":"GE Healthcare",
         "product":"NM General Purpose 600 Series",
         "shodan_queries":[
-            "port:4006"
+            {
+                "query":"port:4006",
+                "query_confidence":"tentative"
+            }
         ],
         "censys_queries":[
 
         ],
         "script":"",
-        "confidence":"Tentative"
+        "vendor_confidence":"tentative"
     },
     {
         "vendor":"Orthanc",
         "product":"Orthanc Server",
         "shodan_queries":[
-            "title:\"Orthanc Explorer\"",
-            "port:4242"
+            {
+                "query":"title:\"Orthanc Explorer\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"port:4242",
+                "query_confidence":"certain"
+            }
         ],
         "censys_queries":[
 
         ],
         "script":"",
-        "confidence":"Certain"
+        "vendor_confidence":"certain"
     },
     {
         "vendor":"Xinapse Systems",
         "product":"DICOM Storage Server",
         "shodan_queries":[
-            "port:4560"
+            {
+                "query":"port:4560",
+                "query_confidence":"tentative"
+            }
         ],
         "censys_queries":[
 
         ],
         "script":"",
-        "confidence":"Tentative"
+        "vendor_confidence":"certain"
     },
     {
         "vendor":"DICOM Grid",
         "product":"DICOM Grid Gateway",
         "shodan_queries":[
-            "port:4560",
-            "port:8161"
+            {
+                "query":"port:4560",
+                "query_confidence":"tentative"
+            },
+            {
+                "query":"port:8161",
+                "query_confidence":"tentative"
+            }
         ],
         "censys_queries":[
 
         ],
         "script":"",
-        "confidence":"Tentative"
+        "vendor_confidence":"tentative"
     }
 ]

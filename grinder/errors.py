@@ -2,6 +2,7 @@
 import sys
 import os
 
+
 class ShodanConnectorException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)

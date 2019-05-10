@@ -205,7 +205,7 @@ class GrinderCore:
         self.entities_count_all.append({"entity": "continents", "results": continents})
         return continents
 
-    def count_vulnerabilities(self, max_vulnerabilities=10) -> dict:
+    def count_vulnerabilities(self, max_vulnerabilities=10) -> List[str]:
         """
         Count unique vulnerabilities from Shodan and Vulners.com API scan
 
@@ -562,7 +562,7 @@ class GrinderCore:
         )
 
     @exception_handler(expected_exception=GrinderCoreShodanSaveToDatabaseError)
-    def __shodan_save_to_database(self, query: str) -> None:
+    def __shodan_save_to_database(self, query: dict) -> None:
         """
         Save current query-based results to database
 
@@ -571,7 +571,7 @@ class GrinderCore:
         """
         results_by_query = list(
             filter(
-                lambda host: host.get("query") == query,
+                lambda host: host.get("query") == query.get("query"),
                 self.shodan_processed_results.values(),
             )
         )
@@ -581,7 +581,7 @@ class GrinderCore:
         )
 
     @exception_handler(expected_exception=GrinderCoreCensysSaveToDatabaseError)
-    def __censys_save_to_database(self, query: str) -> None:
+    def __censys_save_to_database(self, query: dict) -> None:
         """
         Save current query-based results to database
 
@@ -590,7 +590,7 @@ class GrinderCore:
         """
         results_by_query = list(
             filter(
-                lambda host: host.get("query") == query,
+                lambda host: host.get("query") == query.get("query"),
                 self.censys_processed_results.values(),
             )
         )
@@ -619,7 +619,7 @@ class GrinderCore:
             total_results=len(self.combined_results),
         )
         self.__close_database()
-    
+
     def __is_query_confidence_valid(self, query_confidence: str) -> bool:
         """
         Check if current query confidence is valid
@@ -637,7 +637,6 @@ class GrinderCore:
         if query_confidence.lower() == self.query_confidence.lower():
             return True
         return False
-
 
     @exception_handler(expected_exception=GrinderCoreProductQueriesError)
     def __process_current_product_queries(self, product_info: dict) -> None:
@@ -695,7 +694,13 @@ class GrinderCore:
         }
 
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
-    def nmap_scan(self, ports="80,443", sudo=False, arguments="-Pn -T4 -A --host-timeout 30", workers=10):
+    def nmap_scan(
+        self,
+        ports="80,443",
+        sudo=False,
+        arguments="-Pn -T4 -A --host-timeout 30",
+        workers=10,
+    ):
         """
         Initiate Nmap scan on hosts
 
@@ -836,7 +841,6 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreFilterQueriesError)
     def __filter_queries_by_vendors(self) -> None:
-        2/0
         """
         Filter queries by vendors
 

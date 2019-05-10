@@ -159,8 +159,12 @@ class GrinderInterface:
                 self.load_censys_keys_from_env()
             )
         if self.args.run:
-            query_confidence_level = self.args.query_confidence or "all queries, any confidence"
-            vendor_confidence_level = self.args.vendor_confidence or "all vendors, any confidence"
+            query_confidence_level = (
+                self.args.query_confidence or "all queries, any confidence"
+            )
+            vendor_confidence_level = (
+                self.args.vendor_confidence or "all vendors, any confidence"
+            )
             vendors_list = self.args.vendors or "all vendors"
 
             print(
@@ -172,15 +176,9 @@ class GrinderInterface:
             print(
                 f"Censys API SECRET: {self.args.censys_secret or DefaultValues.CENSYS_API_SECRET}"
             )
-            print(
-                f"Query confidence level: {query_confidence_level}"
-            )
-            print(
-                f"Vendor confidence level: {vendor_confidence_level}"
-            )
-            print(
-                f"Vendors to scan: {vendors_list}"
-            )
+            print(f"Query confidence level: {query_confidence_level}")
+            print(f"Vendor confidence level: {vendor_confidence_level}")
+            print(f"Vendors to scan: {vendors_list}")
         return self.args
 
     @exception_handler(expected_exception=GrinderInterfaceGetShodanKeyError)

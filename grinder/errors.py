@@ -53,10 +53,7 @@ class GrinderCoreException(Exception):
         self.error_args = error_args
 
     def __str__(self):
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        line_number = exc_tb.tb_lineno
-        filename = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        return f"\nError occured in Grinder Core module: class: {self.error_args.__class__.__name__}, error: {self.error_args}"
+        return f"Error occured in Grinder Core module: {self.error_args}"
 
 
 class GrinderInterfaceException(Exception):

@@ -51,7 +51,8 @@ deactivate
 usage: grinder.py [-h] [-r] [-u] [-q QUERIES_FILE] [-sk SHODAN_KEY] [-cu]
                   [-cp] [-ci CENSYS_ID] [-cs CENSYS_SECRET] [-cm CENSYS_MAX]
                   [-nm] [-nw NMAP_WORKERS] [-vs] [-vw VULNERS_WORKERS]
-                  [-c CONFIDENCE] [-v [VENDORS [VENDORS ...]]] [-ml MAX_LIMIT]
+                  [-vc VENDOR_CONFIDENCE] [-qc QUERY_CONFIDENCE]
+                  [-v [VENDORS [VENDORS ...]]] [-ml MAX_LIMIT]
 
 The Grinder framework was created to automatically enumerate and fingerprint
 different hosts on the Internet using different back-end systems
@@ -78,8 +79,10 @@ optional arguments:
   -vs, --vulners-scan   Initiate Vulners API scanning
   -vw VULNERS_WORKERS, --vulners-workers VULNERS_WORKERS
                         Number of Vulners workers to scan
-  -c CONFIDENCE, --confidence CONFIDENCE
-                        Set confidence level
+  -vc VENDOR_CONFIDENCE, --vendor-confidence VENDOR_CONFIDENCE
+                        Set confidence level for vendors
+  -qc QUERY_CONFIDENCE, --query-confidence QUERY_CONFIDENCE
+                        Set confidence level for queries
   -v [VENDORS [VENDORS ...]], --vendors [VENDORS [VENDORS ...]]
                         Set list of vendors to search from queries file
   -ml MAX_LIMIT, --max-limit MAX_LIMIT
@@ -95,19 +98,19 @@ pytest
 ## Examples
 Run the most basic enumeration with Shodan and Censys engines without map markers and plots (results will be saved in database and output JSON):
 ```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries.json -r
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -r
 ```
 Run an enumeration with 10 Nmap scanning workers, where maximum Censys results is 555 hosts per query, update map markers, count unique entities and create plots
 ```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q queries.json -cu -cp -cm 555 -nm -nw 10 -r 
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -cu -cp -cm 555 -nm -nw 10 -r 
 ```
-Run an enumeration with filtering by vendors (only Nginx and Apache, for example) and confidence levels (only "Firm" level, for example):
+Run an enumeration with filtering by vendors (only Nginx and Apache, for example) and confidence levels (only "Certain" level, for example):
 ```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q queries.json -v nginx apache -c Firm -r
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -v nginx apache -qc Certain -vc Certain -r
 ```
 Run an enumeration with 10 workers of Nmap Vulners API scanning:
 ```
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q queries.json -vs -vw 10 -r
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -vs -vw 10 -r
 ```
 For more options and help use
 ```bash

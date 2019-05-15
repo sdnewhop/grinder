@@ -57,7 +57,7 @@ class GrinderDatabase:
                     vendor TEXT,
                     product TEXT,
                     script TEXT,
-                    confidence TEXT,
+                    vendor_confidence TEXT,
 
                     FOREIGN KEY (scan_information_id) REFERENCES scan_information(id)
                 )
@@ -71,6 +71,7 @@ class GrinderDatabase:
                     scan_data_id INTEGER,
                     scan_information_id INTEGER,
                     query TEXT,
+                    query_confidence TEXT,
                     results_count INTEGER,
                     results TEXT,
 
@@ -87,6 +88,7 @@ class GrinderDatabase:
                     scan_data_id INTEGER,
                     scan_information_id INTEGER,
                     query TEXT,
+                    query_confidence TEXT,
                     results_count INTEGER,
                     results TEXT,
 
@@ -160,7 +162,7 @@ class GrinderDatabase:
 
     @exception_handler(expected_exception=GrinderDatabaseAddBasicScanDataError)
     def add_basic_scan_data(
-        self, vendor: str, product: str, script: str, confidence: str
+        self, vendor: str, product: str, script: str, vendor_confidence: str
     ) -> None:
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(
@@ -176,10 +178,10 @@ class GrinderDatabase:
                     vendor,
                     product,
                     script,
-                    confidence
+                    vendor_confidence
                 ) VALUES (?, ?, ?, ?, ?)
                 """,
-                (current_scan_id, vendor, product, script, confidence),
+                (current_scan_id, vendor, product, script, vendor_confidence),
             )
 
     @exception_handler(expected_exception=GrinderDatabaseAddScanDataError)
@@ -204,14 +206,16 @@ class GrinderDatabase:
                     scan_data_id,
                     scan_information_id,
                     query,
+                    query_confidence,
                     results_count,
                     results
-                ) VALUES (?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     current_scan_data_id,
                     current_scan_id,
-                    query,
+                    query.get("query"),
+                    query.get("query_confidence"),
                     results_count,
                     json_dumps(results),
                 ),
@@ -239,14 +243,16 @@ class GrinderDatabase:
                     scan_data_id,
                     scan_information_id,
                     query,
+                    query_confidence,
                     results_count,
                     results
-                ) VALUES (?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     current_scan_data_id,
                     current_scan_id,
-                    query,
+                    query.get("query"),
+                    query.get("query_confidence"),
                     results_count,
                     json_dumps(results),
                 ),

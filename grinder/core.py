@@ -7,6 +7,7 @@ Other modules must be wrapped here for proper usage.
 from typing import NamedTuple, List
 from termcolor import cprint
 from re import findall
+from time import sleep
 
 # from enforce import runtime_validation
 
@@ -37,6 +38,7 @@ from grinder.errors import (
     GrinderCoreLoadResultsError,
     GrinderCoreHostCensysResultsError,
     GrinderCoreSetCensysMaxResultsError,
+    GrinderCoreSetShodanMaxResultsError,
     GrinderCoreAddProductDataToDatabaseError,
     GrinderCoreShodanSaveToDatabaseError,
     GrinderCoreCensysSaveToDatabaseError,
@@ -91,13 +93,16 @@ class GrinderCore:
         self.entities_count_all: list = []
         self.entities_count_limit: list = []
         self.queries_file: dict = {}
-        self.censys_results_limit: int = DefaultValues.CENSYS_DEFAULT_RESULTS
+
+        self.censys_results_limit: int = DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
+        self.shodan_results_limit: int = DefaultValues.SHODAN_DEFAULT_RESULTS_QUANTITY
 
         self.shodan_api_key = shodan_api_key or DefaultValues.SHODAN_API_KEY
         self.censys_api_id = censys_api_id or DefaultValues.CENSYS_API_ID
         self.censys_api_secret = censys_api_secret or DefaultValues.CENSYS_API_SECRET
 
-        self.confidence: str = ""
+        self.vendor_confidence: str = ""
+        self.query_confidence: str = ""
         self.vendors: list = []
         self.max_entities: int = 6
 
@@ -106,7 +111,7 @@ class GrinderCore:
 
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)
-    def shodan_search(self, query: str) -> list:
+    def shodan_search(self, query: str, results_count=None) -> list:
         """
         Search in shodan database with ShodanConnector
         module.
@@ -114,8 +119,13 @@ class GrinderCore:
         :param query (str): search query for shodan
         :return list: raw shodan results in list
         """
+        if not results_count:
+            results_count = (
+                self.shodan_results_limit
+                or DefaultValues.SHODAN_DEFAULT_RESULTS_QUANTITY
+            )
         shodan = ShodanConnector(api_key=self.shodan_api_key)
-        shodan.search(query)
+        shodan.search(query, results_count)
         shodan_raw_results = shodan.get_results()
         print(f"│ Shodan results count: {shodan.get_shodan_count()}")
         print(f"│ Real results count: {shodan.get_real_count()}")
@@ -132,6 +142,16 @@ class GrinderCore:
         """
         self.censys_results_limit = results_count
 
+    @exception_handler(expected_exception=GrinderCoreSetShodanMaxResultsError)
+    def set_shodan_max_results(self, results_count: int) -> None:
+        """
+        Set maximum results quantity for Shodan queries
+
+        :param results_count (int): maximum results quantity
+        :return None:
+        """
+        self.shodan_results_limit = results_count
+
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)
     def censys_search(self, query: str, results_count=None) -> list:
@@ -145,7 +165,8 @@ class GrinderCore:
         """
         if not results_count:
             results_count = (
-                self.censys_results_limit or DefaultValues.CENSYS_DEFAULT_RESULTS
+                self.censys_results_limit
+                or DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
             )
         censys = CensysConnector(
             api_id=self.censys_api_id, api_secret=self.censys_api_secret
@@ -169,6 +190,18 @@ class GrinderCore:
             search_results = list(self.combined_results.values())
         MapMarkers().update_markers(search_results)
 
+    def __get_proper_entity_name(self, entity_name):
+        """
+        Quick fix to convert entity names, 
+        like vendor - vendors, port - ports etc.
+        """
+        if entity_name.lower() in ["continent", "port", "product", "vendor"]:
+            return entity_name + "s"
+        elif entity_name.lower() in ["country", "vulnerability"]:
+            return entity_name[:-1] + "ies"
+        elif entity_name.lower() == "proto":
+            return entity_name + "cols"
+
     @exception_handler(expected_exception=GrinderCoreCreatePlotError)
     def create_plots(self) -> None:
         """
@@ -178,14 +211,31 @@ class GrinderCore:
         """
         cprint("Create graphical plots...", "blue", attrs=["bold"])
         plots = GrinderPlots()
+        limited_plots = GrinderPlots()
+        # Save all results without limits
         for entity in self.entities_count_all:
-            plots.create_pie_chart(entity.get("results"), entity.get("entity"))
-            plots.save_pie_chart(f'{entity.get("entity")}.png')
-        for fixed_entity in self.entities_count_limit:
+            entity_proper_name = self.__get_proper_entity_name(entity.get("entity"))
             plots.create_pie_chart(
-                fixed_entity.get("results"), fixed_entity.get("entity")
+                results=entity.get("results"),
+                suptitle=f"Percentage of nodes by {entity_proper_name}",
             )
-            plots.save_pie_chart(f'fixed_{fixed_entity.get("entity")}.png')
+            plots.save_pie_chart(
+                relative_path=DefaultValues.PNG_ALL_RESULTS_DIRECTORY,
+                filename=f'{entity.get("entity")}.png',
+            )
+        # Save results with maximum limit
+        for limited_entity in self.entities_count_limit:
+            entity_proper_name = self.__get_proper_entity_name(
+                limited_entity.get("entity")
+            )
+            limited_plots.create_pie_chart(
+                results=limited_entity.get("results"),
+                suptitle=f"Percentage of nodes by {entity_proper_name}",
+            )
+            limited_plots.save_pie_chart(
+                relative_path=DefaultValues.PNG_LIMITED_RESULTS_DIRECTORY,
+                filename=f'limited_{limited_entity.get("entity")}.png',
+            )
 
     @exception_handler(expected_exception=GrinderCoreConvertToContinentsError)
     def count_continents(self) -> dict:
@@ -201,10 +251,10 @@ class GrinderCore:
             if not entity.get("entity") == "country":
                 continue
             continents = GrinderContinents.convert_continents(entity.get("results"))
-        self.entities_count_all.append({"entity": "continents", "results": continents})
+        self.entities_count_all.append({"entity": "continent", "results": continents})
         return continents
 
-    def count_vulnerabilities(self, max_vulnerabilities=10) -> dict:
+    def count_vulnerabilities(self, max_vulnerabilities=10) -> List[str]:
         """
         Count unique vulnerabilities from Shodan and Vulners.com API scan
 
@@ -240,12 +290,12 @@ class GrinderCore:
         utils.count_entities(full_cve_list, max_vulnerabilities)
 
         self.entities_count_all.append(
-            {"entity": "vulnerabilities", "results": utils.get_all_count_results()}
+            {"entity": "vulnerability", "results": utils.get_all_count_results()}
         )
         self.entities_count_limit.append(
             {
-                "entity": "vulnerabilities",
-                "results": utils.get_fixed_max_count_results(),
+                "entity": "vulnerability",
+                "results": utils.get_limited_max_count_results(),
             }
         )
         return full_cve_list
@@ -365,17 +415,17 @@ class GrinderCore:
                 self.filemanager.write_results_json(
                     entity.get("results"),
                     dest_dir=dest_dir,
-                    json_file=f'fixed_{entity.get("entity")}.json',
+                    json_file=f'limited_{entity.get("entity")}.json',
                 )
                 self.filemanager.write_results_csv(
                     entity.get("results"),
                     dest_dir=dest_dir,
-                    csv_file=f'fixed_{entity.get("entity")}.csv',
+                    csv_file=f'limited_{entity.get("entity")}.csv',
                 )
                 self.filemanager.write_results_txt(
                     entity.get("results"),
                     dest_dir=dest_dir,
-                    txt_file=f'fixed_{entity.get("entity")}.txt',
+                    txt_file=f'limited_{entity.get("entity")}.txt',
                 )
 
     @exception_handler(expected_exception=GrinderCoreIsHostExistedError)
@@ -414,10 +464,10 @@ class GrinderCore:
         cprint(f"Count unique {entity_name}...", "blue", attrs=["bold"])
         if not max_entities:
             max_entities = self.max_entities
-        if entity_name == "vulnerabilities":
+        if entity_name == "vulnerability":
             self.count_vulnerabilities(max_entities)
             return
-        if entity_name == "continents":
+        if entity_name == "continent":
             self.count_continents()
             return
         if not search_results:
@@ -432,7 +482,7 @@ class GrinderCore:
             {"entity": entity_name, "results": utils.get_all_count_results()}
         )
         self.entities_count_limit.append(
-            {"entity": entity_name, "results": utils.get_fixed_max_count_results()}
+            {"entity": entity_name, "results": utils.get_limited_max_count_results()}
         )
 
     @exception_handler(expected_exception=GrinderCoreHostShodanResultsError)
@@ -463,8 +513,11 @@ class GrinderCore:
             lat=current_host.get("location").get("latitude"),
             lng=current_host.get("location").get("longitude"),
             country=current_host.get("location").get("country_name"),
-            vulnerabilities=dict(shodan_vulnerabilities=current_host.get("vulns")),
-            nmap_scan=None,
+            vulnerabilities=dict(
+                shodan_vulnerabilities=current_host.get("vulns"),
+                vulners_vulnerabilities={}
+                ),
+            nmap_scan={},
         )
         shodan_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(shodan_result_as_dict.get("ip")):
@@ -497,8 +550,11 @@ class GrinderCore:
             lat=current_host.get("lat"),
             lng=current_host.get("lng"),
             country=current_host.get("country"),
-            vulnerabilities=dict(shodan_vulnerabilities=None),
-            nmap_scan=None,
+            vulnerabilities=dict(
+                shodan_vulnerabilities={},
+                vulners_vulnerabilities={}
+                ),
+            nmap_scan={},
         )
         censys_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(censys_result_as_dict.get("ip")):
@@ -557,11 +613,11 @@ class GrinderCore:
             vendor=product_info.get("vendor"),
             product=product_info.get("product"),
             script=product_info.get("script"),
-            confidence=product_info.get("confidence"),
+            vendor_confidence=product_info.get("vendor_confidence"),
         )
 
     @exception_handler(expected_exception=GrinderCoreShodanSaveToDatabaseError)
-    def __shodan_save_to_database(self, query: str) -> None:
+    def __shodan_save_to_database(self, query: dict) -> None:
         """
         Save current query-based results to database
 
@@ -570,7 +626,7 @@ class GrinderCore:
         """
         results_by_query = list(
             filter(
-                lambda host: host.get("query") == query,
+                lambda host: host.get("query") == query.get("query"),
                 self.shodan_processed_results.values(),
             )
         )
@@ -580,7 +636,7 @@ class GrinderCore:
         )
 
     @exception_handler(expected_exception=GrinderCoreCensysSaveToDatabaseError)
-    def __censys_save_to_database(self, query: str) -> None:
+    def __censys_save_to_database(self, query: dict) -> None:
         """
         Save current query-based results to database
 
@@ -589,7 +645,7 @@ class GrinderCore:
         """
         results_by_query = list(
             filter(
-                lambda host: host.get("query") == query,
+                lambda host: host.get("query") == query.get("query"),
                 self.censys_processed_results.values(),
             )
         )
@@ -619,6 +675,24 @@ class GrinderCore:
         )
         self.__close_database()
 
+    def __is_query_confidence_valid(self, query_confidence: str) -> bool:
+        """
+        Check if current query confidence is valid
+
+        :param query_confidence (str): query confidence to check
+        :return None:
+        """
+        # If current query confidence level is not set - every query is ok
+        if not self.query_confidence:
+            return True
+        # If current query confidence is not valid by definition
+        if not self.query_confidence.lower() in ["firm", "certain", "tentative"]:
+            print("Confidence level for current query is not valid")
+            return False
+        if query_confidence.lower() == self.query_confidence.lower():
+            return True
+        return False
+
     @exception_handler(expected_exception=GrinderCoreProductQueriesError)
     def __process_current_product_queries(self, product_info: dict) -> None:
         """
@@ -635,7 +709,10 @@ class GrinderCore:
         self.__add_product_data_to_database(product_info)
 
         # Shodan queries processor
-        for query in product_info.get("shodan_queries"):
+        for query_info in product_info.get("shodan_queries"):
+            if not self.__is_query_confidence_valid(query_info.get("query_confidence")):
+                continue
+            query = query_info.get("query")
             cprint(f"Current Shodan query is: {query}", "blue", attrs=["bold"])
             shodan_raw_results = self.shodan_search(query)
             for current_host in shodan_raw_results:
@@ -644,7 +721,10 @@ class GrinderCore:
                 )
 
         # Censys queries processor
-        for query in product_info.get("censys_queries"):
+        for query_info in product_info.get("censys_queries"):
+            if not self.__is_query_confidence_valid(query_info.get("query_confidence")):
+                continue
+            query = query_info.get("query")
             cprint(f"Current Censys query is: {query}", "blue", attrs=["bold"])
             censys_raw_results = self.censys_search(query)
             for current_host in censys_raw_results:
@@ -669,7 +749,13 @@ class GrinderCore:
         }
 
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
-    def nmap_scan(self, ports="80,443", sudo=False, arguments="-Pn -T4 -A --host-timeout 30", workers=10):
+    def nmap_scan(
+        self,
+        ports="80,443",
+        sudo=False,
+        arguments="-Pn -T4 -A --host-timeout 30",
+        workers=10,
+    ):
         """
         Initiate Nmap scan on hosts
 
@@ -758,14 +844,23 @@ class GrinderCore:
                 {"vulners_vulnerabilities": hosts_vulners.get(host)}
             )
 
-    def set_confidence(self, confidence: str) -> None:
+    def set_vendor_confidence(self, confidence: str) -> None:
         """
-        Set confidence level for search
+        Set vendor confidence level for search
 
         :param confidence (str): confidence level
         :return None:
         """
-        self.confidence = confidence
+        self.vendor_confidence = confidence
+
+    def set_query_confidence(self, confidence: str) -> None:
+        """
+        Set query confidence level for search
+
+        :param confidence (str): confidence level
+        :return None:
+        """
+        self.query_confidence = confidence
 
     def set_vendors(self, vendors: List[str]) -> None:
         """
@@ -777,26 +872,26 @@ class GrinderCore:
         self.vendors = vendors
 
     @exception_handler(expected_exception=GrinderCoreFilterQueriesError)
-    def __filter_queries_by_confidence(self) -> None:
+    def __filter_queries_by_vendor_confidence(self) -> None:
         """
-        Filter queries by confidence
+        Filter queries by vendor confidence (not the same as query confidence)
 
         :return None:
         """
-        if not self.confidence:
+        if not self.vendor_confidence:
             return
-        if not self.confidence.lower() in ["firm", "certain", "tentative"]:
-            print("Confidence level is not valid")
+        if not self.vendor_confidence.lower() in ["firm", "certain", "tentative"]:
+            print("Confidence level for vendors is not valid")
             return
         self.queries_file = list(
             filter(
-                lambda product: product.get("confidence").lower()
-                == self.confidence.lower(),
+                lambda product: product.get("vendor_confidence").lower()
+                == self.vendor_confidence.lower(),
                 self.queries_file,
             )
         )
         if not self.queries_file:
-            print("Queries with equal confidence level not found")
+            print("Vendors with equal confidence level not found")
             return
 
     @exception_handler(expected_exception=GrinderCoreFilterQueriesError)
@@ -870,7 +965,7 @@ class GrinderCore:
             )
             return self.combined_results
 
-        self.__filter_queries_by_confidence()
+        self.__filter_queries_by_vendor_confidence()
         self.__filter_queries_by_vendors()
         if not self.queries_file:
             print("Filter method is not valid.")

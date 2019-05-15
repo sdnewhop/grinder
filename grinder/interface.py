@@ -93,6 +93,14 @@ class GrinderInterface:
             help="Censys default maximum results quantity",
         )
         parser.add_argument(
+            "-sm",
+            "--shodan-max",
+            action="store",
+            type=int,
+            default=None,
+            help="Shodan default maximum results quantity. ",
+        )
+        parser.add_argument(
             "-nm",
             "--nmap-scan",
             action="store_true",
@@ -123,11 +131,18 @@ class GrinderInterface:
             help="Number of Vulners workers to scan",
         )
         parser.add_argument(
-            "-c",
-            "--confidence",
+            "-vc",
+            "--vendor-confidence",
             action="store",
             default=None,
-            help="Set confidence level",
+            help="Set confidence level for vendors",
+        )
+        parser.add_argument(
+            "-qc",
+            "--query-confidence",
+            action="store",
+            default=None,
+            help="Set confidence level for queries",
         )
         parser.add_argument(
             "-v",
@@ -144,6 +159,13 @@ class GrinderInterface:
             default=None,
             help="Maximum number of unique entities in plots and results",
         )
+        parser.add_argument(
+            "-d",
+            "--debug",
+            action="store_true",
+            default=False,
+            help="Show more information",
+        )
         self.args = parser.parse_args()
         if not self.args.shodan_key:
             self.args.shodan_key = self.load_shodan_key_from_env()
@@ -151,7 +173,15 @@ class GrinderInterface:
             self.args.censys_id, self.args.censys_secret = (
                 self.load_censys_keys_from_env()
             )
-        if self.args.run:
+        if self.args.run and self.args.debug:
+            query_confidence_level = (
+                self.args.query_confidence or "all queries, any confidence"
+            )
+            vendor_confidence_level = (
+                self.args.vendor_confidence or "all vendors, any confidence"
+            )
+            vendors_list = self.args.vendors or "all vendors"
+
             print(
                 f"Shodan API key: {self.args.shodan_key or DefaultValues.SHODAN_API_KEY}"
             )
@@ -161,6 +191,11 @@ class GrinderInterface:
             print(
                 f"Censys API SECRET: {self.args.censys_secret or DefaultValues.CENSYS_API_SECRET}"
             )
+            print(f"Query confidence level: {query_confidence_level}")
+            print(f"Vendor confidence level: {vendor_confidence_level}")
+            print(f"Vendors to scan: {vendors_list}")
+            print(f"Shodan max results quantity: {self.args.shodan_max}")
+            print(f"Censys max results quantity: {self.args.censys_max}")
         return self.args
 
     @exception_handler(expected_exception=GrinderInterfaceGetShodanKeyError)

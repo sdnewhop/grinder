@@ -1,0 +1,664 @@
+[
+    {
+        "vendor":"Silver Peak Systems",
+        "product":"Silver Peak Unity EdgeConnect",
+        "shodan_queries":[
+            {
+                "query": "vxoaSessionID",
+                "query_confidence": "certain"
+            },
+            {
+                "query":"ssl:\"silver-peak\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vsilverpeak.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Silver Peak Systems",
+        "product":"Silver Peak Systems Unity Orchestrator",
+        "shodan_queries":[
+            {
+                "query":"gmsSessionID",
+                "query_confidence": "certain"
+            },
+            {
+                "query":"ssl:\"Silverpeak GMS\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vsilverpeak.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"CloudGenix",
+        "product":"CloudGenix SD-WAN",
+        "shodan_queries":[
+            {
+                "query": "ssl:\"O=CloudGenix Inc\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"firm"
+    },
+    {
+        "vendor":"Ecessa",
+        "product":"Ecessa WANworX SD-WAN",
+        "shodan_queries":[
+            {
+                "query": "http.html_hash:-1848258522 title:\"Ecessa\"",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"tentative"
+    },
+    {
+        "vendor":"Nuage",
+        "product":"Nuage Networks SD-WAN (VNS)",
+        "shodan_queries":[
+            {
+                "query": "title:\"SD-WAN*Portal\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:1069145589",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:1069145589 title:\"SD-WAN*Portal\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:1069145589 title:\"Architect\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:1069145589 title:\"VNS Portal\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Talari",
+        "product":"Talari SD-WAN",
+        "shodan_queries":[
+            {
+                "query": "http.favicon.hash:269992656",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl:\"emailAddress=support@talari.com\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vtalari.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Citrix",
+        "product":"Citrix Netscaler SD-WAN",
+        "shodan_queries":[
+            {
+                "query": "http.favicon.hash:-1272756243 title:\"Citrix NetScaler SD-WAN - Login\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "title:\"DC | Login\" and ssl:\"Citrix\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vcitrix.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Citrix",
+        "product":"Citrix Netscaler SD-WAN Center",
+        "shodan_queries":[
+            {
+                "query":"http.favicon.hash:-1272756243 title:\"SD-WAN Center*Login\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query": "VWCSession",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vcitrix.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Riverbed",
+        "product":"Riverbed SteelConnect",
+        "shodan_queries":[
+            {
+                "query": "title:\"SteelConnect Manager\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "title:\"Riverbed AWS Appliance\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vriverbed.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Riverbed",
+        "product":"Riverbed SteelHead",
+        "shodan_queries":[
+            {
+                "query": "ssl:Riverbed Apache",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-1338133217",
+                "query_confidence":"certain"
+            },
+            {
+                "query": "title:\"amnesiac Sign in\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vriverbed.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Versa",
+        "product":"Versa Director",
+        "shodan_queries":[
+            {
+                "query": "\"server: versa Director\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl:\"VersaDirector\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query": "ssl:\"versa-director\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Versa",
+        "product":"Versa Flex",
+        "shodan_queries":[
+            {
+                "query": "title:\"Flex VNF Web-UI\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vversa_flex.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Versa",
+        "product":"Versa Analytics",
+        "shodan_queries":[
+            {
+                "query":"versa-analytics port:161",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"ssl:\"versa-analytics\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"\"van_analytics\" port:9160",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vversa_analytics.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Versa",
+        "product":"Versa Analytics Server",
+        "shodan_queries":[
+            {
+                "query":"Versa-Analytics-Server",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vversa_analytics_server.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Cisco",
+        "product":"Cisco SD-WAN",
+        "shodan_queries":[
+            {
+                "query":"title:\"Viptela vManage\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"title:\"Cisco vManage\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"title:vManage",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"ssl:\"O=Viptela Inc\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"http.favicon.hash:-904700687",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Fatpipe",
+        "product":"Fatpipe SYMPHONY SD-WAN",
+        "shodan_queries":[
+            {
+                "query":"Linux Fatpipe",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"title:\"Fatpipe WARP\" port:443",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vfatpipe.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"VMWare",
+        "product":"VMWare VeloCloud",
+        "shodan_queries":[
+            {
+                "query":"title:\"VeloCloud\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"title:\"VeloCloud Orchestrator\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"http.html_hash:1218757368",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"http.favicon.hash:-2062596654 title:\"301 Moved Permanently\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vvmware_nsx.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Teloip",
+        "product":"Teloip VINO SD-WAN",
+        "shodan_queries":[
+            {
+                "query":"title:\"Teloip Orchestrator API\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Aryaka",
+        "product":"Aryaka SD-WAN",
+        "shodan_queries":[
+            {
+                "query":"title:\"Aryaka\"",
+                "query_confidence":"tentative"
+            },
+            {
+                "query":"\"Aryaka Networks\"",
+                "query_confidence":"tentative"
+            },
+            {
+                "query":"http.favicon.hash:-1423557501",
+                "query_confidence":"tentative"
+            },
+            {
+                "query":"title:\"Aryaka, Welcome\"",
+                "query_confidence":"tentative"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"tentative"
+    },
+    {
+        "vendor":"Arista",
+        "product":"Arista Networks EOS",
+        "shodan_queries":[
+            {
+                "query":"\"Arista Networks EOS\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Sonus",
+        "product":"Sonus SBC Management Application",
+        "shodan_queries":[
+            {
+                "query":"title:\"SBC Management Application\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vsonus_mgmt.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Sonus",
+        "product":"Sonus SBC Edge",
+        "shodan_queries":[
+            {
+                "query":"title:\"SBC Edge\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"title:\"SBC 1000\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vsonus_edge.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"InfoVista",
+        "product":"InfoVista SALSA",
+        "shodan_queries":[
+            {
+                "query":"\"Server: Apache\"+title:\"SALSA\"*\"Login\" port:443",
+                "query_confidence":"firm"
+            },
+            {
+                "query":"ssl:\"SALSA Portal\"",
+                "query_confidence":"firm"
+            },
+            {
+                "query":"title:\"SALSA Login\"",
+                "query_confidence":"firm"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"firm"
+    },
+    {
+        "vendor":"Huawei",
+        "product":"Huawei SD-WAN",
+        "shodan_queries":[
+            {
+                "query":"\"Agile Controller\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Arista",
+        "product":"Arista Networks EOS",
+        "shodan_queries":[
+            {
+                "query":"\"Arista Networks EOS\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"128 Technology",
+        "product":"128 Technology Networking Platform",
+        "shodan_queries":[
+            {
+                "query":"http.title:\"128T Networking Platform\"",
+                "query_confidence":"tentative"
+            },
+            {
+                "query":"http.favicon.hash:-1556425248",
+                "query_confidence":"tentative"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"tentative"
+    },
+    {
+        "vendor":"Glue Networks",
+        "product":"Gluware Control",
+        "shodan_queries":[
+            {
+                "query":"title:\"Gluware Control\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vgluware.py",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Barracuda Networks",
+        "product":"Barracuda CloudGen Firewall",
+        "shodan_queries":[
+            {
+                "query":"ssl:\"Barracuda CloudGen Firewall\" port:\"443\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"Barracuda CloudGen Firewall",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Juniper",
+        "product":"Juniper Networks Contrail SD-WAN",
+        "shodan_queries":[
+            {
+                "query":"title:\"Log In - Juniper Networks Web Management\"",
+                "query_confidence":"tentative"
+            },
+            {
+                "query":"\"Juniper Networks, Inc.\" junos srx",
+                "query_confidence":"tentative"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"tentative"
+    },
+    {
+        "vendor":"Viprinet",
+        "product":"Viprinet Virtual VPN Hub",
+        "shodan_queries":[
+            {
+                "query":"Server: \"Viprinet\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"Server: \"ViprinetHubReplacement\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"title:\"Viprinet - AdminDesk - Login\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"http.favicon.hash:-1352019987",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"ssl: \"Viprinet\" port:\"161\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Cradlepoint",
+        "product":"Cradlepoint SD-WAN",
+        "shodan_queries":[
+            {
+                "query":"title:\"Login :: CR4250\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"title:\"Login :: AER2200\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vcradlepoint.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Fortinet",
+        "product":"Fortinet FortiGate SD-WAN",
+        "shodan_queries":[
+            {
+                "query":"ssl:\"OU=FortiGate\" ssl:\"O=Fortinet\" ssl:CN=FGT",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Fortinet",
+        "product":"Fortinet FortiGate SD-WAN",
+        "shodan_queries":[
+            {
+                "query":"http.favicon.hash:945408572 http.title:\"302*\" port:8008",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vfortinet.nse",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Brain4Net",
+        "product":"Brain4Net Orchestrator",
+        "shodan_queries":[
+            {
+                "query":"title: B4N ORC",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"vbrain.nse",
+        "vendor_confidence":"certain"
+    }
+]

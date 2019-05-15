@@ -99,13 +99,20 @@ class GrinderFileManager:
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     @create_results_directory()
     @create_subdirectory(subdirectory=DefaultValues.PNG_RESULTS_DIRECTORY)
+    @create_subdirectory(
+        subdirectory=f"{DefaultValues.PNG_RESULTS_DIRECTORY}/{DefaultValues.PNG_ALL_RESULTS_DIRECTORY}"
+    )
+    @create_subdirectory(
+        subdirectory=f"{DefaultValues.PNG_RESULTS_DIRECTORY}/{DefaultValues.PNG_LIMITED_RESULTS_DIRECTORY}"
+    )
     def write_results_png(
         self,
         plot,
         dest_dir: str,
+        sub_dir: str,
         png_file: str,
         png_dir=DefaultValues.PNG_RESULTS_DIRECTORY,
     ) -> None:
         if not plot:
             return
-        plot.savefig(f"{dest_dir}/{png_dir}/{png_file}")
+        plot.savefig(f"{dest_dir}/{png_dir}/{sub_dir}/{png_file}")

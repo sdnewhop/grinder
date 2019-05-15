@@ -17,9 +17,11 @@ class ShodanConnector:
         self.real_results_count: int = 0
 
     @exception_handler(expected_exception=ShodanConnectorSearchError)
-    def search(self, query: str) -> None:
+    def search(
+        self, query: str, max_records=DefaultValues.SHODAN_DEFAULT_RESULTS_QUANTITY
+    ) -> None:
         try:
-            self.results = list(self.api.search_cursor(query))
+            self.results = list(self.api.search_cursor(query))[:max_records]
             self.shodan_results_count = self.api.count(query).get("total")
         except (APIError, APITimeout) as api_error:
             print(f"Shodan API error: {api_error}")

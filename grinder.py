@@ -23,11 +23,12 @@ if __name__ == "__main__":
         core.set_censys_max_results(args.censys_max)
     if args.shodan_max:
         core.set_shodan_max_results(args.shodan_max)
-
     if args.vendor_confidence:
         core.set_vendor_confidence(args.vendor_confidence)
     if args.query_confidence:
         core.set_query_confidence(args.query_confidence)
+    if args.max_limit:
+        core.set_unique_entities_quantity(args.max_limit)
     if args.vendors:
         core.set_vendors(args.vendors)
 
@@ -43,8 +44,10 @@ if __name__ == "__main__":
 
     print(f"Total results: {len(search_results)}")
 
-    if args.max_limit:
-        core.set_unique_entities_quantity(args.max_limit)
+    if args.vulners_scan:
+        core.vulners_scan(ports="22,80,443", workers=args.vulners_workers)
+    if args.nmap_scan and args.run:
+        core.nmap_scan(ports="22,80,443", workers=args.nmap_workers)
     if args.count_unique:
         core.count_unique_entities("product")
         core.count_unique_entities("vendor")
@@ -57,10 +60,6 @@ if __name__ == "__main__":
         core.update_map_markers()
     if args.create_plots:
         core.create_plots()
-    if args.nmap_scan and args.run:
-        core.nmap_scan(ports="22,80,443", workers=args.nmap_workers)
-    if args.vulners_scan:
-        core.vulners_scan(ports="22,80,443", workers=args.vulners_workers)
     if args.run:
         core.save_results_to_database()
     core.save_results()

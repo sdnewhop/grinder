@@ -51,8 +51,8 @@ if __name__ == "__main__":
         core.count_unique_entities("port")
         core.count_unique_entities("proto")
         core.count_unique_entities("country")
-        core.count_unique_entities("vulnerabilities")
-        core.count_unique_entities("continents")
+        core.count_unique_entities("vulnerability")
+        core.count_unique_entities("continent")
     if args.update_markers:
         core.update_map_markers()
     if args.create_plots:

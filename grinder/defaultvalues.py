@@ -26,6 +26,8 @@ class DefaultValues:
     TXT_CONTINENTS_FILE: str = "continents.txt"
 
     PNG_RESULTS_DIRECTORY: str = "png"
+    PNG_ALL_RESULTS_DIRECTORY: str = "all_results"
+    PNG_LIMITED_RESULTS_DIRECTORY: str = "limited_results"
 
 
 class DefaultPlotValues:

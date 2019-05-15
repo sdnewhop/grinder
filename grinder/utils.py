@@ -6,7 +6,7 @@ from collections import Counter
 class GrinderUtils:
     def __init__(self):
         self.dict_with_all_results: dict = {}
-        self.dict_with_fixed_max_results: dict = {}
+        self.dict_with_limited_max_results: dict = {}
 
     def count_entities(self, results: list, max_entities: int) -> None:
         number_of_entities: dict = Counter(results)
@@ -24,7 +24,7 @@ class GrinderUtils:
             for key in list(entities_sorted_by_value)
             if key is not None
         }
-        self.dict_with_fixed_max_results = {
+        self.dict_with_limited_max_results = {
             key: entities_sorted_by_value[key]
             for key in list(entities_sorted_by_value)[:real_max_entities]
             if key is not None
@@ -33,5 +33,5 @@ class GrinderUtils:
     def get_all_count_results(self) -> dict:
         return self.dict_with_all_results
 
-    def get_fixed_max_count_results(self) -> dict:
-        return self.dict_with_fixed_max_results
+    def get_limited_max_count_results(self) -> dict:
+        return self.dict_with_limited_max_results

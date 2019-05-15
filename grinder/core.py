@@ -7,6 +7,7 @@ Other modules must be wrapped here for proper usage.
 from typing import NamedTuple, List
 from termcolor import cprint
 from re import findall
+from time import sleep
 
 # from enforce import runtime_validation
 
@@ -189,6 +190,18 @@ class GrinderCore:
             search_results = list(self.combined_results.values())
         MapMarkers().update_markers(search_results)
 
+    def __get_proper_entity_name(self, entity_name):
+        """
+        Quick fix to convert entity names, 
+        like vendor - vendors, port - ports etc.
+        """
+        if entity_name.lower() in ["continent", "port", "product", "vendor"]:
+            return entity_name + "s"
+        elif entity_name.lower() in ["country", "vulnerability"]:
+            return entity_name[:-1] + "ies"
+        elif entity_name.lower() == "proto":
+            return entity_name + "cols"
+
     @exception_handler(expected_exception=GrinderCoreCreatePlotError)
     def create_plots(self) -> None:
         """
@@ -198,14 +211,31 @@ class GrinderCore:
         """
         cprint("Create graphical plots...", "blue", attrs=["bold"])
         plots = GrinderPlots()
+        limited_plots = GrinderPlots()
+        # Save all results without limits
         for entity in self.entities_count_all:
-            plots.create_pie_chart(entity.get("results"), entity.get("entity"))
-            plots.save_pie_chart(f'{entity.get("entity")}.png')
-        for fixed_entity in self.entities_count_limit:
+            entity_proper_name = self.__get_proper_entity_name(entity.get("entity"))
             plots.create_pie_chart(
-                fixed_entity.get("results"), fixed_entity.get("entity")
+                results=entity.get("results"),
+                suptitle=f"Percentage of nodes by {entity_proper_name}",
             )
-            plots.save_pie_chart(f'fixed_{fixed_entity.get("entity")}.png')
+            plots.save_pie_chart(
+                relative_path=DefaultValues.PNG_ALL_RESULTS_DIRECTORY,
+                filename=f'{entity.get("entity")}.png',
+            )
+        # Save results with maximum limit
+        for limited_entity in self.entities_count_limit:
+            entity_proper_name = self.__get_proper_entity_name(
+                limited_entity.get("entity")
+            )
+            limited_plots.create_pie_chart(
+                results=limited_entity.get("results"),
+                suptitle=f"Percentage of nodes by {entity_proper_name}",
+            )
+            limited_plots.save_pie_chart(
+                relative_path=DefaultValues.PNG_LIMITED_RESULTS_DIRECTORY,
+                filename=f'limited_{limited_entity.get("entity")}.png',
+            )
 
     @exception_handler(expected_exception=GrinderCoreConvertToContinentsError)
     def count_continents(self) -> dict:
@@ -221,7 +251,7 @@ class GrinderCore:
             if not entity.get("entity") == "country":
                 continue
             continents = GrinderContinents.convert_continents(entity.get("results"))
-        self.entities_count_all.append({"entity": "continents", "results": continents})
+        self.entities_count_all.append({"entity": "continent", "results": continents})
         return continents
 
     def count_vulnerabilities(self, max_vulnerabilities=10) -> List[str]:
@@ -260,12 +290,12 @@ class GrinderCore:
         utils.count_entities(full_cve_list, max_vulnerabilities)
 
         self.entities_count_all.append(
-            {"entity": "vulnerabilities", "results": utils.get_all_count_results()}
+            {"entity": "vulnerability", "results": utils.get_all_count_results()}
         )
         self.entities_count_limit.append(
             {
-                "entity": "vulnerabilities",
-                "results": utils.get_fixed_max_count_results(),
+                "entity": "vulnerability",
+                "results": utils.get_limited_max_count_results(),
             }
         )
         return full_cve_list
@@ -385,17 +415,17 @@ class GrinderCore:
                 self.filemanager.write_results_json(
                     entity.get("results"),
                     dest_dir=dest_dir,
-                    json_file=f'fixed_{entity.get("entity")}.json',
+                    json_file=f'limited_{entity.get("entity")}.json',
                 )
                 self.filemanager.write_results_csv(
                     entity.get("results"),
                     dest_dir=dest_dir,
-                    csv_file=f'fixed_{entity.get("entity")}.csv',
+                    csv_file=f'limited_{entity.get("entity")}.csv',
                 )
                 self.filemanager.write_results_txt(
                     entity.get("results"),
                     dest_dir=dest_dir,
-                    txt_file=f'fixed_{entity.get("entity")}.txt',
+                    txt_file=f'limited_{entity.get("entity")}.txt',
                 )
 
     @exception_handler(expected_exception=GrinderCoreIsHostExistedError)
@@ -434,10 +464,10 @@ class GrinderCore:
         cprint(f"Count unique {entity_name}...", "blue", attrs=["bold"])
         if not max_entities:
             max_entities = self.max_entities
-        if entity_name == "vulnerabilities":
+        if entity_name == "vulnerability":
             self.count_vulnerabilities(max_entities)
             return
-        if entity_name == "continents":
+        if entity_name == "continent":
             self.count_continents()
             return
         if not search_results:
@@ -452,7 +482,7 @@ class GrinderCore:
             {"entity": entity_name, "results": utils.get_all_count_results()}
         )
         self.entities_count_limit.append(
-            {"entity": entity_name, "results": utils.get_fixed_max_count_results()}
+            {"entity": entity_name, "results": utils.get_limited_max_count_results()}
         )
 
     @exception_handler(expected_exception=GrinderCoreHostShodanResultsError)

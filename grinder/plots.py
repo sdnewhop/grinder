@@ -18,9 +18,13 @@ class GrinderPlots:
         self.results_figure_id: int = 0
 
     @exception_handler(expected_exception=GrinderPlotsSavePieChartError)
-    def save_pie_chart(self, filename: str) -> None:
+    def save_pie_chart(self, relative_path: str, filename: str) -> None:
         GrinderFileManager.write_results_png(
-            self, self.plot, png_file=filename, dest_dir=DefaultValues.RESULTS_DIRECTORY
+            self,
+            self.plot,
+            png_file=filename,
+            dest_dir=DefaultValues.RESULTS_DIRECTORY,
+            sub_dir=relative_path,
         )
 
     @exception_handler(expected_exception=GrinderPlotsAdjustAutopctError)

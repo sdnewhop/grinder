@@ -9,11 +9,11 @@
             },
             {
                 "query":"DICOM -FINDSCU",
-                "query_confidence":"certain"
+                "query_confidence":"firm"
             },
             {
                 "query":"\"Content-Type: application/dicom\"",
-                "query_confidence":"certain"
+                "query_confidence":"firm"
             },
             {
                 "query":"\"DICOM Server Response\"",
@@ -29,18 +29,18 @@
             },
             {
                 "query":"port:2761",
-                "query_confidence":"certain"
+                "query_confidence":"tentative"
             },
             {
                 "query":"port:2762",
-                "query_confidence":"certain"
+                "query_confidence":"tentative"
             }
         ],
         "censys_queries":[
 
         ],
         "script":"",
-        "vendor_confidence":"firm"
+        "vendor_confidence":"certain"
     },
     {
         "vendor":"PMOD Technologies",
@@ -108,7 +108,7 @@
 
         ],
         "script":"",
-        "vendor_confidence":"certain"
+        "vendor_confidence":"tentative"
     },
     {
         "vendor":"DICOM Grid",

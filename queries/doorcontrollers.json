@@ -1,0 +1,17 @@
+[
+    {
+        "vendor":"HID",
+        "product":"VertX Door Controllers",
+        "shodan_queries":[
+            {
+                "query":"\"HID VertX\" port:4070",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":""
+    }
+]

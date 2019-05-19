@@ -1,0 +1,51 @@
+[
+    {
+        "vendor":"MQTT",
+        "product":"MQTT Protocol",
+        "shodan_queries":[
+            {
+                "query":"MQTT port:1883",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"port:1883 \"MQTT Connection Code:\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"AMQP",
+        "product":"AMQP Protocol",
+        "shodan_queries":[
+            {
+                "query":"\"AMQP\\x01\\x01\\x00\n\" port:5672",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"AMQP",
+        "product":"RabbitMQ",
+        "shodan_queries":[
+            {
+                "query":"rabbitmq port:5672",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    }
+]

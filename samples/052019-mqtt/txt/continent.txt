@@ -1,0 +1,1 @@
+{"Asia": 30988, "North America": 11260, "Europe": 17832, "South and Central America": 1980, "Oceania": 866, "Africa": 870, "Asia/Pacific Region": 142, "Cote D'Ivoire": 4, "Reunion": 2, "Netherlands Antilles": 1}

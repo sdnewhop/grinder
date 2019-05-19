@@ -214,6 +214,8 @@ class GrinderCore:
         limited_plots = GrinderPlots()
         # Save all results without limits
         for entity in self.entities_count_all:
+            if not entity.get("results"):
+                continue
             entity_proper_name = self.__get_proper_entity_name(entity.get("entity"))
             plots.create_pie_chart(
                 results=entity.get("results"),
@@ -225,6 +227,8 @@ class GrinderCore:
             )
         # Save results with maximum limit
         for limited_entity in self.entities_count_limit:
+            if not limited_entity.get("results"):
+                continue
             entity_proper_name = self.__get_proper_entity_name(
                 limited_entity.get("entity")
             )

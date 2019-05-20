@@ -135,7 +135,7 @@ class GrinderInterface:
             "--script-check",
             action="store_true",
             default=False,
-            help="Initiate custom scripts additional checks"
+            help="Initiate custom scripts additional checks",
         )
         parser.add_argument(
             "-vc",

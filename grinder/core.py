@@ -521,8 +521,8 @@ class GrinderCore:
             country=current_host.get("location").get("country_name"),
             vulnerabilities=dict(
                 shodan_vulnerabilities=current_host.get("vulns") or {},
-                vulners_vulnerabilities={}
-                ),
+                vulners_vulnerabilities={},
+            ),
             nmap_scan={},
         )
         shodan_result_as_dict = dict(host_info._asdict())
@@ -556,10 +556,7 @@ class GrinderCore:
             lat=current_host.get("lat"),
             lng=current_host.get("lng"),
             country=current_host.get("country"),
-            vulnerabilities=dict(
-                shodan_vulnerabilities={},
-                vulners_vulnerabilities={}
-                ),
+            vulnerabilities=dict(shodan_vulnerabilities={}, vulners_vulnerabilities={}),
             nmap_scan={},
         )
         censys_result_as_dict = dict(host_info._asdict())
@@ -962,7 +959,7 @@ class GrinderCore:
             script_res = script_executor.run_script(host_info)
             if not script_res:
                 continue
-            self.combined_results[ip].update({"script":script_res})
+            self.combined_results[ip].update({"script": script_res})
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)

@@ -6,6 +6,7 @@ from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
 from grinder.errors import GrinderScriptExecutorRunScriptError
 
+
 class PyScriptExecutor:
     def __init__(self, queries_info):
         """
@@ -16,7 +17,7 @@ class PyScriptExecutor:
         :return None
         """
         self.queries_info = queries_info
-    
+
     @exception_handler(expected_exception=GrinderScriptExecutorRunScriptError)
     def run_script(self, host_info):
         """
@@ -27,12 +28,17 @@ class PyScriptExecutor:
         """
         script = None
         for product in self.queries_info:
-            if (product.get("vendor"), product.get("product")) == (host_info.get("vendor"), host_info.get("product")):
+            if (product.get("vendor"), product.get("product")) == (
+                host_info.get("vendor"),
+                host_info.get("product"),
+            ):
                 script = product.get("script")
         if not script:
             return
         if isinstance(script, str) and script.endswith(".py"):
-            full_path = Path(".").joinpath(DefaultValues.PY_SCRIPTS_DIRECTORY).joinpath(script)
+            full_path = (
+                Path(".").joinpath(DefaultValues.PY_SCRIPTS_DIRECTORY).joinpath(script)
+            )
             try:
                 module = SourceFileLoader("main", str(full_path)).load_module()
                 return module.main(host_info)

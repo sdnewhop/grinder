@@ -50,9 +50,10 @@ deactivate
 ```bash
 usage: grinder.py [-h] [-r] [-u] [-q QUERIES_FILE] [-sk SHODAN_KEY] [-cu]
                   [-cp] [-ci CENSYS_ID] [-cs CENSYS_SECRET] [-cm CENSYS_MAX]
-                  [-nm] [-nw NMAP_WORKERS] [-vs] [-vw VULNERS_WORKERS]
-                  [-vc VENDOR_CONFIDENCE] [-qc QUERY_CONFIDENCE]
-                  [-v [VENDORS [VENDORS ...]]] [-ml MAX_LIMIT]
+                  [-sm SHODAN_MAX] [-nm] [-nw NMAP_WORKERS] [-vs]
+                  [-vw VULNERS_WORKERS] [-sc] [-vc VENDOR_CONFIDENCE]
+                  [-qc QUERY_CONFIDENCE] [-v [VENDORS [VENDORS ...]]]
+                  [-ml MAX_LIMIT] [-d]
 
 The Grinder framework was created to automatically enumerate and fingerprint
 different hosts on the Internet using different back-end systems
@@ -73,12 +74,15 @@ optional arguments:
                         Censys API SECRET key
   -cm CENSYS_MAX, --censys-max CENSYS_MAX
                         Censys default maximum results quantity
+  -sm SHODAN_MAX, --shodan-max SHODAN_MAX
+                        Shodan default maximum results quantity.
   -nm, --nmap-scan      Initiate Nmap scanning
   -nw NMAP_WORKERS, --nmap-workers NMAP_WORKERS
                         Number of Nmap workers to scan
   -vs, --vulners-scan   Initiate Vulners API scanning
   -vw VULNERS_WORKERS, --vulners-workers VULNERS_WORKERS
                         Number of Vulners workers to scan
+  -sc, --script-check   Initiate custom scripts additional checks
   -vc VENDOR_CONFIDENCE, --vendor-confidence VENDOR_CONFIDENCE
                         Set confidence level for vendors
   -qc QUERY_CONFIDENCE, --query-confidence QUERY_CONFIDENCE
@@ -87,6 +91,7 @@ optional arguments:
                         Set list of vendors to search from queries file
   -ml MAX_LIMIT, --max-limit MAX_LIMIT
                         Maximum number of unique entities in plots and results
+  -d, --debug           Show more information
 
 ```
 
@@ -95,6 +100,7 @@ You can run tests from root grinder directory with command
 ```
 pytest
 ```
+Tests currently in progress.
 ## Examples
 Run the most basic enumeration with Shodan and Censys engines without map markers and plots (results will be saved in database and output JSON):
 ```bash

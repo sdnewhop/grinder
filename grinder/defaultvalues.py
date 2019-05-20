@@ -21,6 +21,8 @@ class DefaultValues:
     TXT_RESULTS_DIRECTORY: str = "txt"
     TXT_RESULTS_FILE: str = "all_results.txt"
 
+    PY_SCRIPTS_DIRECTORY: str = "py_scripts"
+
     JSON_CONTINENTS_FILE: str = "continents.json"
     CSV_CONTINENTS_FILE: str = "continents.csv"
     TXT_CONTINENTS_FILE: str = "continents.txt"

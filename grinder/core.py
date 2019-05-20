@@ -46,6 +46,7 @@ from grinder.errors import (
     GrinderCoreNmapScanError,
     GrinderCoreFilterQueriesError,
     GrinderCoreVulnersScanError,
+    GrinderCoreRunScriptsError,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -53,6 +54,7 @@ from grinder.nmapprocessmanager import NmapProcessingManager
 from grinder.plots import GrinderPlots
 from grinder.shodanconnector import ShodanConnector
 from grinder.utils import GrinderUtils
+from grinder.pyscriptexecutor import PyScriptExecutor
 
 
 class HostInfo(NamedTuple):
@@ -518,7 +520,7 @@ class GrinderCore:
             lng=current_host.get("location").get("longitude"),
             country=current_host.get("location").get("country_name"),
             vulnerabilities=dict(
-                shodan_vulnerabilities=current_host.get("vulns"),
+                shodan_vulnerabilities=current_host.get("vulns") or {},
                 vulners_vulnerabilities={}
                 ),
             nmap_scan={},
@@ -934,6 +936,33 @@ class GrinderCore:
                 self.queries_file,
             )
         )
+
+    @exception_handler(expected_exception=GrinderCoreRunScriptsError)
+    def run_scripts(self, queries_filename):
+        """
+        Initiate script execution
+
+        :param queries_filename (str): name of json file with input data
+            such as queries (shodan_queries, censys_queries)
+        :return None
+        """
+        if not self.queries_file:
+            try:
+                self.queries_file = self.filemanager.get_queries(
+                    queries_file=queries_filename
+                )
+            except GrinderFileManagerOpenError:
+                print(
+                    "Oops! File with queries was not found. Create it or set name properly."
+                )
+                return
+
+        script_executor = PyScriptExecutor(self.queries_file)
+        for ip, host_info in self.combined_results.items():
+            script_res = script_executor.run_script(host_info)
+            if not script_res:
+                continue
+            self.combined_results[ip].update({"script":script_res})
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)

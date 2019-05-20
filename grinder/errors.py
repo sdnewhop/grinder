@@ -93,6 +93,20 @@ class GrinderDatabaseException(Exception):
         return f"Error occured in Grinder Database module: {self.error_args}"
 
 
+class GrinderScriptExecutor(Exception):
+    def __init__(self, error_args: Exception):
+        super().__init__(self)
+        self.error_args = error_args
+
+    def __str__(self):
+        return f"Error occured in Grinder Script Executor module: {self.error_args}"
+
+
+class GrinderScriptExecutorRunScriptError(GrinderScriptExecutor):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
 class ShodanConnectorInitError(ShodanConnectorException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
@@ -287,6 +301,9 @@ class GrinderCoreFilterQueriesError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 
+class GrinderCoreRunScriptsError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
 
 class GrinderInterfaceLoadEnvironmentKeyError(GrinderInterfaceException):
     def __init__(self, error_args: Exception):

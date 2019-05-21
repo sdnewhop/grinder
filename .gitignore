@@ -3,7 +3,7 @@
 .vscode/
 results/
 .DS_Store
-markers.js
+map/maps/markers.js
 database.db
 
 # Byte-compiled / optimized / DLL files

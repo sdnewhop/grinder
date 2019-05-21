@@ -1,0 +1,17 @@
+[
+    {
+        "vendor":"MQTT",
+        "product":"MQTT Protocol",
+        "shodan_queries":[
+            {
+                "query":"port:1883 \"MQTT Connection Code:\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+
+        ],
+        "script":"",
+        "vendor_confidence":"certain"
+    }
+]

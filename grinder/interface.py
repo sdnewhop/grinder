@@ -131,6 +131,13 @@ class GrinderInterface:
             help="Number of Vulners workers to scan",
         )
         parser.add_argument(
+            "-sc",
+            "--script-check",
+            action="store_true",
+            default=False,
+            help="Initiate custom scripts additional checks",
+        )
+        parser.add_argument(
             "-vc",
             "--vendor-confidence",
             action="store",

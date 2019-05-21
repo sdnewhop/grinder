@@ -46,6 +46,7 @@ from grinder.errors import (
     GrinderCoreNmapScanError,
     GrinderCoreFilterQueriesError,
     GrinderCoreVulnersScanError,
+    GrinderCoreRunScriptsError,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -53,6 +54,7 @@ from grinder.nmapprocessmanager import NmapProcessingManager
 from grinder.plots import GrinderPlots
 from grinder.shodanconnector import ShodanConnector
 from grinder.utils import GrinderUtils
+from grinder.pyscriptexecutor import PyScriptExecutor
 
 
 class HostInfo(NamedTuple):
@@ -214,6 +216,8 @@ class GrinderCore:
         limited_plots = GrinderPlots()
         # Save all results without limits
         for entity in self.entities_count_all:
+            if not entity.get("results"):
+                continue
             entity_proper_name = self.__get_proper_entity_name(entity.get("entity"))
             plots.create_pie_chart(
                 results=entity.get("results"),
@@ -225,6 +229,8 @@ class GrinderCore:
             )
         # Save results with maximum limit
         for limited_entity in self.entities_count_limit:
+            if not limited_entity.get("results"):
+                continue
             entity_proper_name = self.__get_proper_entity_name(
                 limited_entity.get("entity")
             )
@@ -514,9 +520,9 @@ class GrinderCore:
             lng=current_host.get("location").get("longitude"),
             country=current_host.get("location").get("country_name"),
             vulnerabilities=dict(
-                shodan_vulnerabilities=current_host.get("vulns"),
-                vulners_vulnerabilities={}
-                ),
+                shodan_vulnerabilities=current_host.get("vulns") or {},
+                vulners_vulnerabilities={},
+            ),
             nmap_scan={},
         )
         shodan_result_as_dict = dict(host_info._asdict())
@@ -550,10 +556,7 @@ class GrinderCore:
             lat=current_host.get("lat"),
             lng=current_host.get("lng"),
             country=current_host.get("country"),
-            vulnerabilities=dict(
-                shodan_vulnerabilities={},
-                vulners_vulnerabilities={}
-                ),
+            vulnerabilities=dict(shodan_vulnerabilities={}, vulners_vulnerabilities={}),
             nmap_scan={},
         )
         censys_result_as_dict = dict(host_info._asdict())
@@ -930,6 +933,33 @@ class GrinderCore:
                 self.queries_file,
             )
         )
+
+    @exception_handler(expected_exception=GrinderCoreRunScriptsError)
+    def run_scripts(self, queries_filename):
+        """
+        Initiate script execution
+
+        :param queries_filename (str): name of json file with input data
+            such as queries (shodan_queries, censys_queries)
+        :return None
+        """
+        if not self.queries_file:
+            try:
+                self.queries_file = self.filemanager.get_queries(
+                    queries_file=queries_filename
+                )
+            except GrinderFileManagerOpenError:
+                print(
+                    "Oops! File with queries was not found. Create it or set name properly."
+                )
+                return
+
+        script_executor = PyScriptExecutor(self.queries_file)
+        for ip, host_info in self.combined_results.items():
+            script_res = script_executor.run_script(host_info)
+            if not script_res:
+                continue
+            self.combined_results[ip].update({"script": script_res})
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)

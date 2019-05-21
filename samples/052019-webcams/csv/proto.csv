@@ -1,0 +1,8 @@
+proto,count
+http-simple-new,3038
+http,1513
+rtsp-tcp,822
+https-simple-new,713
+auto,187
+https,13
+udpxy,5

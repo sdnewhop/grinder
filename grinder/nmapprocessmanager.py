@@ -26,8 +26,8 @@ class NmapProcessing(Process):
     @exception_handler(expected_exception=NmapProcessingRunError)
     def run(self):
         while True:
-            host = self.queue.get()
-            print(f" ■ Current scan host: {host: >20}")
+            index, hosts_quantity, host = self.queue.get()
+            print(f" ■ Current scan host ({index}/{hosts_quantity}): \t{host}")
             nm = NmapConnector()
             nm.scan(
                 host=host, arguments=self.arguments, ports=self.ports, sudo=self.sudo
@@ -38,7 +38,6 @@ class NmapProcessing(Process):
                 return {}
             if results.get(host).values():
                 NmapProcessingResults.RESULTS.update({host: results.get(host)})
-                print(f" ■ Done host: {host: >28}")
             self.queue.task_done()
 
 
@@ -59,8 +58,9 @@ class NmapProcessingManager:
             process = NmapProcessing(queue, self.arguments, self.ports, self.sudo)
             process.daemon = True
             process.start()
-        for host in self.hosts:
-            queue.put(host)
+        hosts_quantity = len(self.hosts)
+        for index, host in enumerate(self.hosts):
+            queue.put((index, hosts_quantity, host))
         queue.join()
 
     def start(self):

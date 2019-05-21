@@ -1,0 +1,1 @@
+{"dicom": 16514, "auto": 7398, "dht": 66, "http": 57, "https": 54, "https-simple-new": 16, "http-simple-new": 6, "nanocore-rat": 6, "ftp": 5, "smb": 4, "sip": 3, "rdp": 2, "rsync": 1, "java-rmi": 1, "ms-sql-monitor": 1, "telnet": 1, "netbios": 1, "couchdb": 1, "mdns": 1, "gtp-v1": 1}

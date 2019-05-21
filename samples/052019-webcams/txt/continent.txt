@@ -1,0 +1,1 @@
+{"North America": 2257, "Europe": 2550, "Asia": 786, "South and Central America": 575, "Oceania": 92, "Africa": 30, "Reunion": 1}

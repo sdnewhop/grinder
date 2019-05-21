@@ -1,0 +1,1 @@
+{"China": 16056, "United States": 10386, "Germany": 3775, "Korea, Republic of": 2626, "Japan": 2359, "Hong Kong": 2195, "Singapore": 1998, "Taiwan": 1957}

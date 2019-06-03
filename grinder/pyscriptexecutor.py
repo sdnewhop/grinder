@@ -8,36 +8,19 @@ from grinder.errors import GrinderScriptExecutorRunScriptError
 
 
 class PyScriptExecutor:
-    def __init__(self, queries_info):
-        """
-        Init python script executor
-        with queries file to get script names
-
-        :param queries_info (list): list from queries file
-        :return None
-        """
-        self.queries_info = queries_info
-
+    @staticmethod
     @exception_handler(expected_exception=GrinderScriptExecutorRunScriptError)
-    def run_script(self, host_info):
+    def run_script(host_info, py_script):
         """
         Import additional script and run it
 
-        :param host_info (dict): current host information
+        :param host_info (dict): information about host
+        :param py_script (str): python script filename
         :return: data from additional script
         """
-        script = None
-        for product in self.queries_info:
-            if (product.get("vendor"), product.get("product")) == (
-                host_info.get("vendor"),
-                host_info.get("product"),
-            ):
-                script = product.get("script")
-        if not script:
-            return
-        if isinstance(script, str) and script.endswith(".py"):
+        if isinstance(py_script, str) and py_script.endswith(".py"):
             full_path = (
-                Path(".").joinpath(DefaultValues.PY_SCRIPTS_DIRECTORY).joinpath(script)
+                Path(".").joinpath(DefaultValues.CUSTOM_SCRIPTS_DIRECTORY).joinpath(DefaultValues.PY_SCRIPTS_DIRECTORY).joinpath(py_script)
             )
             try:
                 module = SourceFileLoader("main", str(full_path)).load_module()

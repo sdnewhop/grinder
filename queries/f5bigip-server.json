@@ -1,0 +1,24 @@
+[
+    {
+        "vendor": "F5",
+        "product": "BIG-IP server",
+        "shodan_queries": [
+            {
+                "query": "\"Server: BigIP\"",
+                "query_confidence": "tentative"
+            },
+            {
+                "query": "BIG-IP",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
+]

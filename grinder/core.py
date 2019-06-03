@@ -526,10 +526,7 @@ class GrinderCore:
                 vulners_vulnerabilities={},
             ),
             nmap_scan={},
-            scripts=dict(
-                py_script=None,
-                nse_script=None
-            )
+            scripts=dict(py_script=None, nse_script=None),
         )
         shodan_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(shodan_result_as_dict.get("ip")):
@@ -562,15 +559,9 @@ class GrinderCore:
             lat=current_host.get("lat"),
             lng=current_host.get("lng"),
             country=current_host.get("country"),
-            vulnerabilities=dict(
-                shodan_vulnerabilities={}, 
-                vulners_vulnerabilities={}
-            ),
+            vulnerabilities=dict(shodan_vulnerabilities={}, vulners_vulnerabilities={}),
             nmap_scan={},
-            scripts=dict(
-                py_script=None,
-                nse_script=None
-            )
+            scripts=dict(py_script=None, nse_script=None),
         )
         censys_result_as_dict = dict(host_info._asdict())
         if not self.__is_host_existed(censys_result_as_dict.get("ip")):
@@ -972,8 +963,7 @@ class GrinderCore:
         for ip, host_info in self.combined_results.items():
             scripts = None
             for product in self.queries_file:
-                if (product.get("vendor"), 
-                    product.get("product")) == (
+                if (product.get("vendor"), product.get("product")) == (
                     host_info.get("vendor"),
                     host_info.get("product"),
                 ):
@@ -981,7 +971,7 @@ class GrinderCore:
                     break
             if not scripts:
                 continue
-            
+
             py_script = scripts.get("py_script")
             if py_script:
                 py_script_res = PyScriptExecutor.run_script(host_info, py_script)
@@ -990,18 +980,23 @@ class GrinderCore:
                 else:
                     print(f"[PyExecutor: Successful]\tScript {py_script} done for {ip}")
                     if py_script_res:
-                        self.combined_results[ip]["scripts"]["py_script"] = py_script_res
-            
+                        self.combined_results[ip]["scripts"][
+                            "py_script"
+                        ] = py_script_res
+
             nse_script = scripts.get("nse_script")
             if nse_script:
                 nse_script_res = NmapScriptExecutor.run_script(host_info, nse_script)
                 if not nse_script_res:
                     print(f"[NseExecutor: Empty]\tScript {nse_script} done for {ip}")
                 else:
-                    print(f"[NseExecutor: Successful]\tScript {nse_script} done for {ip}")
+                    print(
+                        f"[NseExecutor: Successful]\tScript {nse_script} done for {ip}"
+                    )
                     if nse_script_res:
-                        self.combined_results[ip]["scripts"]["nse_script"] = nse_script_res
-
+                        self.combined_results[ip]["scripts"][
+                            "nse_script"
+                        ] = nse_script_res
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)

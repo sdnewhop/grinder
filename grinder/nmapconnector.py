@@ -23,7 +23,9 @@ class NmapConnector:
             return True
 
     @exception_handler(expected_exception=NmapConnectorScanError)
-    def scan(self, host: str, arguments: str = "", ports: str = "", sudo: bool = False) -> None:
+    def scan(
+        self, host: str, arguments: str = "", ports: str = "", sudo: bool = False
+    ) -> None:
         # Add special Nmap key to scan ipv6 hosts
         if self.check_ip_v6(host):
             arguments += " -6"

@@ -7,20 +7,29 @@ from grinder.defaultvalues import DefaultValues
 from grinder.decorators import exception_handler
 from grinder.errors import GrinderScriptExecutorRunScriptError
 
+
 class NmapScriptExecutor:
     @staticmethod
     @exception_handler(expected_exception=GrinderScriptExecutorRunScriptError)
     def run_script(host_info, nse_script, host_timeout=60):
-        if not (isinstance(nse_script, str) and (nse_script.endswith(".nse") or nse_script.endswith(".lua"))):
+        if not (
+            isinstance(nse_script, str)
+            and (nse_script.endswith(".nse") or nse_script.endswith(".lua"))
+        ):
             return
         nmap_script_name = nse_script.split(".")[0]
-        script_path = Path(".").joinpath(DefaultValues.CUSTOM_SCRIPTS_DIRECTORY).joinpath(DefaultValues.NSE_SCRIPTS_DIRECTORY).joinpath(nse_script)
+        script_path = (
+            Path(".")
+            .joinpath(DefaultValues.CUSTOM_SCRIPTS_DIRECTORY)
+            .joinpath(DefaultValues.NSE_SCRIPTS_DIRECTORY)
+            .joinpath(nse_script)
+        )
         nm = NmapConnector()
         nm.scan(
-            host=host_info.get("ip"), 
-            arguments=f"-Pn -sV -T4 --host-timeout {int(host_timeout)*1000}ms --script=./{str(script_path)}", 
+            host=host_info.get("ip"),
+            arguments=f"-Pn -sV -T4 --host-timeout {int(host_timeout)*1000}ms --script=./{str(script_path)}",
             ports=str(host_info.get("port")),
-            sudo=False
+            sudo=False,
         )
         results = nm.get_results()
 

@@ -20,7 +20,10 @@ class PyScriptExecutor:
         """
         if isinstance(py_script, str) and py_script.endswith(".py"):
             full_path = (
-                Path(".").joinpath(DefaultValues.CUSTOM_SCRIPTS_DIRECTORY).joinpath(DefaultValues.PY_SCRIPTS_DIRECTORY).joinpath(py_script)
+                Path(".")
+                .joinpath(DefaultValues.CUSTOM_SCRIPTS_DIRECTORY)
+                .joinpath(DefaultValues.PY_SCRIPTS_DIRECTORY)
+                .joinpath(py_script)
             )
             try:
                 module = SourceFileLoader("main", str(full_path)).load_module()

@@ -1,0 +1,1 @@
+{"North America": 4605, "Asia": 4707, "Europe": 1598, "Oceania": 302, "South and Central America": 490, "Africa": 94, "Asia/Pacific Region": 4, "Netherlands Antilles": 3}

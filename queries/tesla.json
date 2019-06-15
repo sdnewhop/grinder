@@ -1,17 +1,18 @@
 [
-   {
-       "vendor":"Tesla",
-       "product":"Tesla PowerPack",
-       "shodan_queries":[
-           {
-               "query":"http.title:\"Tesla PowerPack System\" http.component:\"d3\" -ga3ca4f2",
-               "query_confidence":"certain"
-           }
-       ],
-       "censys_queries":[
-
-       ],
-       "script":"",
-       "vendor_confidence":"certain"
-   }
+    {
+        "vendor": "Tesla",
+        "product": "Tesla PowerPack",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"Tesla PowerPack System\" http.component:\"d3\" -ga3ca4f2",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
 ]

@@ -1,1 +1,0 @@
-{"North America": 4031, "Europe": 2174, "Asia": 1539, "Oceania": 316, "Africa": 241, "South and Central America": 113, "Cote D'Ivoire": 4, "Palestinian Territory": 4, "Asia/Pacific Region": 3}

@@ -1,38 +1,44 @@
 [
     {
-        "vendor":"Apache Software Foundation",
-        "product":"Apache HTTP Server",
-        "shodan_queries":[
+        "vendor": "Apache Software Foundation",
+        "product": "Apache HTTP Server",
+        "shodan_queries": [
             {
-                "query":"Apache",
-                "query_confidence":"certain"
+                "query": "Apache",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
+        "censys_queries": [
             {
-                "query":"Apache",
-                "query_confidence":"certain"
+                "query": "Apache",
+                "query_confidence": "certain"
             }
         ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "scripts": {
+            "py_script": "test.py",
+            "nse_script": "test.nse"
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"Nginx",
-        "product":"Nginx",
-        "shodan_queries":[
+        "vendor": "Nginx",
+        "product": "Nginx",
+        "shodan_queries": [
             {
-                "query":"Nginx",
-                "query_confidence":"certain"
+                "query": "Nginx",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
+        "censys_queries": [
             {
-                "query":"Nginx",
-                "query_confidence":"certain"
+                "query": "Nginx",
+                "query_confidence": "certain"
             }
         ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "scripts": {
+            "py_script": "test.py",
+            "nse_script": "test.nse"
+        },
+        "vendor_confidence": "certain"
     }
 ]

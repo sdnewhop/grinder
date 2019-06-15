@@ -1,32 +1,34 @@
 [
     {
-        "vendor":"AMQP",
-        "product":"AMQP Protocol",
-        "shodan_queries":[
+        "vendor": "AMQP",
+        "product": "AMQP Protocol",
+        "shodan_queries": [
             {
-                "query":"AMQP port:5672",
-                "query_confidence":"certain"
+                "query": "AMQP port:5672",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"AMQP",
-        "product":"RabbitMQ",
-        "shodan_queries":[
+        "vendor": "AMQP",
+        "product": "RabbitMQ",
+        "shodan_queries": [
             {
-                "query":"rabbitmq port:5672",
-                "query_confidence":"certain"
+                "query": "rabbitmq port:5672",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     }
 ]

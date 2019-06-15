@@ -1,171 +1,182 @@
 [
     {
-        "vendor":"Cisco",
-        "product":"LinkSys",
-        "shodan_queries":[
+        "vendor": "Cisco",
+        "product": "LinkSys",
+        "shodan_queries": [
             {
-                "query":"http.html:\"Linksys_Blue_Logo.gif\"",
-                "query_confidence":"certain"
+                "query": "http.html:\"Linksys_Blue_Logo.gif\"",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"TRENDnet",
-        "product":"Wireless Internet Camera Server",
-        "shodan_queries":[
+        "vendor": "TRENDnet",
+        "product": "Wireless Internet Camera Server",
+        "shodan_queries": [
             {
-                "query":"product:\"D-Link/Airlink IP webcam http config\"",
-                "query_confidence":"certain"
+                "query": "product:\"D-Link/Airlink IP webcam http config\"",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"IP Webcam",
-        "product":"IP Webcam Server 0.4",
-        "shodan_queries":[
+        "vendor": "IP Webcam",
+        "product": "IP Webcam Server 0.4",
+        "shodan_queries": [
             {
-                "query":"\"Server: IP Webcam Server 0.4\"",
-                "query_confidence":"certain"
+                "query": "\"Server: IP Webcam Server 0.4\"",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"IP Webcam",
-        "product":"IP Webcam Server 0.3",
-        "shodan_queries":[
+        "vendor": "IP Webcam",
+        "product": "IP Webcam Server 0.3",
+        "shodan_queries": [
             {
-                "query":"\"Server: IP Webcam Server 0.3\"",
-                "query_confidence":"certain"
+                "query": "\"Server: IP Webcam Server 0.3\"",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"IP Webcam",
-        "product":"IP Webcam Server 0.2",
-        "shodan_queries":[
+        "vendor": "IP Webcam",
+        "product": "IP Webcam Server 0.2",
+        "shodan_queries": [
             {
-                "query":"\"Server: IP Webcam Server 0.2\"",
-                "query_confidence":"certain"
+                "query": "\"Server: IP Webcam Server 0.2\"",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"IP Webcam",
-        "product":"IP Webcam Server 0.1",
-        "shodan_queries":[
+        "vendor": "IP Webcam",
+        "product": "IP Webcam Server 0.1",
+        "shodan_queries": [
             {
-                "query":"\"Server: IP Webcam Server 0.1\"",
-                "query_confidence":"certain"
+                "query": "\"Server: IP Webcam Server 0.1\"",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"IP Webcam",
-        "product":"IP Webcam Server",
-        "shodan_queries":[
+        "vendor": "IP Webcam",
+        "product": "IP Webcam Server",
+        "shodan_queries": [
             {
-                "query":"http.title:\"IP Webcam\"",
-                "query_confidence":"firm"
+                "query": "http.title:\"IP Webcam\"",
+                "query_confidence": "firm"
             },
             {
-                "query":"\"Server: IP Webcam Server\" \"200 OK\"",
-                "query_confidence":"certain"
+                "query": "\"Server: IP Webcam Server\" \"200 OK\"",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"firm"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "firm"
     },
     {
-        "vendor":"Webcam",
-        "product":"UBNT Streaming Server",
-        "shodan_queries":[
+        "vendor": "Webcam",
+        "product": "UBNT Streaming Server",
+        "shodan_queries": [
             {
-                "query":"\"Server: UBNT Streaming Server\"",
-                "query_confidence":"certain"
+                "query": "\"Server: UBNT Streaming Server\"",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"Yawcam",
-        "product":"Yawcam",
-        "shodan_queries":[
+        "vendor": "Yawcam",
+        "product": "Yawcam",
+        "shodan_queries": [
             {
-                "query":"\"Server: yawcam\" \"Mime-Type: text/html\"",
-                "query_confidence":"certain"
+                "query": "\"Server: yawcam\" \"Mime-Type: text/html\"",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"Webcam",
-        "product":"webcam 7",
-        "shodan_queries":[
+        "vendor": "Webcam",
+        "product": "webcam 7",
+        "shodan_queries": [
             {
-                "query":"\"webcam 7\" http.component:\"mootools\" -401",
-                "query_confidence":"certain"
+                "query": "\"webcam 7\" http.component:\"mootools\" -401",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     },
     {
-        "vendor":"Webcam",
-        "product":"webcamXP 5",
-        "shodan_queries":[
+        "vendor": "Webcam",
+        "product": "webcamXP 5",
+        "shodan_queries": [
             {
-                "query":"\"webcamXP\" http.component:\"mootools\" -401",
-                "query_confidence":"certain"
+                "query": "\"webcamXP\" http.component:\"mootools\" -401",
+                "query_confidence": "certain"
             }
         ],
-        "censys_queries":[
-
-        ],
-        "script":"",
-        "vendor_confidence":"certain"
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
     }
 ]

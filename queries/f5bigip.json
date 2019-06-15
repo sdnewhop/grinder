@@ -1,0 +1,39 @@
+[
+    {
+        "vendor": "F5",
+        "product": "BIG-IP",
+        "shodan_queries": [
+            {
+                "query": "F5-Login-Page",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "WWW-Authenticate: Basic realm=BIG-IP",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-335242539",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.title:\"BIG-IP&reg;- Redirect\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "443.https.get.body_sha256:5d78eb6fa93b995f9a39f90b6fb32f016e80dbcda8eb71a17994678692585ee5",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "443.https.get.title:\"BIG-IP&reg;- Redirect\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
+]

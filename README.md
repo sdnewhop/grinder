@@ -1,14 +1,19 @@
-# grinder
-Internet-connected Devices Census Python Framework 
-![Grinder Screenshot](/screenshot.png?raw=true "Grinder Help")
+# Grinder Framework
+:mag_right: Internet-connected Devices Census Python Framework 
+![Grinder Screenshot](/docs/screenshot.png?raw=true "Grinder Help")
 ## Description
 The Grinder framework was created to automatically enumerate and fingerprint different hosts on the Internet using different back-end systems: search engines, such as Shodan or Censys, for discovering hosts and NMAP engine for fingerprinting and specific checks. The Grinder framework can be used in many different areas of researches, as a connected Python module in your own project or as an independent ready-to-use from the box tool.  
+## Grinder Workflow
+![Grinder Workflow](/docs/workflow.png?raw=true "Grinder Workflow")
 ## Requirements
-- Python 3.6+
-- Shodan and Censys accounts
-## Current features
-[Grinder Development Project](https://github.com/sdnewhop/grinder/projects/2?fullscreen=true)
-## Setup and configure environment
+- [Python 3.6+](https://www.python.org/downloads/)
+- [Shodan](https://account.shodan.io/register) and [Censys](https://account.shodan.io/register) accounts
+- [Nmap Security Scanner](https://nmap.org/download.html)
+## Current Features
+ - [Grinder Development Project](https://github.com/sdnewhop/grinder/projects/2?fullscreen=true)  
+ 
+The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
+## Setup and Configure Environment
 1. Clone the repository
 ```
 git clone https://github.com/sdnewhop/grinder
@@ -47,6 +52,7 @@ export CENSYS_API_SECRET=YOUR_CENSYS_API_SECRET_HERE
 deactivate
 ```
 ## Usage
+### Help on Command Line Arguments
 ```bash
 usage: grinder.py [-h] [-r] [-u] [-q QUERIES_FILE] [-sk SHODAN_KEY] [-cu]
                   [-cp] [-ci CENSYS_ID] [-cs CENSYS_SECRET] [-cm CENSYS_MAX]
@@ -94,29 +100,30 @@ optional arguments:
   -d, --debug           Show more information
 
 ```
-
-## Tests
-You can run tests from root grinder directory with command
-```
-pytest
-```
-Tests currently in progress.
 ## Examples
 Run the most basic enumeration with Shodan and Censys engines without map markers and plots (results will be saved in database and output JSON):
 ```bash
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -r
 ```
-Run an enumeration with 10 Nmap scanning workers, where maximum Censys results is 555 hosts per query, update map markers, count unique entities and create plots
+Run an enumeration with 10 Nmap scanning workers, where maximum Censys results is 555 hosts per query and maximum Shodan results is 1337 hosts per query, update map markers, count unique entities and create plots:
 ```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -cu -cp -cm 555 -nm -nw 10 -r 
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -cu -cp -cm 555 -sm 1337 -nm -nw 10 -r 
 ```
-Run an enumeration with filtering by vendors (only Nginx and Apache, for example) and confidence levels (only "Certain" level, for example):
+Run an enumeration with filtering by vendors (only Nginx and Apache, for example) and confidence levels (only "Certain" level, for example) for queries and vendor:
 ```bash
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -v nginx apache -qc Certain -vc Certain -r
 ```
 Run an enumeration with 10 workers of Nmap Vulners API scanning:
-```
+```bash
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -vs -vw 10 -r
+```
+Run an enumeration with custom scripts which are described in .json file with queries:
+```bash
+./grinder.py -sc -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -r
+```
+Run Grinder with debug information about scanning:
+```bash
+./grinder.py -d -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -r
 ```
 For more options and help use
 ```bash

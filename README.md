@@ -129,3 +129,35 @@ For more options and help use
 ```bash
 ./grinder.py -h
 ```
+## Add Your Own Queries
+To add your own vendors and products with queries you can simply create a new .json file in the directory with queries and choose it while running Grinder in the "run" scan mode.
+
+Format of file with queries:
+```json
+[
+    {
+        "vendor": "YOUR OWN VENDOR HERE",
+        "product": "YOUR OWN PRODUCT HERE",
+        "shodan_queries": [
+            {
+                "query": "YOUR SHODAN QUERY HERE",
+                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative|firm|certain}"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "YOUR CENSYS QUERY HERE",
+                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative|firm|certain}"
+            }
+        ],
+        "scripts": {
+            "py_script": "NAME OF PYTHON SCRIPT FROM /custom_scripts/py_scripts",
+            "nse_script": "NAME OF NSE SCRIPT FROM /custom_scripts/nse_scripts"
+        },
+        "vendor_confidence": "VENDOR CONFIDENCE LEVEL {tentative|firm|certain}"
+    },
+    {
+    
+    }
+]
+```

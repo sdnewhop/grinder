@@ -508,7 +508,7 @@ class GrinderCore:
         """
         if not (
             current_host.get("location").get("latitude")
-            and current_host.get("location").get("latitude")
+            and current_host.get("location").get("longitude")
         ):
             return
         host_info = HostInfo(

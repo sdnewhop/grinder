@@ -1,6 +1,16 @@
 # Grinder Framework
 :mag_right: Internet-connected Devices Census Python Framework 
 ![Grinder Screenshot](/docs/screenshot.png?raw=true "Grinder Help")
+## Contents
+1. [Description](#description)
+1. [Grinder Workflow](#grinder-workflow)
+1. [Requirements](#requirements)
+1. [Current Features](#current-features)
+1. [Setup and Configure Environment](#setup-and-configure-environment)
+1. [Build in Docker](#build-in-docker)
+1. [Usage](#usage)
+1. [Examples](#examples)
+1. [Add Your Own Queries](#add-your-own-queries)
 ## Description
 The Grinder framework was created to automatically enumerate and fingerprint different hosts on the Internet using different back-end systems: search engines, such as Shodan or Censys, for discovering hosts and NMAP engine for fingerprinting and specific checks. The Grinder framework can be used in many different areas of researches, as a connected Python module in your own project or as an independent ready-to-use from the box tool.  
 ## Grinder Workflow
@@ -50,6 +60,11 @@ export CENSYS_API_SECRET=YOUR_CENSYS_API_SECRET_HERE
 7. Deactivate virtual environment after use and restore default python interpreter
 ```
 deactivate
+```
+## Build in Docker
+To build the Grinder framework as a docker image you can use the script `docker-build.sh`, and to run this image you can use the script `docker-run.sh`:
+```bash
+docker run -it --rm --volume $(pwd)/results:/code/results --volume $(pwd)/map:/code/map grinder-framework -h
 ```
 ## Usage
 ### Help on Command Line Arguments

@@ -758,7 +758,8 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
     def nmap_scan(
         self,
-        ports="80,443",
+        ports="",
+        top_ports=100,
         sudo=False,
         arguments="-Pn -T4 -A --host-timeout 30",
         workers=10,
@@ -774,6 +775,9 @@ class GrinderCore:
         """
         cprint("Start Nmap scanning", "blue", attrs=["bold"])
         cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])
+        # Check for top-ports in case when ports are not defined by user
+        if not ports:
+            arguments = f"{arguments} --top-ports {str(top_ports)}"
         if not self.shodan_processed_results:
             self.shodan_processed_results = self.db.load_last_shodan_results()
         if not self.censys_processed_results:
@@ -801,6 +805,7 @@ class GrinderCore:
         self,
         sudo=False,
         ports="",
+        top_ports=100,
         workers=1,
         host_timeout=120,
         vulners_path="/plugins/vulners.nse",
@@ -814,11 +819,15 @@ class GrinderCore:
         all_hosts = list(
             {**self.shodan_processed_results, **self.censys_processed_results}.keys()
         )
+        arguments = f"-Pn -sV --script=.{vulners_path} --host-timeout {int(host_timeout)*1000}ms"
+        # Check for top-ports in case when ports are not defined by user
+        if not ports:
+            arguments = f"{arguments} --top-ports {str(top_ports)}"
         vulners_scan = NmapProcessingManager(
             hosts=all_hosts,
             ports=ports,
             sudo=sudo,
-            arguments=f"-Pn -sV --script=.{vulners_path} --host-timeout {int(host_timeout)*1000}ms",
+            arguments=arguments,
             workers=workers,
         )
         vulners_scan.start()

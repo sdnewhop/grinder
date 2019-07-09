@@ -45,9 +45,9 @@ if __name__ == "__main__":
     print(f"Total results: {len(search_results)}")
 
     if args.vulners_scan:
-        core.vulners_scan(ports="22,80,443", workers=args.vulners_workers)
+        core.vulners_scan(workers=args.vulners_workers)
     if args.nmap_scan:
-        core.nmap_scan(ports="22,80,443", workers=args.nmap_workers)
+        core.nmap_scan(workers=args.nmap_workers)
     if args.script_check:
         core.run_scripts(queries_filename=args.queries_file)
     if args.count_unique:

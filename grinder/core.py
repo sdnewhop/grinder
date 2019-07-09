@@ -777,7 +777,8 @@ class GrinderCore:
         ports: str = None,
         top_ports: int = None,
         sudo: bool = False,
-        arguments: str = "-Pn -T4 -A --host-timeout 30",
+        host_timeout: int = 30,
+        arguments: str = "-Pn -T4 -A",
         workers: int = 10,
     ):
         """
@@ -795,6 +796,8 @@ class GrinderCore:
         # Check for top-ports if defined
         if top_ports:
             arguments = f"{arguments} --top-ports {str(top_ports)}"
+        if host_timeout:
+            arguments = f"{arguments} --host-timeout {str(host_timeout)}s"
 
         if not self.shodan_processed_results:
             self.shodan_processed_results = self.db.load_last_shodan_results()
@@ -843,7 +846,7 @@ class GrinderCore:
         all_hosts = [{"ip": host.get("ip"), "port": host.get("port")} for host in all_hosts.values()]
 
         # Check for top-ports if defined
-        arguments = f"-Pn -sV --script=.{vulners_path} --host-timeout {int(host_timeout)*1000}ms"
+        arguments = f"-Pn -sV --script=.{vulners_path} --host-timeout {str(host_timeout)}s"
         if top_ports:
             arguments = f"{arguments} --top-ports {str(top_ports)}"
         
@@ -934,7 +937,7 @@ class GrinderCore:
             required_confidences = ["certain"]
         elif self.vendor_confidence.lower() == "firm":
             required_confidences = ["certain", "firm"]
-        elif self.vendor_confidence.lower() == "tentative:
+        elif self.vendor_confidence.lower() == "tentative":
             required_confidences = ["certain", "firm", "tentative"]
         else:
             required_confidences = []

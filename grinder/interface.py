@@ -131,6 +131,22 @@ class GrinderInterface:
             help="Number of Vulners workers to scan",
         )
         parser.add_argument(
+            "-ht",
+            "--host-timeout",
+            action="store",
+            type=int,
+            default=120,
+            help="Default host timeout in seconds for scanning with Vulners and Nmap core"
+        )
+        parser.add_argument(
+            "-tp",
+            "--top-ports",
+            action="store",
+            type=int,
+            default=100,
+            help="Quantity of popular top-ports in additional to Shodan ports scan (with Nmap)"
+        )
+        parser.add_argument(
             "-sc",
             "--script-check",
             action="store_true",

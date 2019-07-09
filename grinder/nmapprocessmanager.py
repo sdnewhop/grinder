@@ -30,12 +30,19 @@ class NmapProcessing(Process):
             host_ip = host.get("ip")
             host_port = str(host.get("port"))
             if not self.ports:
-                print(f" ■ Current scan host ({index}/{hosts_quantity}): {host_ip}:{host_port}")
+                print(
+                    f" ■ Current scan host ({index}/{hosts_quantity}): {host_ip}:{host_port}"
+                )
             if self.ports:
-                print(f" ■ Current scan host ({index}/{hosts_quantity}): {host_ip}:{str(self.ports)}")
+                print(
+                    f" ■ Current scan host ({index}/{hosts_quantity}): {host_ip}:{str(self.ports)}"
+                )
             nm = NmapConnector()
             nm.scan(
-                host=host_ip, arguments=self.arguments, ports=(self.ports or host_port), sudo=self.sudo
+                host=host_ip,
+                arguments=self.arguments,
+                ports=(self.ports or host_port),
+                sudo=self.sudo,
             )
             results = nm.get_results()
             if not results.get(host_ip):

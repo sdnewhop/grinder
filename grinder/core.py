@@ -696,7 +696,23 @@ class GrinderCore:
         if not self.query_confidence.lower() in ["firm", "certain", "tentative"]:
             print("Confidence level for current query is not valid")
             return False
-        if query_confidence.lower() == self.query_confidence.lower():
+        
+        """
+        Lower confidence must include higher confidence:
+        certain = certain
+        firm = firm + certain
+        tentative = tentative + firm + certain
+        """
+        if self.query_confidence.lower() == "certain":
+            required_confidences = ["certain"]
+        elif self.query_confidence.lower() == "firm":
+            required_confidences = ["certain", "firm"]
+        elif self.query_confidence.lower() == "tentative":
+            required_confidences = ["certain", "firm", "tentative"]
+        else:
+            required_confidences = []
+
+        if query_confidence.lower() in required_confidences:
             return True
         return False
 
@@ -908,10 +924,25 @@ class GrinderCore:
         if not self.vendor_confidence.lower() in ["firm", "certain", "tentative"]:
             print("Confidence level for vendors is not valid")
             return
+        """
+        Lower confidence must include higher confidence:
+        certain = certain
+        firm = firm + certain
+        tentative = tentative + firm + certain
+        """
+        if self.vendor_confidence.lower() == "certain":
+            required_confidences = ["certain"]
+        elif self.vendor_confidence.lower() == "firm":
+            required_confidences = ["certain", "firm"]
+        elif self.vendor_confidence.lower() == "tentative:
+            required_confidences = ["certain", "firm", "tentative"]
+        else:
+            required_confidences = []
+        
         self.queries_file = list(
             filter(
                 lambda product: product.get("vendor_confidence").lower()
-                == self.vendor_confidence.lower(),
+                in required_confidences,
                 self.queries_file,
             )
         )

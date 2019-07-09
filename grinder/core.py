@@ -696,7 +696,7 @@ class GrinderCore:
         if not self.query_confidence.lower() in ["firm", "certain", "tentative"]:
             print("Confidence level for current query is not valid")
             return False
-        
+
         """
         Lower confidence must include higher confidence:
         certain = certain
@@ -803,12 +803,19 @@ class GrinderCore:
             self.shodan_processed_results = self.db.load_last_shodan_results()
         if not self.censys_processed_results:
             self.censys_processed_results = self.db.load_last_censys_results()
-        
+
         # Make ip:port list of all results
         all_hosts = {**self.shodan_processed_results, **self.censys_processed_results}
-        all_hosts = [{"ip": host.get("ip"), "port": host.get("port")} for host in all_hosts.values()]
+        all_hosts = [
+            {"ip": host.get("ip"), "port": host.get("port")}
+            for host in all_hosts.values()
+        ]
 
-        cprint(f"Nmap scan arguments: {arguments}, custom ports: \"{str(ports)}\", top-ports: \"{str(top_ports)}\"", "blue", attrs=["bold"])
+        cprint(
+            f'Nmap scan arguments: {arguments}, custom ports: "{str(ports)}", top-ports: "{str(top_ports)}"',
+            "blue",
+            attrs=["bold"],
+        )
         nmap_scan = NmapProcessingManager(
             hosts=all_hosts,
             ports=ports,
@@ -832,7 +839,7 @@ class GrinderCore:
         top_ports: int = None,
         workers: int = 1,
         host_timeout: int = 120,
-        vulners_path: str ="/plugins/vulners.nse",
+        vulners_path: str = "/plugins/vulners.nse",
     ):
         cprint("Start Vulners API scanning", "blue", attrs=["bold"])
         cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])
@@ -843,14 +850,23 @@ class GrinderCore:
 
         # Make ip:port list of all results
         all_hosts = {**self.shodan_processed_results, **self.censys_processed_results}
-        all_hosts = [{"ip": host.get("ip"), "port": host.get("port")} for host in all_hosts.values()]
+        all_hosts = [
+            {"ip": host.get("ip"), "port": host.get("port")}
+            for host in all_hosts.values()
+        ]
 
         # Check for top-ports if defined
-        arguments = f"-Pn -sV --script=.{vulners_path} --host-timeout {str(host_timeout)}s"
+        arguments = (
+            f"-Pn -sV --script=.{vulners_path} --host-timeout {str(host_timeout)}s"
+        )
         if top_ports:
             arguments = f"{arguments} --top-ports {str(top_ports)}"
-        
-        cprint(f"Vulners scan arguments: {arguments}, custom ports: \"{str(ports)}\", top-ports: \"{str(top_ports)}\"", "blue", attrs=["bold"])
+
+        cprint(
+            f'Vulners scan arguments: {arguments}, custom ports: "{str(ports)}", top-ports: "{str(top_ports)}"',
+            "blue",
+            attrs=["bold"],
+        )
         vulners_scan = NmapProcessingManager(
             hosts=all_hosts,
             ports=ports,
@@ -941,7 +957,7 @@ class GrinderCore:
             required_confidences = ["certain", "firm", "tentative"]
         else:
             required_confidences = []
-        
+
         self.queries_file = list(
             filter(
                 lambda product: product.get("vendor_confidence").lower()

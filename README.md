@@ -4,6 +4,7 @@
 ## Contents
 1. [Description](#description)
 1. [Grinder Workflow](#grinder-workflow)
+1. [Grinder Map Example](#grinder-map-example)
 1. [Requirements](#requirements)
 1. [Current Features](#current-features)
 1. [Setup and Configure Environment](#setup-and-configure-environment)
@@ -15,6 +16,11 @@
 The Grinder framework was created to automatically enumerate and fingerprint different hosts on the Internet using different back-end systems: search engines, such as Shodan or Censys, for discovering hosts and NMAP engine for fingerprinting and specific checks. The Grinder framework can be used in many different areas of researches, as a connected Python module in your own project or as an independent ready-to-use from the box tool.  
 ## Grinder Workflow
 ![Grinder Workflow](/docs/workflow.png?raw=true "Grinder Workflow")
+## Grinder Map Example
+Grinder Framework can easily build an interactive map with found hosts in your browser:
+![Grinder Map 1](/docs/map_1.png?raw=true "Grinder Map 1")
+Also, Grinder can show you some basic information:
+![Grinder Map 2](/docs/map_2.png?raw=true "Grinder Map 2")
 ## Requirements
 - [Python 3.6+](https://www.python.org/downloads/)
 - [Shodan](https://account.shodan.io/register) and [Censys](https://account.shodan.io/register) accounts

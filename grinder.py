@@ -43,7 +43,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print(f"Total results: {len(search_results)}")
-
     if args.vulners_scan:
         core.vulners_scan(
             top_ports=args.top_ports,

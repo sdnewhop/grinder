@@ -143,8 +143,8 @@ class GrinderInterface:
             "--top-ports",
             action="store",
             type=int,
-            default=100,
-            help="Quantity of popular top-ports in additional to Shodan ports scan (with Nmap)",
+            default=None,
+            help="Quantity of popular top-ports in addition to Shodan ports",
         )
         parser.add_argument(
             "-sc",

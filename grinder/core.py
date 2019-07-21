@@ -785,6 +785,7 @@ class GrinderCore:
         Initiate Nmap scan on hosts
 
         :param ports (str): ports to scan
+        :param top_ports (int): quantity of top-ports to scan
         :param sudo (bool): sudo if needed
         :param arguments (str): Nmap arguments
         :param workers (int): number of Nmap workers

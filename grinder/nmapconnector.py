@@ -29,10 +29,24 @@ class NmapConnector:
         # Add special Nmap key to scan ipv6 hosts
         if self.check_ip_v6(host):
             arguments += " -6"
-        if arguments and ports:
+
+        # If user wants to scan for top-ports,
+        # let's remove other ports from nmap scan
+        if "top-ports" in arguments:
+            self.nm.scan(hosts=host, arguments=arguments, sudo=sudo)
+
+        # Else if user doesn't want scan for top-ports,
+        # let's scan with defined ports
+        elif arguments and ports:
             self.nm.scan(hosts=host, arguments=arguments, ports=ports, sudo=sudo)
+
+        # Else if ports are not defined, let's
+        # scan with default ports
         elif arguments:
             self.nm.scan(hosts=host, arguments=arguments, sudo=sudo)
+
+        # If arguments are not setted too, make
+        # simple scan
         else:
             self.nm.scan(hosts=host, sudo=sudo)
         self.results = {host: self.nm[host] for host in self.nm.all_hosts()}

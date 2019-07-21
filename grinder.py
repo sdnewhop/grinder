@@ -43,11 +43,18 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print(f"Total results: {len(search_results)}")
-
     if args.vulners_scan:
-        core.vulners_scan(ports="22,80,443", workers=args.vulners_workers)
+        core.vulners_scan(
+            top_ports=args.top_ports,
+            host_timeout=args.host_timeout,
+            workers=args.vulners_workers,
+        )
     if args.nmap_scan:
-        core.nmap_scan(ports="22,80,443", workers=args.nmap_workers)
+        core.nmap_scan(
+            top_ports=args.top_ports,
+            host_timeout=args.host_timeout,
+            workers=args.nmap_workers,
+        )
     if args.script_check:
         core.run_scripts(queries_filename=args.queries_file)
     if args.count_unique:

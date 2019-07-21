@@ -123,6 +123,15 @@ class GrinderCore:
         :param query (str): search query for shodan
         :return list: raw shodan results in list
         """
+
+        # Skip default values
+        if (
+            self.shodan_api_key == "YOUR_DEFAULT_API_KEY"
+        ):
+            print(f"│ Shodan key is not defined. Skip scan.")
+            print(f"└ ", end="")
+            return []
+
         if not results_count:
             results_count = (
                 self.shodan_results_limit
@@ -167,11 +176,22 @@ class GrinderCore:
         :param results_count (int): maximum results quantity
         :return list: raw censys results in list
         """
+
+        # Skip default values
+        if (
+            self.censys_api_id == "YOUR_CENSYS_API_ID"
+            or self.censys_api_secret == "YOUR_CENSYS_API_SECRET"
+        ):
+            print(f"│ Censys key is not defined. Skip scan.")
+            print(f"└ ", end="")
+            return []
+
         if not results_count:
             results_count = (
                 self.censys_results_limit
                 or DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
             )
+
         censys = CensysConnector(
             api_id=self.censys_api_id, api_secret=self.censys_api_secret
         )
@@ -371,13 +391,11 @@ class GrinderCore:
         :return None:
         """
         cprint("Save all results...", "blue", attrs=["bold"])
-        # If combined results is empty - try to refresh it
-        # from processed results (in case of successful scan)
-        if not self.combined_results:
-            self.combined_results = {
-                **self.shodan_processed_results,
-                **self.censys_processed_results,
-            }
+        # Refresh combined results in any case
+        self.combined_results = {
+            **self.shodan_processed_results,
+            **self.censys_processed_results,
+        }
 
         # If all scan results were empty after refreshing
         if not self.combined_results:
@@ -508,7 +526,7 @@ class GrinderCore:
         """
         if not (
             current_host.get("location").get("latitude")
-            and current_host.get("location").get("latitude")
+            and current_host.get("location").get("longitude")
         ):
             return
         host_info = HostInfo(
@@ -696,7 +714,23 @@ class GrinderCore:
         if not self.query_confidence.lower() in ["firm", "certain", "tentative"]:
             print("Confidence level for current query is not valid")
             return False
-        if query_confidence.lower() == self.query_confidence.lower():
+
+        """
+        Lower confidence must include higher confidence:
+        certain = certain
+        firm = firm + certain
+        tentative = tentative + firm + certain
+        """
+        if self.query_confidence.lower() == "certain":
+            required_confidences = ["certain"]
+        elif self.query_confidence.lower() == "firm":
+            required_confidences = ["certain", "firm"]
+        elif self.query_confidence.lower() == "tentative":
+            required_confidences = ["certain", "firm", "tentative"]
+        else:
+            required_confidences = []
+
+        if query_confidence.lower() in required_confidences:
             return True
         return False
 
@@ -758,15 +792,18 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
     def nmap_scan(
         self,
-        ports="80,443",
-        sudo=False,
-        arguments="-Pn -T4 -A --host-timeout 30",
-        workers=10,
+        ports: str = None,
+        top_ports: int = None,
+        sudo: bool = False,
+        host_timeout: int = 30,
+        arguments: str = "-Pn -T4 -A",
+        workers: int = 10,
     ):
         """
         Initiate Nmap scan on hosts
 
         :param ports (str): ports to scan
+        :param top_ports (int): quantity of top-ports to scan
         :param sudo (bool): sudo if needed
         :param arguments (str): Nmap arguments
         :param workers (int): number of Nmap workers
@@ -774,12 +811,29 @@ class GrinderCore:
         """
         cprint("Start Nmap scanning", "blue", attrs=["bold"])
         cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])
+
+        # Check for top-ports if defined
+        if top_ports:
+            arguments = f"{arguments} --top-ports {str(top_ports)}"
+        if host_timeout:
+            arguments = f"{arguments} --host-timeout {str(host_timeout)}s"
+
         if not self.shodan_processed_results:
             self.shodan_processed_results = self.db.load_last_shodan_results()
         if not self.censys_processed_results:
             self.censys_processed_results = self.db.load_last_censys_results()
-        all_hosts = list(
-            {**self.shodan_processed_results, **self.censys_processed_results}.keys()
+
+        # Make ip:port list of all results
+        all_hosts = {**self.shodan_processed_results, **self.censys_processed_results}
+        all_hosts = [
+            {"ip": host.get("ip"), "port": host.get("port")}
+            for host in all_hosts.values()
+        ]
+
+        cprint(
+            f'Nmap scan arguments: {arguments}, custom ports: "{str(ports)}", top-ports: "{str(top_ports)}"',
+            "blue",
+            attrs=["bold"],
         )
         nmap_scan = NmapProcessingManager(
             hosts=all_hosts,
@@ -799,11 +853,12 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreVulnersScanError)
     def vulners_scan(
         self,
-        sudo=False,
-        ports="",
-        workers=1,
-        host_timeout=120,
-        vulners_path="/plugins/vulners.nse",
+        sudo: bool = False,
+        ports: str = None,
+        top_ports: int = None,
+        workers: int = 1,
+        host_timeout: int = 120,
+        vulners_path: str = "/plugins/vulners.nse",
     ):
         cprint("Start Vulners API scanning", "blue", attrs=["bold"])
         cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])
@@ -811,14 +866,31 @@ class GrinderCore:
             self.shodan_processed_results = self.db.load_last_shodan_results()
         if not self.censys_processed_results:
             self.censys_processed_results = self.db.load_last_censys_results()
-        all_hosts = list(
-            {**self.shodan_processed_results, **self.censys_processed_results}.keys()
+
+        # Make ip:port list of all results
+        all_hosts = {**self.shodan_processed_results, **self.censys_processed_results}
+        all_hosts = [
+            {"ip": host.get("ip"), "port": host.get("port")}
+            for host in all_hosts.values()
+        ]
+
+        # Check for top-ports if defined
+        arguments = (
+            f"-Pn -sV --script=.{vulners_path} --host-timeout {str(host_timeout)}s"
+        )
+        if top_ports:
+            arguments = f"{arguments} --top-ports {str(top_ports)}"
+
+        cprint(
+            f'Vulners scan arguments: {arguments}, custom ports: "{str(ports)}", top-ports: "{str(top_ports)}"',
+            "blue",
+            attrs=["bold"],
         )
         vulners_scan = NmapProcessingManager(
             hosts=all_hosts,
             ports=ports,
             sudo=sudo,
-            arguments=f"-Pn -sV --script=.{vulners_path} --host-timeout {int(host_timeout)*1000}ms",
+            arguments=arguments,
             workers=workers,
         )
         vulners_scan.start()
@@ -890,10 +962,25 @@ class GrinderCore:
         if not self.vendor_confidence.lower() in ["firm", "certain", "tentative"]:
             print("Confidence level for vendors is not valid")
             return
+        """
+        Lower confidence must include higher confidence:
+        certain = certain
+        firm = firm + certain
+        tentative = tentative + firm + certain
+        """
+        if self.vendor_confidence.lower() == "certain":
+            required_confidences = ["certain"]
+        elif self.vendor_confidence.lower() == "firm":
+            required_confidences = ["certain", "firm"]
+        elif self.vendor_confidence.lower() == "tentative":
+            required_confidences = ["certain", "firm", "tentative"]
+        else:
+            required_confidences = []
+
         self.queries_file = list(
             filter(
                 lambda product: product.get("vendor_confidence").lower()
-                == self.vendor_confidence.lower(),
+                in required_confidences,
                 self.queries_file,
             )
         )

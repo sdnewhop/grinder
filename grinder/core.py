@@ -391,13 +391,11 @@ class GrinderCore:
         :return None:
         """
         cprint("Save all results...", "blue", attrs=["bold"])
-        # If combined results is empty - try to refresh it
-        # from processed results (in case of successful scan)
-        if not self.combined_results:
-            self.combined_results = {
-                **self.shodan_processed_results,
-                **self.censys_processed_results,
-            }
+        # Refresh combined results in any case
+        self.combined_results = {
+            **self.shodan_processed_results,
+            **self.censys_processed_results,
+        }
 
         # If all scan results were empty after refreshing
         if not self.combined_results:

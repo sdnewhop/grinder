@@ -1,4 +1,6 @@
 # Custom
+TLS-Scanner/
+tls/
 *venv*/
 .vscode/
 results/

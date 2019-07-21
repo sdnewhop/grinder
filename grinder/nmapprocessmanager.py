@@ -9,6 +9,7 @@ from grinder.errors import (
     NmapProcessingManagerOrganizeProcessesError,
 )
 from grinder.nmapconnector import NmapConnector
+from grinder.defaultvalues import DefaultProcessManagerValues
 
 
 class NmapProcessingResults:
@@ -55,7 +56,12 @@ class NmapProcessing(Process):
 
 class NmapProcessingManager:
     def __init__(
-        self, hosts: list, ports=None, sudo=False, arguments="-Pn -A", workers=5
+        self, 
+        hosts: list, 
+        ports=DefaultProcessManagerValues.PORTS, 
+        sudo=DefaultProcessManagerValues.SUDO, 
+        arguments=DefaultProcessManagerValues.ARGUMENTS, 
+        workers=DefaultProcessManagerValues.WORKERS
     ):
         self.hosts = hosts
         self.workers = workers

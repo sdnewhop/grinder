@@ -15,7 +15,7 @@ from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
 from grinder.dbhandling import GrinderDatabase
 from grinder.decorators import exception_handler, timer
-from grinder.defaultvalues import DefaultValues
+from grinder.defaultvalues import DefaultValues, DefaultNmapScanValues, DefaultVulnersScanValues
 from grinder.errors import (
     GrinderCoreSearchError,
     GrinderCoreBatchSearchError,
@@ -47,6 +47,7 @@ from grinder.errors import (
     GrinderCoreFilterQueriesError,
     GrinderCoreVulnersScanError,
     GrinderCoreRunScriptsError,
+    GrinderCoreTlsScanner,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -56,6 +57,7 @@ from grinder.shodanconnector import ShodanConnector
 from grinder.utils import GrinderUtils
 from grinder.pyscriptexecutor import PyScriptExecutor
 from grinder.nmapscriptexecutor import NmapScriptExecutor
+from grinder.tlsscanner import TlsScanner
 
 
 class HostInfo(NamedTuple):
@@ -789,15 +791,31 @@ class GrinderCore:
             **self.censys_processed_results,
         }
 
+    @exception_handler(expected_exception=GrinderCoreTlsScanner)
+    def tls_scan(self):
+        if not self.shodan_processed_results:
+            self.shodan_processed_results = self.db.load_last_shodan_results()
+        if not self.censys_processed_results:
+            self.censys_processed_results = self.db.load_last_censys_results()
+        self.combined_results = {
+            **self.shodan_processed_results,
+            **self.censys_processed_results,
+        }
+        tls_scanner = TlsScanner(self.combined_results)
+        tls_scanner.sort_alive_hosts()
+        tls_scanner.detect_tls_ports()
+        tls_scanner.link_alive_hosts_with_tls_ports()
+        tls_scanner.start_tls_scan()
+
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
     def nmap_scan(
         self,
-        ports: str = None,
-        top_ports: int = None,
-        sudo: bool = False,
-        host_timeout: int = 30,
-        arguments: str = "-Pn -T4 -A",
-        workers: int = 10,
+        ports: str = DefaultNmapScanValues.PORTS,
+        top_ports: int = DefaultNmapScanValues.TOP_PORTS,
+        sudo: bool = DefaultNmapScanValues.SUDO,
+        host_timeout: int = DefaultNmapScanValues.HOST_TIMEOUT,
+        arguments: str = DefaultNmapScanValues.ARGUMENTS,
+        workers: int = DefaultNmapScanValues.WORKERS,
     ):
         """
         Initiate Nmap scan on hosts
@@ -853,12 +871,12 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreVulnersScanError)
     def vulners_scan(
         self,
-        sudo: bool = False,
-        ports: str = None,
-        top_ports: int = None,
-        workers: int = 1,
-        host_timeout: int = 120,
-        vulners_path: str = "/plugins/vulners.nse",
+        sudo: bool = DefaultVulnersScanValues.SUDO,
+        ports: str = DefaultVulnersScanValues.PORTS,
+        top_ports: int = DefaultVulnersScanValues.TOP_PORTS,
+        workers: int = DefaultVulnersScanValues.WORKERS,
+        host_timeout: int = DefaultVulnersScanValues.HOST_TIMEOUT,
+        vulners_path: str = DefaultVulnersScanValues.VULNERS_SCRIPT_PATH,
     ):
         cprint("Start Vulners API scanning", "blue", attrs=["bold"])
         cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])

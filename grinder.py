@@ -57,6 +57,7 @@ if __name__ == "__main__":
         )
     if args.script_check:
         core.run_scripts(queries_filename=args.queries_file)
+    core.tls_scan()
     if args.count_unique:
         core.count_unique_entities("product")
         core.count_unique_entities("vendor")

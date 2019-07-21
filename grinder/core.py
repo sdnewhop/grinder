@@ -123,6 +123,15 @@ class GrinderCore:
         :param query (str): search query for shodan
         :return list: raw shodan results in list
         """
+
+        # Skip default values
+        if (
+            self.shodan_api_key == "YOUR_DEFAULT_API_KEY"
+        ):
+            print(f"│ Shodan key is not defined. Skip scan.")
+            print(f"└ ", end="")
+            return []
+
         if not results_count:
             results_count = (
                 self.shodan_results_limit
@@ -167,11 +176,22 @@ class GrinderCore:
         :param results_count (int): maximum results quantity
         :return list: raw censys results in list
         """
+
+        # Skip default values
+        if (
+            self.censys_api_id == "YOUR_CENSYS_API_ID"
+            or self.censys_api_secret == "YOUR_CENSYS_API_SECRET"
+        ):
+            print(f"│ Censys key is not defined. Skip scan.")
+            print(f"└ ", end="")
+            return []
+
         if not results_count:
             results_count = (
                 self.censys_results_limit
                 or DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
             )
+
         censys = CensysConnector(
             api_id=self.censys_api_id, api_secret=self.censys_api_secret
         )

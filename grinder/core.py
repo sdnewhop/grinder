@@ -796,6 +796,7 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreTlsScanner)
     def tls_scan(self):
+        cprint("Start TLS scanning", "blue", attrs=["bold"])
         if not self.shodan_processed_results:
             self.shodan_processed_results = self.db.load_last_shodan_results()
         if not self.censys_processed_results:
@@ -807,6 +808,9 @@ class GrinderCore:
         tls_scanner = TlsScanner(self.combined_results)
         tls_parser = TlsParser(self.combined_results)
         try:
+            cprint(
+                "Checking for currently online and alive hosts", "blue", attrs=["bold"]
+            )
             tls_scanner.sort_alive_hosts()
         except Exception as sort_alive_hosts_err:
             print(
@@ -814,11 +818,19 @@ class GrinderCore:
             )
             return
         try:
+            cprint(
+                "Detect SSL/TLS ports, certificates and services",
+                "blue",
+                attrs=["bold"],
+            )
             tls_scanner.detect_tls_ports()
         except Exception as detect_tls_ports_err:
             print(f"Error at detecting of TLS ports method: {detect_tls_ports_err}")
             return
         try:
+            cprint(
+                "Link compatible ports and services with hosts", "blue", attrs=["bold"]
+            )
             tls_scanner.link_alive_hosts_with_tls_ports()
         except Exception as link_alive_hosts_with_tls_ports_err:
             print(
@@ -826,11 +838,13 @@ class GrinderCore:
             )
             return
         try:
+            cprint("Run TLS-Scanner", "blue", attrs=["bold"])
             tls_scanner.start_tls_scan()
         except Exception as tls_scan_err:
             print(f"Error at TLS scanning: {tls_scan_err}")
             return
         try:
+            cprint("Parse and process TLS-Scanner results", "blue", attrs=["bold"])
             tls_parser.load_tls_scan_results()
         except Exception as parse_tls_results_err:
             print(f"Error at TLS results parsing: {parse_tls_results_err}")

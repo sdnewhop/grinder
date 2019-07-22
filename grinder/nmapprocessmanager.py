@@ -30,14 +30,15 @@ class NmapProcessing(Process):
             index, hosts_quantity, host = self.queue.get()
             host_ip = host.get("ip")
             host_port = str(host.get("port"))
-            if not self.ports:
-                print(
-                    f" ■ Current scan host ({index}/{hosts_quantity}): {host_ip}:{host_port}"
-                )
+
+            port_postfix = "Default"
+            if not self.ports and host_port:
+                port_postfix = host_port
             if self.ports:
-                print(
-                    f" ■ Current scan host ({index}/{hosts_quantity}): {host_ip}:{str(self.ports)}"
-                )
+                port_postfix = str(self.ports)
+            print(
+                f"⭕ Current scan host ({index}/{hosts_quantity}): {host_ip}:{port_postfix}"
+            )
             nm = NmapConnector()
             nm.scan(
                 host=host_ip,

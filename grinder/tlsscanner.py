@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from grinder.nmapprocessmanager import NmapProcessingManager
-from grinder.decorators import create_results_directory, create_subdirectory
+from grinder.decorators import create_results_directory, create_subdirectory, timer
 from grinder.defaultvalues import DefaultTlsScannerValues, DefaultValues
 
 from nmap import PortScanner
@@ -9,6 +9,7 @@ from itertools import zip_longest
 from random import choice
 from subprocess import check_output, DEVNULL
 from re import compile
+from termcolor import cprint
 
 
 class TlsScanner:
@@ -39,7 +40,7 @@ class TlsScanner:
         groups = [list(group) for group in groups]
         groups_len = len(groups)
         for index, group in enumerate(groups):
-            print(f"Pingscan for {self.n} hosts from group {index}/{groups_len}")
+            print(f"│ Do pingscan for {self.n} hosts ({index}/{groups_len})")
             group_ips = [ip for ip in group if ip]
             hosts_in_nmap_format = " ".join(group_ips)
             nm.scan(
@@ -51,6 +52,7 @@ class TlsScanner:
                 ip for ip in results if nm[ip]["status"]["state"] == "up"
             ]
             groups[index] = alive_hosts_group
+        print(f"└ Done pingscan for {len(hosts_ip)} hosts")
         groups_flat = [host for group in groups for host in group]
         self.alive_hosts = groups_flat
         self._set_ping_status()
@@ -85,6 +87,7 @@ class TlsScanner:
                         self.tls_ports[host].append(port)
                     else:
                         self.tls_ports[host] = [port]
+                    self.hosts[host].update({"ssl_cert": ssl_cert})
             if self.tls_ports.get(host):
                 self.hosts[host].update({"tls_ports": self.tls_ports[host]})
 
@@ -107,6 +110,38 @@ class TlsScanner:
             else:
                 self.alive_hosts_with_ports[host] = 443
 
+    @timer
+    def _run_tls_on_host(
+        self, scanner_path, host, port, report_detail, scan_detail, threads
+    ):
+        command = [
+            "java",
+            "-jar",
+            scanner_path,
+            "-connect",
+            str(host) + ":" + str(port),
+            "-noColor",
+            "-implementation",
+            "-reportDetail",
+            report_detail,
+            "-scanDetail",
+            scan_detail,
+            "-overallThreads",
+            str(threads),
+            "-parallelProbes",
+            str(threads),
+        ]
+        tls_scanner_res = check_output(
+            command,
+            universal_newlines=True,
+            timeout=DefaultTlsScannerValues.TLS_SCANNER_TIMEOUT,
+            stderr=DEVNULL,
+        )
+        ansi_escape = compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+        tls_scanner_res = ansi_escape.sub("", tls_scanner_res)
+        print(f"└ ", end="")
+        return tls_scanner_res
+
     def start_tls_scan(
         self,
         report_detail: str = DefaultTlsScannerValues.TLS_SCANNER_REPORT_DETAIL,
@@ -114,34 +149,25 @@ class TlsScanner:
         scanner_path: str = DefaultTlsScannerValues.TLS_SCANNER_PATH,
         threads: int = DefaultTlsScannerValues.TLS_SCANNER_THREADS,
     ):
-        for host, port in self.alive_hosts_with_ports.items():
-            print(f"Start tls scan for {host}")
+        alive_hosts_quantity = len(self.alive_hosts_with_ports.items())
+        for index, host_port in enumerate(self.alive_hosts_with_ports.items()):
+            host, port = host_port
+            cprint(
+                f"Start TLS scan for {index} from {alive_hosts_quantity} hosts",
+                "blue",
+                attrs=["bold"],
+            )
+            print(f"│ Host: {host}")
+            print(f"│ Port: {port}")
             try:
-                command = [
-                    "java",
-                    "-jar",
-                    scanner_path,
-                    "-connect",
-                    str(host) + ":" + str(port),
-                    "-noColor",
-                    "-implementation",
-                    "-reportDetail",
-                    report_detail,
-                    "-scanDetail",
-                    scan_detail,
-                    "-overallThreads",
-                    str(threads),
-                    "-parallelProbes",
-                    str(threads),
-                ]
-                tls_scanner_res = check_output(
-                    command,
-                    universal_newlines=True,
-                    timeout=DefaultTlsScannerValues.TLS_SCANNER_TIMEOUT,
-                    stderr=DEVNULL,
+                tls_scanner_res = self._run_tls_on_host(
+                    scanner_path=scanner_path,
+                    host=host,
+                    port=port,
+                    report_detail=report_detail,
+                    scan_detail=scan_detail,
+                    threads=threads,
                 )
-                ansi_escape = compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-                tls_scanner_res = ansi_escape.sub("", tls_scanner_res)
             except:
                 continue
             vendor = self.hosts[host].get("vendor")
@@ -155,6 +181,7 @@ class TlsScanner:
                 filename=name_of_file,
                 result=tls_scanner_res,
             )
+        print(f"Done TLS scan for {alive_hosts_quantity} hosts")
 
     @create_results_directory()
     @create_subdirectory(subdirectory=DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)

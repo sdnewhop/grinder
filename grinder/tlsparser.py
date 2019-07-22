@@ -87,7 +87,9 @@ class TlsParser:
                 results = host_tls_results.read()
 
                 attacks, bugs = self._parse_attacks(results)
-                search_pattern = findall(r"(\d+.\d+.\d+.\d+)-(\d+)-(\w+)-(.+).txt", file)
+                search_pattern = findall(
+                    r"(\d+.\d+.\d+.\d+)-(\d+)-(\w+)-(.+).txt", file
+                )
                 if not search_pattern:
                     continue
                 ip, port, vendor, product = search_pattern[0]
@@ -119,7 +121,7 @@ class TlsParser:
         self,
         results,
         dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
-        filename: str = DefaultTlsParserValues.ATTACKS_JSON
+        filename: str = DefaultTlsParserValues.ATTACKS_JSON,
     ):
         full_path = Path(".").joinpath(dest_dir).joinpath(filename)
         with open(full_path, "w") as alive_hosts:

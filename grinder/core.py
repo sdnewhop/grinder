@@ -15,7 +15,11 @@ from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
 from grinder.dbhandling import GrinderDatabase
 from grinder.decorators import exception_handler, timer
-from grinder.defaultvalues import DefaultValues, DefaultNmapScanValues, DefaultVulnersScanValues
+from grinder.defaultvalues import (
+    DefaultValues,
+    DefaultNmapScanValues,
+    DefaultVulnersScanValues,
+)
 from grinder.errors import (
     GrinderCoreSearchError,
     GrinderCoreBatchSearchError,
@@ -128,9 +132,7 @@ class GrinderCore:
         """
 
         # Skip default values
-        if (
-            self.shodan_api_key == "YOUR_DEFAULT_API_KEY"
-        ):
+        if self.shodan_api_key == "YOUR_DEFAULT_API_KEY":
             print(f"│ Shodan key is not defined. Skip scan.")
             print(f"└ ", end="")
             return []
@@ -807,7 +809,9 @@ class GrinderCore:
         try:
             tls_scanner.sort_alive_hosts()
         except Exception as sort_alive_hosts_err:
-            print(f"Error at TLS scanner sort alive hosts method: {sort_alive_hosts_err}")
+            print(
+                f"Error at TLS scanner sort alive hosts method: {sort_alive_hosts_err}"
+            )
             return
         try:
             tls_scanner.detect_tls_ports()
@@ -817,7 +821,9 @@ class GrinderCore:
         try:
             tls_scanner.link_alive_hosts_with_tls_ports()
         except Exception as link_alive_hosts_with_tls_ports_err:
-            print(f"Error at linking hosts with ports in TLS method: {link_alive_hosts_with_tls_ports_err}")
+            print(
+                f"Error at linking hosts with ports in TLS method: {link_alive_hosts_with_tls_ports_err}"
+            )
             return
         try:
             tls_scanner.start_tls_scan()

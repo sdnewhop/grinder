@@ -194,7 +194,7 @@ class GrinderInterface:
             "--tls-scan",
             action="store_true",
             default=False,
-            help="Check for possible TLS attacks and bugs (require TLS-Scanner)"
+            help="Check for possible TLS attacks and bugs (require TLS-Scanner)",
         )
 
         self.args = parser.parse_args()

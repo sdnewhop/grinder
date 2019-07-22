@@ -56,12 +56,12 @@ class NmapProcessing(Process):
 
 class NmapProcessingManager:
     def __init__(
-        self, 
-        hosts: list, 
-        ports=DefaultProcessManagerValues.PORTS, 
-        sudo=DefaultProcessManagerValues.SUDO, 
-        arguments=DefaultProcessManagerValues.ARGUMENTS, 
-        workers=DefaultProcessManagerValues.WORKERS
+        self,
+        hosts: list,
+        ports=DefaultProcessManagerValues.PORTS,
+        sudo=DefaultProcessManagerValues.SUDO,
+        arguments=DefaultProcessManagerValues.ARGUMENTS,
+        workers=DefaultProcessManagerValues.WORKERS,
     ):
         self.hosts = hosts
         self.workers = workers

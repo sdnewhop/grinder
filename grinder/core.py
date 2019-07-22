@@ -58,6 +58,7 @@ from grinder.utils import GrinderUtils
 from grinder.pyscriptexecutor import PyScriptExecutor
 from grinder.nmapscriptexecutor import NmapScriptExecutor
 from grinder.tlsscanner import TlsScanner
+from grinder.tlsparser import TlsParser
 
 
 class HostInfo(NamedTuple):
@@ -802,10 +803,32 @@ class GrinderCore:
             **self.censys_processed_results,
         }
         tls_scanner = TlsScanner(self.combined_results)
-        tls_scanner.sort_alive_hosts()
-        tls_scanner.detect_tls_ports()
-        tls_scanner.link_alive_hosts_with_tls_ports()
-        tls_scanner.start_tls_scan()
+        tls_parser = TlsParser(self.combined_results)
+        try:
+            tls_scanner.sort_alive_hosts()
+        except Exception as sort_alive_hosts_err:
+            print(f"Error at TLS scanner sort alive hosts method: {sort_alive_hosts_err}")
+            return
+        try:
+            tls_scanner.detect_tls_ports()
+        except Exception as detect_tls_ports_err:
+            print(f"Error at detecting of TLS ports method: {detect_tls_ports_err}")
+            return
+        try:
+            tls_scanner.link_alive_hosts_with_tls_ports()
+        except Exception as link_alive_hosts_with_tls_ports_err:
+            print(f"Error at linking hosts with ports in TLS method: {link_alive_hosts_with_tls_ports_err}")
+            return
+        try:
+            tls_scanner.start_tls_scan()
+        except Exception as tls_scan_err:
+            print(f"Error at TLS scanning: {tls_scan_err}")
+            return
+        try:
+            tls_parser.load_tls_scan_results()
+        except Exception as parse_tls_results_err:
+            print(f"Error at TLS results parsing: {parse_tls_results_err}")
+            return
 
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
     def nmap_scan(

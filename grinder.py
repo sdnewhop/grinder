@@ -55,9 +55,10 @@ if __name__ == "__main__":
             host_timeout=args.host_timeout,
             workers=args.nmap_workers,
         )
+    if args.tls_scan:
+        core.tls_scan()
     if args.script_check:
         core.run_scripts(queries_filename=args.queries_file)
-    core.tls_scan()
     if args.count_unique:
         core.count_unique_entities("product")
         core.count_unique_entities("vendor")

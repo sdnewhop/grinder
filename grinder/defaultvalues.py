@@ -34,6 +34,10 @@ class DefaultValues:
     PNG_LIMITED_RESULTS_DIRECTORY: str = "limited_results"
 
 
+class DefaultTlsParserValues:
+    ATTACKS_JSON = "tls_scanner_results.json"
+
+
 class DefaultTlsScannerValues:
     LENGTH_OF_HOSTS_SUBGROUPS = 5
     NMAP_PING_SCAN_ARGS = "-n -sP -PE --max-retries=1"

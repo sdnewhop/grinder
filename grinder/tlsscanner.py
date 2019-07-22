@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 from grinder.nmapprocessmanager import NmapProcessingManager
-from grinder.decorators import create_results_directory
-from grinder.defaultvalues import DefaultTlsScannerValues
+from grinder.decorators import create_results_directory, create_subdirectory
+from grinder.defaultvalues import DefaultTlsScannerValues, DefaultValues
 
 from nmap import PortScanner
 from pprint import pprint
 from itertools import zip_longest
 from random import choice
-from subprocess import check_output
+from subprocess import check_output, DEVNULL
 from re import compile
 
 
@@ -37,7 +37,7 @@ class TlsScanner:
         groups = [list(group) for group in groups]
         groups_len = len(groups)
         for index, group in enumerate(groups):
-            print(f"Pingscan for group {str(index)}/{str(groups_len)}")
+            print(f"Pingscan for {self.n} hosts from group {index}/{groups_len}")
             group_ips = [ip for ip in group if ip]
             hosts_in_nmap_format = " ".join(group_ips)
             nm.scan(hosts=hosts_in_nmap_format, 
@@ -55,7 +55,7 @@ class TlsScanner:
         hosts_in_nmap_format = [{"ip": ip, "port": ""} for ip in self.alive_hosts]
         ssl_scan = NmapProcessingManager(
             hosts=hosts_in_nmap_format,
-            arguments=f"-T4 -F -sC -sV --script=.{ssl_script_path} --version-intensity 1 --host-timeout={host_timeout}s",
+            arguments=f"-T4 -F -sC -sV --script=.{ssl_script_path} --version-intensity 1 --open --host-timeout={host_timeout}s",
             workers=10
         )
         ssl_scan.start()
@@ -122,7 +122,10 @@ class TlsScanner:
                         str(threads),
                         "-parallelProbes",
                         str(threads)]
-                tls_scanner_res = check_output(command, universal_newlines=True, timeout=DefaultTlsScannerValues.TLS_SCANNER_TIMEOUT)
+                tls_scanner_res = check_output(command, 
+                                               universal_newlines=True, 
+                                               timeout=DefaultTlsScannerValues.TLS_SCANNER_TIMEOUT, 
+                                               stderr=DEVNULL)
                 ansi_escape = compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
                 tls_scanner_res = ansi_escape.sub('', tls_scanner_res)
             except:
@@ -130,9 +133,13 @@ class TlsScanner:
             vendor = self.hosts[host].get("vendor")
             product = self.hosts[host].get("product")
             name_of_file = "{host}-{port}-{vendor}-{product}".format(host=host, port=str(port), vendor=vendor, product=product).replace(" ", "_")
-            self.save_tls_results(dest_dir=DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR, filename=name_of_file, result=tls_scanner_res)
+            self.save_tls_results(dest_dir=DefaultValues.RESULTS_DIRECTORY, 
+                                  sub_dir=DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR,
+                                  filename=name_of_file, 
+                                  result=tls_scanner_res)
     
     @create_results_directory()
-    def save_tls_results(self, dest_dir: str, filename: str, result):
-        with open(f"./{dest_dir}/{filename}.txt", mode="w") as result_file:
+    @create_subdirectory(subdirectory=DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)
+    def save_tls_results(self, dest_dir: str, sub_dir: str, filename: str, result):
+        with open(f"./{dest_dir}/{sub_dir}/{filename}.txt", mode="w") as result_file:
             result_file.write(result)

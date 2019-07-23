@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 from grinder.nmapprocessmanager import NmapProcessingManager
-from grinder.decorators import create_results_directory, create_subdirectory, timer
+from grinder.decorators import create_results_directory, create_subdirectory, timer, exception_handler
 from grinder.defaultvalues import DefaultTlsScannerValues, DefaultValues
+from grinder.errors import GrinderCoreTlsScanner
 
 from nmap import PortScanner
 from pprint import pprint
@@ -111,6 +112,7 @@ class TlsScanner:
                 self.alive_hosts_with_ports[host] = 443
 
     @timer
+    @exception_handler(expected_exception=GrinderCoreTlsScanner)
     def _run_tls_on_host(
         self, scanner_path, host, port, report_detail, scan_detail, threads
     ):
@@ -168,7 +170,7 @@ class TlsScanner:
                     scan_detail=scan_detail,
                     threads=threads,
                 )
-            except:
+            except Exception:
                 continue
             vendor = self.hosts[host].get("vendor")
             product = self.hosts[host].get("product")

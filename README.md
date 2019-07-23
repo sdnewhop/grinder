@@ -23,8 +23,10 @@ Also, Grinder can show you some basic information:
 ![Grinder Map 2](/docs/map_2.png?raw=true "Grinder Map 2")
 ## Requirements
 - [Python 3.6+](https://www.python.org/downloads/)
-- [Shodan](https://account.shodan.io/register) and [Censys](https://account.shodan.io/register) accounts
-- [Nmap Security Scanner](https://nmap.org/download.html)
+- [Shodan](https://account.shodan.io/register) and [Censys](https://account.shodan.io/register) accounts (free or pro)
+- [Nmap Security Scanner 7.60+](https://nmap.org/download.html)
+- [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker)
+- [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner)
 ## Current Features
  - [Grinder Development Project](https://github.com/sdnewhop/grinder/projects/2?fullscreen=true)  
  

@@ -56,7 +56,7 @@ if __name__ == "__main__":
             workers=args.nmap_workers,
         )
     if args.tls_scan:
-        core.tls_scan()
+        core.tls_scan(args.tls_scan_path)
     if args.script_check:
         core.run_scripts(queries_filename=args.queries_file)
     if args.count_unique:

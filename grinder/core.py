@@ -795,7 +795,7 @@ class GrinderCore:
         }
 
     @exception_handler(expected_exception=GrinderCoreTlsScanner)
-    def tls_scan(self):
+    def tls_scan(self, scanner_path):
         cprint("Start TLS scanning", "blue", attrs=["bold"])
         if not self.shodan_processed_results:
             self.shodan_processed_results = self.db.load_last_shodan_results()
@@ -839,7 +839,10 @@ class GrinderCore:
             return
         try:
             cprint("Run TLS-Scanner", "blue", attrs=["bold"])
-            tls_scanner.start_tls_scan()
+            if scanner_path:
+                tls_scanner.start_tls_scan(scanner_path=scanner_path)
+            else:
+                tls_scanner.start_tls_scan()
         except Exception as tls_scan_err:
             print(f"Error at TLS scanning: {tls_scan_err}")
             return

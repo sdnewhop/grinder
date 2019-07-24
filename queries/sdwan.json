@@ -691,5 +691,129 @@
             "nse_script": "vbrain.nse"
         },
         "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "FlexiWAN",
+        "product": "FlexiWAN Management",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"flexiwan\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "http.title:\"FlexiWAN Management\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "OpenDaylight",
+        "product": "OpenDaylight SDN Controller (Tallac)",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"OpenDaylight - Login\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Tallac Networks",
+        "product": "Tallac SDN Activity Manager",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"SDN Activity Manager\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Cato Networks",
+        "product": "Cato Networks Edge SD-WAN (Cato Networks Socket)",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"Cato Networks\"",
+                "query_confidence": "tentative"
+            },
+            {
+                "query": "http.title:\"Cato Networks Socket\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "firm"
+    },
+    {
+        "vendor": "SimpleWAN",
+        "product": "SimpleWAN SD-WAN 2.0",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"SimpleWAN Dashboard\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-517891188",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Brocade Communications Systems",
+        "product": "Brocade Services Director",
+        "shodan_queries": [
+            {
+                "query": "http.favicon.hash:12809338",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Ubiquiti Networks",
+        "product": "Unifi SDN Controller",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"UniFi SDN\"",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries": [],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "tentative"
     }
 ]

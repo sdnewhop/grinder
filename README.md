@@ -23,37 +23,60 @@ Also, Grinder can show you some basic information:
 ![Grinder Map 2](/docs/map_2.png?raw=true "Grinder Map 2")
 ## Requirements
 - [Python 3.6+](https://www.python.org/downloads/)
-- [Shodan](https://account.shodan.io/register) and [Censys](https://account.shodan.io/register) accounts
-- [Nmap Security Scanner](https://nmap.org/download.html)
+- [Shodan](https://account.shodan.io/register) and [Censys](https://account.shodan.io/register) accounts  
+Required to collect hosts, both free and full accounts are suitable. Also, it's possible to use only one account (Censys or Shodan, Shodan is preferable).
+- [Nmap Security Scanner 7.60+](https://nmap.org/download.html)  
+Version 7.60 and newer has been tested with currently used in Grinder scripts (ssl-cert.nse, vulners.nse, etc.).
+- [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker)  
+Required only for TLS scanning. Version 3.0 has been tested.
+- [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner)  
+Required only for TLS scanning.
 ## Current Features
+### Already implemented
+- Collecting hosts and additional information using Shodan and Censys search engines
+- Scanning ports and services with boosted multiprocessed Nmap Scanner wrapper
+- Scanning vulnerabilities and additional information about them with Vulners database and Shodan CVEs database
+- Retrieving information about SSL certificates
+- Scanning for SSL/TLS configuration and supported ciphersuites
+- Scanning for SSL/TLS bugs, vulnerabilities and attacks
+- Building an interactive map with information about the hosts found
+- Creating plots and tables based on the collected results
+- Custom scanning scripts support (in LUA or Python3)
+- Confidence filtering system support
+- Special vendors scanning and filtering support
+
+### Development and future updates
  - [Grinder Development Project](https://github.com/sdnewhop/grinder/projects/2?fullscreen=true)  
  
 The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
 ## Setup and Configure Environment
-1. Clone the repository
+1. Install [Nmap Security Scanner](https://nmap.org/download.html), if not installed.
+2. Clone the repository
 ```
 git clone https://github.com/sdnewhop/grinder
 ```
-2. Create virtual environment
+3. Clone and install [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker).
+4. Clone [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner) in directory with Grinder and install it.
+5. Create virtual environment
 ```
 cd grinder
 python3 -m venv grindervenv
 source grindervenv/bin/activate
 ```
-3. Check if virtual environment successfully loaded
+6. Check if virtual environment successfully loaded
 ```
 which python
 which pip
 ```
-4. Install project requirements in virtual environment
+7. Install project requirements in virtual environment
 ```
 pip3 install -r requirements.txt
 ```
-5. Run the script
+8. Run the script
 ```
 ./grinder.py -h
 ```
-6. Set your Shodan and Censys keys via a command line argument
+9. Set your Shodan and Censys keys via a command line argument
 ```
 ./grinder.py -sk YOUR_SHODAN_KEY -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET
 ```
@@ -63,7 +86,7 @@ export SHODAN_API_KEY=YOUR_SHODAN_API_KEY_HERE
 export CENSYS_API_ID=YOUR_CENSYS_API_ID_HERE
 export CENSYS_API_SECRET=YOUR_CENSYS_API_SECRET_HERE
 ```
-7. Deactivate virtual environment after use and restore default python interpreter
+10. Deactivate virtual environment after use and restore default python interpreter
 ```
 deactivate
 ```

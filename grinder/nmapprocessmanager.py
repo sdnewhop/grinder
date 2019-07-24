@@ -9,6 +9,7 @@ from grinder.errors import (
     NmapProcessingManagerOrganizeProcessesError,
 )
 from grinder.nmapconnector import NmapConnector
+from grinder.defaultvalues import DefaultProcessManagerValues
 
 
 class NmapProcessingResults:
@@ -29,14 +30,15 @@ class NmapProcessing(Process):
             index, hosts_quantity, host = self.queue.get()
             host_ip = host.get("ip")
             host_port = str(host.get("port"))
-            if not self.ports:
-                print(
-                    f" ■ Current scan host ({index}/{hosts_quantity}): {host_ip}:{host_port}"
-                )
+
+            port_postfix = "Default"
+            if not self.ports and host_port:
+                port_postfix = host_port
             if self.ports:
-                print(
-                    f" ■ Current scan host ({index}/{hosts_quantity}): {host_ip}:{str(self.ports)}"
-                )
+                port_postfix = str(self.ports)
+            print(
+                f"⭕ Current scan host ({index}/{hosts_quantity}): {host_ip}:{port_postfix}"
+            )
             nm = NmapConnector()
             nm.scan(
                 host=host_ip,
@@ -55,7 +57,12 @@ class NmapProcessing(Process):
 
 class NmapProcessingManager:
     def __init__(
-        self, hosts: list, ports=None, sudo=False, arguments="-Pn -A", workers=5
+        self,
+        hosts: list,
+        ports=DefaultProcessManagerValues.PORTS,
+        sudo=DefaultProcessManagerValues.SUDO,
+        arguments=DefaultProcessManagerValues.ARGUMENTS,
+        workers=DefaultProcessManagerValues.WORKERS,
     ):
         self.hosts = hosts
         self.workers = workers

@@ -189,6 +189,21 @@ class GrinderInterface:
             default=False,
             help="Show more information",
         )
+        parser.add_argument(
+            "-ts",
+            "--tls-scan",
+            action="store_true",
+            default=False,
+            help="Check for possible TLS attacks and bugs (require TLS-Scanner)",
+        )
+        parser.add_argument(
+            "-tsp",
+            "--tls-scan-path",
+            action="store",
+            default=None,
+            help="Path to TLS-Scanner.jar (if TLS-Scanner directory not in Grinder root, else not required)"
+        )
+
         self.args = parser.parse_args()
         if not self.args.shodan_key:
             self.args.shodan_key = self.load_shodan_key_from_env()

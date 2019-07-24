@@ -15,7 +15,11 @@ from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
 from grinder.dbhandling import GrinderDatabase
 from grinder.decorators import exception_handler, timer
-from grinder.defaultvalues import DefaultValues
+from grinder.defaultvalues import (
+    DefaultValues,
+    DefaultNmapScanValues,
+    DefaultVulnersScanValues,
+)
 from grinder.errors import (
     GrinderCoreSearchError,
     GrinderCoreBatchSearchError,
@@ -47,6 +51,7 @@ from grinder.errors import (
     GrinderCoreFilterQueriesError,
     GrinderCoreVulnersScanError,
     GrinderCoreRunScriptsError,
+    GrinderCoreTlsScanner,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -56,6 +61,8 @@ from grinder.shodanconnector import ShodanConnector
 from grinder.utils import GrinderUtils
 from grinder.pyscriptexecutor import PyScriptExecutor
 from grinder.nmapscriptexecutor import NmapScriptExecutor
+from grinder.tlsscanner import TlsScanner
+from grinder.tlsparser import TlsParser
 
 
 class HostInfo(NamedTuple):
@@ -125,9 +132,7 @@ class GrinderCore:
         """
 
         # Skip default values
-        if (
-            self.shodan_api_key == "YOUR_DEFAULT_API_KEY"
-        ):
+        if self.shodan_api_key == "YOUR_DEFAULT_API_KEY":
             print(f"│ Shodan key is not defined. Skip scan.")
             print(f"└ ", end="")
             return []
@@ -789,15 +794,74 @@ class GrinderCore:
             **self.censys_processed_results,
         }
 
+    @exception_handler(expected_exception=GrinderCoreTlsScanner)
+    def tls_scan(self, scanner_path):
+        cprint("Start TLS scanning", "blue", attrs=["bold"])
+        if not self.shodan_processed_results:
+            self.shodan_processed_results = self.db.load_last_shodan_results()
+        if not self.censys_processed_results:
+            self.censys_processed_results = self.db.load_last_censys_results()
+        self.combined_results = {
+            **self.shodan_processed_results,
+            **self.censys_processed_results,
+        }
+        tls_scanner = TlsScanner(self.combined_results)
+        tls_parser = TlsParser(self.combined_results)
+        try:
+            cprint(
+                "Checking for currently online and alive hosts", "blue", attrs=["bold"]
+            )
+            tls_scanner.sort_alive_hosts()
+        except Exception as sort_alive_hosts_err:
+            print(
+                f"Error at TLS scanner sort alive hosts method: {sort_alive_hosts_err}"
+            )
+            return
+        try:
+            cprint(
+                "Detect SSL/TLS ports, certificates and services",
+                "blue",
+                attrs=["bold"],
+            )
+            tls_scanner.detect_tls_ports()
+        except Exception as detect_tls_ports_err:
+            print(f"Error at detecting of TLS ports method: {detect_tls_ports_err}")
+            return
+        try:
+            cprint(
+                "Link compatible ports and services with hosts", "blue", attrs=["bold"]
+            )
+            tls_scanner.link_alive_hosts_with_tls_ports()
+        except Exception as link_alive_hosts_with_tls_ports_err:
+            print(
+                f"Error at linking hosts with ports in TLS method: {link_alive_hosts_with_tls_ports_err}"
+            )
+            return
+        try:
+            cprint("Run TLS-Scanner", "blue", attrs=["bold"])
+            if scanner_path:
+                tls_scanner.start_tls_scan(scanner_path=scanner_path)
+            else:
+                tls_scanner.start_tls_scan()
+        except Exception as tls_scan_err:
+            print(f"Error at TLS scanning: {tls_scan_err}")
+            return
+        try:
+            cprint("Parse and process TLS-Scanner results", "blue", attrs=["bold"])
+            tls_parser.load_tls_scan_results()
+        except Exception as parse_tls_results_err:
+            print(f"Error at TLS results parsing: {parse_tls_results_err}")
+            return
+
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
     def nmap_scan(
         self,
-        ports: str = None,
-        top_ports: int = None,
-        sudo: bool = False,
-        host_timeout: int = 30,
-        arguments: str = "-Pn -T4 -A",
-        workers: int = 10,
+        ports: str = DefaultNmapScanValues.PORTS,
+        top_ports: int = DefaultNmapScanValues.TOP_PORTS,
+        sudo: bool = DefaultNmapScanValues.SUDO,
+        host_timeout: int = DefaultNmapScanValues.HOST_TIMEOUT,
+        arguments: str = DefaultNmapScanValues.ARGUMENTS,
+        workers: int = DefaultNmapScanValues.WORKERS,
     ):
         """
         Initiate Nmap scan on hosts
@@ -853,12 +917,12 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreVulnersScanError)
     def vulners_scan(
         self,
-        sudo: bool = False,
-        ports: str = None,
-        top_ports: int = None,
-        workers: int = 1,
-        host_timeout: int = 120,
-        vulners_path: str = "/plugins/vulners.nse",
+        sudo: bool = DefaultVulnersScanValues.SUDO,
+        ports: str = DefaultVulnersScanValues.PORTS,
+        top_ports: int = DefaultVulnersScanValues.TOP_PORTS,
+        workers: int = DefaultVulnersScanValues.WORKERS,
+        host_timeout: int = DefaultVulnersScanValues.HOST_TIMEOUT,
+        vulners_path: str = DefaultVulnersScanValues.VULNERS_SCRIPT_PATH,
     ):
         cprint("Start Vulners API scanning", "blue", attrs=["bold"])
         cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])

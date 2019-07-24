@@ -3,7 +3,7 @@
 import sys
 from functools import wraps
 from os import path, makedirs, system
-from time import time
+from time import time, strftime, gmtime
 
 
 def exception_handler(expected_exception):
@@ -12,7 +12,6 @@ def exception_handler(expected_exception):
             try:
                 return function(*args, **kwargs)
             except KeyboardInterrupt:
-                print("Keyboard Interrupt Detected. Operation aborted. Bye!")
                 system("stty sane")
                 sys.exit(1)
             except SystemExit:
@@ -60,7 +59,8 @@ def timer(function):
         start = time()
         result = function(*args, **kwargs)
         end = time()
-        print(f"Done in {round(end - start, 2)}s")
+        seconds = round(end - start, 2)
+        print(f"Done in {seconds}s ({str(strftime('%M:%S', gmtime(seconds)))})")
         return result
 
     return wrapper

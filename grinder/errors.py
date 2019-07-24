@@ -297,6 +297,11 @@ class GrinderCoreNmapScanError(GrinderCoreException):
         super().__init__(error_args)
 
 
+class GrinderCoreTlsScanner(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
 class GrinderCoreFilterQueriesError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)

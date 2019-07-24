@@ -72,7 +72,9 @@ class GrinderFileManager:
                 results_to_write = GrinderFileManager.csv_dict_fix(
                     results_to_write, csv_file
                 )
-            writer = DictWriter(result_csv_file, fieldnames=results_to_write[0].keys())
+
+            maximum_fields = max(results_to_write, key=len)
+            writer = DictWriter(result_csv_file, fieldnames=maximum_fields.keys())
             writer.writeheader()
             for row in results_to_write:
                 writer.writerow(row)

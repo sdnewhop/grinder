@@ -12,7 +12,6 @@ def exception_handler(expected_exception):
             try:
                 return function(*args, **kwargs)
             except KeyboardInterrupt:
-                print("Keyboard Interrupt Detected. Operation aborted. Bye!")
                 system("stty sane")
                 sys.exit(1)
             except SystemExit:

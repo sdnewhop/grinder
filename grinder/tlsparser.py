@@ -59,8 +59,6 @@ class TlsParser:
                 continue
             if attack_res[0] == "true":
                 attacks.update({attack: True})
-            elif attack_res[0] == "false":
-                attacks.update({attack: False})
 
         bugs = {}
         for bug in LIST_OF_BUGS:
@@ -69,8 +67,6 @@ class TlsParser:
                 continue
             if bug_res[0] == "true":
                 bugs.update({bug: True})
-            elif bug_res[0] == "false":
-                bugs.update({attack: False})
 
         return attacks, bugs
 

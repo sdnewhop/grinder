@@ -8,7 +8,7 @@ from nmap import PortScanner
 from pprint import pprint
 from itertools import zip_longest
 from random import choice
-from subprocess import check_output, DEVNULL
+from subprocess import check_output, DEVNULL, TimeoutExpired
 from re import compile
 from termcolor import cprint
 
@@ -133,17 +133,23 @@ class TlsScanner:
             "-parallelProbes",
             str(threads),
         ]
-        tls_scanner_res = check_output(
-            command,
-            universal_newlines=True,
-            timeout=DefaultTlsScannerValues.TLS_SCANNER_TIMEOUT,
-            stderr=DEVNULL,
-        )
+        try:
+            tls_scanner_res = check_output(
+                command,
+                universal_newlines=True,
+                timeout=DefaultTlsScannerValues.TLS_SCANNER_TIMEOUT,
+                stderr=DEVNULL,
+            )
+        except TimeoutExpired:
+            print(f"└ Timeout expired: ", end="")
+            return
+
         ansi_escape = compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
         tls_scanner_res = ansi_escape.sub("", tls_scanner_res)
         print(f"└ ", end="")
         return tls_scanner_res
 
+    @timer
     def start_tls_scan(
         self,
         report_detail: str = DefaultTlsScannerValues.TLS_SCANNER_REPORT_DETAIL,
@@ -170,7 +176,10 @@ class TlsScanner:
                     scan_detail=scan_detail,
                     threads=threads,
                 )
-            except Exception:
+            except Exception as unexp_err:
+                print(f"└ TLS Scanning error ({str(unexp_err)})")
+                continue
+            if not tls_scanner_res:
                 continue
             vendor = self.hosts[host].get("vendor")
             product = self.hosts[host].get("product")
@@ -183,7 +192,7 @@ class TlsScanner:
                 filename=name_of_file,
                 result=tls_scanner_res,
             )
-        print(f"Done TLS scan for {alive_hosts_quantity} hosts")
+        print(f"TLS scan for {alive_hosts_quantity} hosts: ", end="")
 
     @create_results_directory()
     @create_subdirectory(subdirectory=DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)

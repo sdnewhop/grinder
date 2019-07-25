@@ -29,14 +29,14 @@ function openInNewTab(url) {
 
 for (var i = 0; i < markers.length; ++i) {
   if (markers[i].port === (443 || 8443)) {
-    proto = 'https://'
+    proto = 'https://';
   }
   else {
-    proto = 'http://'
+    proto = 'http://';
   }
-  let full_host_addr = proto + markers[i].ip + ':' + markers[i].port
-  let shodan_addr = 'https://www.shodan.io/host/' + markers[i].ip
-  let censys_addr = 'https://censys.io/ipv4/' + markers[i].ip
+  let full_host_addr = proto + markers[i].ip + ':' + markers[i].port;
+  let shodan_addr = 'https://www.shodan.io/host/' + markers[i].ip;
+  let censys_addr = 'https://censys.io/ipv4/' + markers[i].ip;
   var popup = '<b>Vendor:</b> ' + markers[i].vendor +
       '<br/><b>Product:</b> ' + markers[i].product +
       '<br/><b>Version:</b> ' + markers[i].additional_info +

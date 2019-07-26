@@ -15,9 +15,9 @@ var myURL = jQuery('script[src$="leaf-demo.js"]').attr('src').replace('leaf-demo
 var myIcon = L.icon({
   iconUrl: myURL + 'images/pin24.png',
   iconRetinaUrl: myURL + 'images/pin48.png',
-  iconSize: [29, 24],
-  iconAnchor: [9, 21],
-  popupAnchor: [0, -14]
+  iconSize: [24, 39],
+  iconAnchor: [11, 37],
+  popupAnchor: [1, -23]
 });
 
 var markerClusters = L.markerClusterGroup();

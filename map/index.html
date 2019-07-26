@@ -13,6 +13,13 @@
                 <br><b>Protocol:</b> {{protocol}}
                 <br><b>Coordinates:</b> {{latitude}}, {{longitude}}
                 <br><br>
+                <div class="codebox">
+                <input type="button" class="btn btn-primary btn-sm btn-block" value="Show more" 
+                onclick="var spoiler = $(this).parents('.codebox').find('.content').toggle('slow'); if ( this.value == 'Hide' ) { this.value = 'Show more'; } else { this.value = 'Hide'; };return false;">
+                    <div class="content" name="spoiler" style="display: none;">
+                        Text
+                    </div></div>
+                <br>
             </div>
         </script>
 

@@ -42,6 +42,7 @@ for (var i = 0; i < markers.length; ++i) {
   let shodanAdditionalInfo = 'https://www.shodan.io/host/' + markers[i].ip;
   let censysAdditionalInfo = 'https://censys.io/ipv4/' + markers[i].ip;
   let googleMapsInfo = 'https://www.google.com/maps/search/?api=1&query=' + markers[i].lat + ',' + markers[i].lng;
+  let ipLookup = 'https://extreme-ip-lookup.com/' + markers[i].ip
 
   let allLinks = '<a id="LinkToHost" title="Link to host" href="#" onclick="openInNewTab(\'' + HostAddress + '\');return false;"><b>Open</b></a>' + 
   '<br/>' + 
@@ -49,7 +50,10 @@ for (var i = 0; i < markers.length; ++i) {
   '<br/>' + 
   '<a id="LinkToCensys" title="Link to Censys" href="#" onclick="openInNewTab(\'' + censysAdditionalInfo + '\');return false;"><b>Show in Censys</b></a>' +
   '<br/>' +
-  '<a id="LinkToGoogleMaps" title="Link to Google Maps" href="#" onclick="openInNewTab(\'' + googleMapsInfo + '\');return false;"><b>Show in Google Maps</b></a>';
+  '<a id="LinkToGoogleMaps" title="Link to Google Maps" href="#" onclick="openInNewTab(\'' + googleMapsInfo + '\');return false;"><b>Show in Google Maps</b></a>' +
+  '<br/>' +
+  '<a id="LinkToIpLookup" title="Link to IP Lookup" href="#" onclick="openInNewTab(\'' + ipLookup + '\');return false;"><b>Show in IP Lookup</b></a>';
+
 
 
   let context = {

@@ -27,6 +27,9 @@ function openInNewTab(url) {
   win.focus();
 }
 
+var source = $("#grinder-popup").html();
+var template = Handlebars.compile(source);
+
 for (var i = 0; i < markers.length; ++i) {
   if (markers[i].port === (443 || 8443)) {
     proto = 'https://';
@@ -34,21 +37,27 @@ for (var i = 0; i < markers.length; ++i) {
   else {
     proto = 'http://';
   }
-  let full_host_addr = proto + markers[i].ip + ':' + markers[i].port;
-  let shodan_addr = 'https://www.shodan.io/host/' + markers[i].ip;
-  let censys_addr = 'https://censys.io/ipv4/' + markers[i].ip;
-  var popup = '<b>Vendor:</b> ' + markers[i].vendor +
-      '<br/><b>Product:</b> ' + markers[i].product +
-      '<br/><b>Version:</b> ' + markers[i].additional_info +
-      '<br/><b>IP:</b> ' + markers[i].ip +
-      '<br/><b>Port:</b> ' + markers[i].port +
-      '<br/><b>Protocol:</b> ' + markers[i].proto +
-      '<br/><br/>' +
-      '<a id="LinkToHost" title="Link to host" href="#" onclick="openInNewTab(\'' + full_host_addr + '\');return false;"><b>Open ' + full_host_addr + '</b></a>' + 
-      '<br/>' + 
-      '<a id="LinkToShodan" title="Link to Shodan" href="#" onclick="openInNewTab(\'' + shodan_addr + '\');return false;"><b>Show information from Shodan</b></a>' + 
-      '<br/>' + 
-      '<a id="LinkToCensys" title="Link to Censys" href="#" onclick="openInNewTab(\'' + censys_addr + '\');return false;"><b>Show information from Censys</b></a>';
+
+  let HostAddress = proto + markers[i].ip + ':' + markers[i].port;
+  let shodanAdditionalInfo = 'https://www.shodan.io/host/' + markers[i].ip;
+  let censysAdditionalInfo = 'https://censys.io/ipv4/' + markers[i].ip;
+
+  let context = {
+    vendor: markers[i].vendor || "Not detected",
+    product: markers[i].product || "Not detected",
+    version: markers[i].additional_info || "Not detected",
+    ip: markers[i].ip,
+    port: markers[i].port,
+    protocol: markers[i].proto || "Not detected"
+  }
+  var popup = template(context);
+
+  var popup = popup +       
+  '<a id="LinkToHost" title="Link to host" href="#" onclick="openInNewTab(\'' + HostAddress + '\');return false;"><b>Open ' + HostAddress + '</b></a>' + 
+  '<br/>' + 
+  '<a id="LinkToShodan" title="Link to Shodan" href="#" onclick="openInNewTab(\'' + shodanAdditionalInfo + '\');return false;"><b>Show information from Shodan</b></a>' + 
+  '<br/>' + 
+  '<a id="LinkToCensys" title="Link to Censys" href="#" onclick="openInNewTab(\'' + censysAdditionalInfo + '\');return false;"><b>Show information from Censys</b></a>';
 
   var m = L.marker([markers[i].lat, markers[i].lng], {
           icon: myIcon

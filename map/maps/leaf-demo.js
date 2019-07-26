@@ -41,6 +41,7 @@ for (var i = 0; i < markers.length; ++i) {
   let HostAddress = proto + markers[i].ip + ':' + markers[i].port;
   let shodanAdditionalInfo = 'https://www.shodan.io/host/' + markers[i].ip;
   let censysAdditionalInfo = 'https://censys.io/ipv4/' + markers[i].ip;
+  let googleMapsInfo = 'https://www.google.com/maps/search/?api=1&query=' + markers[i].lat + ',' + markers[i].lng;
 
   let context = {
     vendor: markers[i].vendor || "Not detected",
@@ -48,7 +49,9 @@ for (var i = 0; i < markers.length; ++i) {
     version: markers[i].additional_info || "Not detected",
     ip: markers[i].ip,
     port: markers[i].port,
-    protocol: markers[i].proto || "Not detected"
+    protocol: markers[i].proto || "Not detected",
+    latitude: Math.round(markers[i].lat * 1000) / 1000,
+    longitude: Math.round(markers[i].lng * 1000) / 1000
   }
   var popup = template(context);
 
@@ -57,7 +60,9 @@ for (var i = 0; i < markers.length; ++i) {
   '<br/>' + 
   '<a id="LinkToShodan" title="Link to Shodan" href="#" onclick="openInNewTab(\'' + shodanAdditionalInfo + '\');return false;"><b>Show information from Shodan</b></a>' + 
   '<br/>' + 
-  '<a id="LinkToCensys" title="Link to Censys" href="#" onclick="openInNewTab(\'' + censysAdditionalInfo + '\');return false;"><b>Show information from Censys</b></a>';
+  '<a id="LinkToCensys" title="Link to Censys" href="#" onclick="openInNewTab(\'' + censysAdditionalInfo + '\');return false;"><b>Show information from Censys</b></a>' +
+  '<br/>' +
+  '<a id="LinkToGoogleMaps" title="Link to Google Maps" href="#" onclick="openInNewTab(\'' + googleMapsInfo + '\');return false;"><b>Show information from Google Maps</b></a>';
 
   var m = L.marker([markers[i].lat, markers[i].lng], {
           icon: myIcon

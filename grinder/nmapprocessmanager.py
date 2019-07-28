@@ -2,6 +2,7 @@
 
 from multiprocessing import Process, JoinableQueue, Manager
 from os import system
+from datetime import datetime
 
 from grinder.decorators import exception_handler
 from grinder.errors import (
@@ -36,8 +37,9 @@ class NmapProcessing(Process):
                 port_postfix = host_port
             if self.ports:
                 port_postfix = str(self.ports)
+            current_time = datetime.now().strftime("%H:%M:%S")
             print(
-                f"⭕ Current scan host ({index}/{hosts_quantity}): {host_ip}:{port_postfix}"
+                f"⭕ Current scan host ({index}/{hosts_quantity}): {host_ip}:{port_postfix} (started at: {str(current_time)})"
             )
             nm = NmapConnector()
             nm.scan(

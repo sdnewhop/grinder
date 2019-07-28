@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Grinder Map</title>
+
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+        <!-- Leaflet -->
+        <script type="text/javascript" src="js/leaflet.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/leaflet.css">
+
+        <!-- JQuery -->
+        <script type="text/javascript" src="js/jquery.min.js"></script>
+
+        <!-- Bootstrap -->
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/popper.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+
+        <!-- Leaflet awesome markers -->
+        <script type="text/javascript" src="js/leaflet.awesome-markers.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/leaflet.awesome-markers.css">
+
+        <!-- Leaflet markercluster -->
+        <script type="text/javascript" src="js/leaflet.markercluster-src.js"></script>
+        <script type="text/javascript" src="js/leaflet.markercluster.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/MarkerCluster.Default.css">
+        <link rel="stylesheet" type="text/css" href="css/MarkerCluster.css">
+
+        <!-- Handlebars templates -->
+        <script type="text/javascript" src="js/handlebars.js"></script>
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+
+        <!-- Custom js and styles -->
+        <link rel="stylesheet" type="text/css" href="custom/styles.css">
+
+        <script id="grinder-popup" type="text/x-handlebars-template">
+            <div class="entry">
+                <b>Vendor:</b> {{vendor}}
+                <br><b>Product:</b> {{product}}
+                <br><b>Version:</b> {{version}}
+                <br><b>IP:</b> {{ip}}
+                <br><b>Port:</b> {{port}}
+                <br><b>Protocol:</b> {{protocol}}
+                <br><b>Coordinates:</b> {{latitude}}, {{longitude}}
+                <br><br>
+
+                <div class="codebox">
+                <input type="button" class="btn btn-primary btn-sm btn-block" value="Show more" 
+                onclick="var spoiler = $(this).parents('.codebox').find('.content').slideToggle(); if ( this.value == 'Hide' ) { this.value = 'Show more'; } else { this.value = 'Hide'; };return false;">
+                    <div class="content" name="spoiler" style="display: none;">
+                        <br>
+                        {{{content}}}
+                    </div></div>
+                <br>
+            </div>
+        </script>
+    </head>
+
+    <!-- Load markers and build map from grinder.js -->
+    <body>
+        <div class="map" id="map"></div>
+        <script type="text/javascript" src="data/markers.js"></script>
+        <script type="text/javascript" src="custom/grinder.js"></script>
+    </body>
+</html>

@@ -1,4 +1,3 @@
-// See post: http://asmaloney.com/2015/06/code/clustering-markers-on-leaflet-maps
 var map = L.map('map', {
   center: [10.0, 5.0],
   minZoom: 2,
@@ -10,7 +9,8 @@ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/
   subdomains: ['a', 'b', 'c']
 }).addTo(map);
 
-var myURL = jQuery('script[src$="leaf-demo.js"]').attr('src').replace('leaf-demo.js', '');
+// var myURL = jQuery('script[src$="grinder.js"]').attr('src').replace('grinder.js', '');
+myURL = "/";
 
 var myIcon = L.icon({
   iconUrl: myURL + 'images/pin24.png',
@@ -45,7 +45,11 @@ for (var i = 0; i < markers.length; ++i) {
   let ipLookup = 'https://extreme-ip-lookup.com/' + markers[i].ip;
   let zoomEyeAdditionalInfo = 'https://www.zoomeye.org/searchResult?q=' + markers[i].ip;
 
-  let allLinks = '<a id="LinkToHost" title="Link to host" href="#" onclick="openInNewTab(\'' + HostAddress + '\');return false;"><b>Open</b></a>' + 
+  let allLinks = 
+  '<br/>' +
+  '<a href="viewraw/' + i.toString() + '"><b>Open raw data </b></a>' + 
+  '<br/>' + 
+  '<a id="LinkToHost" title="Link to host" href="#" onclick="openInNewTab(\'' + HostAddress + '\');return false;"><b>Open host in browser</b></a>' + 
   '<br/>' + 
   '<a id="LinkToShodan" title="Link to Shodan" href="#" onclick="openInNewTab(\'' + shodanAdditionalInfo + '\');return false;"><b>Show in Shodan</b></a>' + 
   '<br/>' + 
@@ -56,7 +60,7 @@ for (var i = 0; i < markers.length; ++i) {
   '<a id="LinkToGoogleMaps" title="Link to Google Maps" href="#" onclick="openInNewTab(\'' + googleMapsInfo + '\');return false;"><b>Show in Google Maps</b></a>' +
   '<br/>' +
   '<a id="LinkToIpLookup" title="Link to IP Lookup" href="#" onclick="openInNewTab(\'' + ipLookup + '\');return false;"><b>Show in IP Lookup</b></a>';
-  
+
   let context = {
     vendor: markers[i].vendor || "Not detected",
     product: markers[i].product || "Not detected",
@@ -66,7 +70,7 @@ for (var i = 0; i < markers.length; ++i) {
     protocol: markers[i].proto || "Not detected",
     latitude: Math.round(markers[i].lat * 1000) / 1000,
     longitude: Math.round(markers[i].lng * 1000) / 1000,
-    content: allLinks
+    content: allLinks,
   }
   var popup = template(context);
 

@@ -20,10 +20,23 @@ def serve_static_files(directory, filename):
     )
 
 
-@app.route("/viewraw/<path:host_id>")
+@app.route("/api/viewraw/<path:host_id>")
 def serve_raw_host_info(host_id):
-    return jsonify(MARKERS[int(host_id)])
+    try:
+        return jsonify(MARKERS[int(host_id)])
+    except IndexError as out_of_range:
+        return jsonify({"error": "request index is out of range"})
+    except TypeError as invalid_id:
+        return jsonify({"error": "request index is invalid"})
+    except:
+        return jsonify({"error": "unexpected error was happened"})
 
+@app.route("/api/viewall")
+def serve_all_host_info():
+    try:
+        return jsonify(MARKERS)
+    except:
+        return jsonify({"error": "unexpected error was happened"})
 
 @app.route("/")
 def root():

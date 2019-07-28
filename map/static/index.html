@@ -1,70 +1,82 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Grinder Map</title>
 
-        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<head>
+    <title>Grinder Map</title>
 
-        <!-- Leaflet -->
-        <script type="text/javascript" src="js/leaflet.js"></script>
-        <link rel="stylesheet" type="text/css" href="css/leaflet.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 
-        <!-- JQuery -->
-        <script type="text/javascript" src="js/jquery.min.js"></script>
+    <!-- Load some custom helpers -->
 
-        <!-- Bootstrap -->
-        <script type="text/javascript" src="js/bootstrap.min.js"></script>
-        <script type="text/javascript" src="js/popper.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="custom/helpers.js"></script>
+    <!-- Leaflet -->
+    <script type="text/javascript" src="js/leaflet.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/leaflet.css">
 
-        <!-- Leaflet awesome markers -->
-        <script type="text/javascript" src="js/leaflet.awesome-markers.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="css/leaflet.awesome-markers.css">
+    <!-- JQuery -->
+    <script type="text/javascript" src="js/jquery.min.js"></script>
 
-        <!-- Leaflet markercluster -->
-        <script type="text/javascript" src="js/leaflet.markercluster-src.js"></script>
-        <script type="text/javascript" src="js/leaflet.markercluster.js"></script>
-        <link rel="stylesheet" type="text/css" href="css/MarkerCluster.Default.css">
-        <link rel="stylesheet" type="text/css" href="css/MarkerCluster.css">
+    <!-- Bootstrap -->
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/popper.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
-        <!-- Handlebars templates -->
-        <script type="text/javascript" src="js/handlebars.js"></script>
+    <!-- Leaflet awesome markers -->
+    <script type="text/javascript" src="js/leaflet.awesome-markers.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/leaflet.awesome-markers.css">
 
-        <!-- Font Awesome -->
-        <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+    <!-- Leaflet markercluster -->
+    <script type="text/javascript" src="js/leaflet.markercluster-src.js"></script>
+    <script type="text/javascript" src="js/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/MarkerCluster.Default.css">
+    <link rel="stylesheet" type="text/css" href="css/MarkerCluster.css">
 
-        <!-- Custom js and styles -->
-        <link rel="stylesheet" type="text/css" href="custom/styles.css">
+    <!-- Handlebars templates -->
+    <script type="text/javascript" src="js/handlebars.js"></script>
 
-        <script id="grinder-popup" type="text/x-handlebars-template">
-            <div class="entry">
-                <b>Vendor:</b> {{vendor}}
-                <br><b>Product:</b> {{product}}
-                <br><b>Version:</b> {{version}}
-                <br><b>IP:</b> {{ip}}
-                <br><b>Port:</b> {{port}}
-                <br><b>Protocol:</b> {{protocol}}
-                <br><b>Coordinates:</b> {{latitude}}, {{longitude}}
-                <br><br>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
 
-                <div class="codebox">
-                <input type="button" class="btn btn-primary btn-sm btn-block" value="Show more" 
-                onclick="var spoiler = $(this).parents('.codebox').find('.content').slideToggle(); if ( this.value == 'Hide' ) { this.value = 'Show more'; } else { this.value = 'Hide'; };return false;">
-                    <div class="content" name="spoiler" style="display: none;">
-                        <br>
-                        {{{content}}}
-                    </div></div>
-                <br>
+    <!-- Custom js and styles -->
+    <link rel="stylesheet" type="text/css" href="custom/styles.css">
+
+    <script id="grinder-popup" type="text/x-handlebars-template">
+        <div class="entry">
+            <b>Vendor:</b> {{basic.vendor}}
+            <br><b>Product:</b> {{basic.product}}
+            <br><b>Version:</b> {{basic.version}}
+            <br><b>IP:</b> {{basic.ip}}
+            <br><b>Port:</b> {{basic.port}}
+            <br><b>Protocol:</b> {{basic.protocol}}
+            <br><b>Coordinates:</b> {{basic.latitude}}, {{basic.longitude}}
+            <br>
+            <br>
+
+            <div class="codebox">
+                <input type="button" class="btn btn-primary btn-sm btn-block" value="Show more" onclick="var spoiler = $(this).parents('.codebox').find('.content').slideToggle(); if ( this.value == 'Hide' ) { this.value = 'Show more'; } else { this.value = 'Hide'; };return false;">
+                <div class="content" name="spoiler" style="display: none;">
+                    <br>
+                    <br><a id="api-raw-data" title="API raw data" href="#" onclick="openInNewTab('{{api.raw}}');return false;"><b>Open raw data</b></a>
+                    <br><a id="link-to-host" title="Link to host" href="#" onclick="openInNewTab('{{additionalContent.host}}');return false;"><b>Open host in browser</b></a>
+                    <br><a id="link-to-shodan" title="Link to Shodan" href="#" onclick="openInNewTab('{{additionalContent.shodan}}');return false;"><b>Show in Shodan</b></a>
+                    <br><a id="link-to-censys" title="Link to Censys" href="#" onclick="openInNewTab('{{additionalContent.censys}}');return false;"><b>Show in Censys</b></a>
+                    <br><a id="link-to-zoom-eye" title="Link to ZoomEye" href="#" onclick="openInNewTab('{{additionalContent.zoomeye}}');return false;"><b>Show in ZoomEye</b></a>
+                    <br><a id="link-to-google-maps" title="Link to Google Maps" href="#" onclick="openInNewTab('{{additionalContent.googlemaps}}');return false;"><b>Show in Google Maps</b></a>
+                    <br><a id="link-to-ip-lookup" title="Link to IP Lookup" href="#" onclick="openInNewTab('{{additionalContent.iplookup}}');return false;"><b>Show in IP Lookup</b></a>';
+                </div>
             </div>
-        </script>
-    </head>
+            <br>
+        </div>
+    </script>
+</head>
 
-    <!-- Load markers and build map from grinder.js -->
-    <body>
-        <div class="map" id="map"></div>
-        <script type="text/javascript" src="data/markers.js"></script>
-        <script type="text/javascript" src="custom/helpers.js"></script>
-        <script type="text/javascript" src="custom/grinder.js"></script>
-    </body>
+<!-- Load markers and build map from grinder.js -->
+
+<body>
+    <div class="map" id="map"></div>
+    <script type="text/javascript" src="data/markers.js"></script>
+    <script type="text/javascript" src="custom/grinder.js"></script>
+</body>
+
 </html>

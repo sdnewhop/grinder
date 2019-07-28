@@ -22,50 +22,33 @@ var template = Handlebars.compile(source);
 
 var markerClusters = L.markerClusterGroup();
 for (var i = 0; i < markers.length; ++i) {
-  if (markers[i].port === (443 || 8443)) {
-      proto = 'https://';
-  } else {
-      proto = 'http://';
-  }
-
-  let HostAddress = proto + markers[i].ip + ':' + markers[i].port;
-  let shodanAdditionalInfo = 'https://www.shodan.io/host/' + markers[i].ip;
-  let censysAdditionalInfo = 'https://censys.io/ipv4/' + markers[i].ip;
-  let googleMapsInfo = 'https://www.google.com/maps/search/?api=1&query=' + markers[i].lat + ',' + markers[i].lng;
-  let ipLookup = 'https://extreme-ip-lookup.com/' + markers[i].ip;
-  let zoomEyeAdditionalInfo = 'https://www.zoomeye.org/searchResult?q=' + markers[i].ip;
-  let rawHostInfo = 'viewraw/' + i.toString();
-
-  let allLinks =
-      '<br/>' +
-      '<a id="ApiRawData" title="API raw data" href="#" onclick="openInNewTab(\'' + rawHostInfo + '\');return false;"><b>Open raw data</b></a>' +
-      '<br/>' +
-      '<a id="LinkToHost" title="Link to host" href="#" onclick="openInNewTab(\'' + HostAddress + '\');return false;"><b>Open host in browser</b></a>' +
-      '<br/>' +
-      '<a id="LinkToShodan" title="Link to Shodan" href="#" onclick="openInNewTab(\'' + shodanAdditionalInfo + '\');return false;"><b>Show in Shodan</b></a>' +
-      '<br/>' +
-      '<a id="LinkToCensys" title="Link to Censys" href="#" onclick="openInNewTab(\'' + censysAdditionalInfo + '\');return false;"><b>Show in Censys</b></a>' +
-      '<br/>' +
-      '<a id="LinkToZoomEye" title="Link to ZoomEye" href="#" onclick="openInNewTab(\'' + zoomEyeAdditionalInfo + '\');return false;"><b>Show in ZoomEye</b></a>' +
-      '<br/>' +
-      '<a id="LinkToGoogleMaps" title="Link to Google Maps" href="#" onclick="openInNewTab(\'' + googleMapsInfo + '\');return false;"><b>Show in Google Maps</b></a>' +
-      '<br/>' +
-      '<a id="LinkToIpLookup" title="Link to IP Lookup" href="#" onclick="openInNewTab(\'' + ipLookup + '\');return false;"><b>Show in IP Lookup</b></a>';
-
+  let proto = (markers[i].port === (443 || 8443)) ? 'https://' : 'http://';
   let context = {
-      vendor: markers[i].vendor || 'Not detected',
-      product: markers[i].product || 'Not detected',
-      version: markers[i].additional_info || 'Not detected',
-      ip: markers[i].ip,
-      port: markers[i].port,
-      protocol: markers[i].proto || 'Not detected',
-      latitude: Math.round(markers[i].lat * 1000) / 1000,
-      longitude: Math.round(markers[i].lng * 1000) / 1000,
-      content: allLinks,
+      basic: {
+        vendor: markers[i].vendor || 'Not detected',
+        product: markers[i].product || 'Not detected',
+        version: markers[i].additional_info || 'Not detected',
+        ip: markers[i].ip,
+        port: markers[i].port,
+        protocol: markers[i].proto || 'Not detected',
+        latitude: Math.round(markers[i].lat * 1000) / 1000,
+        longitude: Math.round(markers[i].lng * 1000) / 1000,
+      },
+      api: {
+        raw: 'viewraw/' + i.toString(),
+      },
+      additionalContent: {
+        host: proto + markers[i].ip + ':' + markers[i].port,
+        shodan: 'https://www.shodan.io/host/' + markers[i].ip,
+        censys: 'https://censys.io/ipv4/' + markers[i].ip,
+        zoomeye: 'https://www.zoomeye.org/searchResult?q=' + markers[i].ip,
+        googlemaps: 'https://www.google.com/maps/search/?api=1&query=' + markers[i].lat + ',' + markers[i].lng,
+        iplookup: 'https://extreme-ip-lookup.com/' + markers[i].ip,
+      },
   }
-  var popup = template(context);
 
-  var m = L.marker([markers[i].lat, markers[i].lng], {
+  let popup = template(context);
+  let m = L.marker([markers[i].lat, markers[i].lng], {
           icon: myIcon
       })
       .bindPopup(popup);

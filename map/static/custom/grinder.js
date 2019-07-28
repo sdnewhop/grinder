@@ -35,7 +35,7 @@ for (var i = 0; i < markers.length; ++i) {
         longitude: Math.round(markers[i].lng * 1000) / 1000,
       },
       api: {
-        raw: 'viewraw/' + i.toString(),
+        raw: 'api/viewraw/' + i.toString(),
       },
       additionalContent: {
         host: proto + markers[i].ip + ':' + markers[i].port,

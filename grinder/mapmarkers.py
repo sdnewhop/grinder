@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from json import dumps
+from json import dump
 
 from grinder.defaultvalues import DefaultValues
 from pathlib import Path
@@ -17,6 +17,5 @@ class MapMarkers:
                   .joinpath(map_directory)
                   .joinpath("static")
                   .joinpath("data")
-                  .joinpath("markers.js"), mode="w") as js_markers:
-            js_dump_results = dumps(results)
-            js_markers.write("var markers = {markers}".format(markers=js_dump_results))
+                  .joinpath("markers.json"), mode="w") as json_markers:
+            dump(results, json_markers, indent=4)

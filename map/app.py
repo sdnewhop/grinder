@@ -1,7 +1,7 @@
 from flask import Flask, send_from_directory, jsonify, json
 from pathlib import Path
-from re import search
 from sys import exit, argv
+from json import load
 
 
 MARKERS: list = []
@@ -11,25 +11,20 @@ app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
 
 
 @app.before_first_request
-def load_markers(path: str = "data", filename: str = "markers.js"):
+def load_markers(path: str = "data", filename: str = "markers.json"):
     try:
         with open(
             Path(".").joinpath("static").joinpath(path).joinpath(filename), mode="r"
-        ) as markers_js:
-            markers_contains = markers_js.read()
+        ) as markers_json:
+            markers_list = load(markers_json)
     except FileNotFoundError:
         print(
             "File with markers not found. Please, finish some scan and run server again."
         )
         exit(1)
 
-    markers_list = search(r"var markers = (.+)", markers_contains)
-    if not markers_list:
-        return
-    markers_list = markers_list.group(1)
-
     global MARKERS
-    MARKERS = json.loads(markers_list)
+    MARKERS = markers_list
     print(" * Map markers was successfully loaded")
 
 

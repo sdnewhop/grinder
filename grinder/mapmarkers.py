@@ -13,9 +13,7 @@ class MapMarkers:
     def update_markers(self, results: list, map_directory=None) -> None:
         if not map_directory:
             map_directory = DefaultValues.MARKERS_DIRECTORY
-        with open(Path(".")
-                  .joinpath(map_directory)
-                  .joinpath("static")
-                  .joinpath("data")
-                  .joinpath("markers.json"), mode="w") as json_markers:
+        path_to_save = Path(".").joinpath(map_directory).joinpath("static").joinpath("data")
+        path_to_save.mkdir(parents=True, exist_ok=True)
+        with open(path_to_save.joinpath("markers.json"), mode="w") as json_markers:
             dump(results, json_markers, indent=4)

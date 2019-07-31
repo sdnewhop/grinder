@@ -67,4 +67,5 @@ def root():
 
 # In case if running with python app.py
 if __name__ == "__main__":
+    load_markers()
     app.run(debug=True, host="0.0.0.0", port=5000)

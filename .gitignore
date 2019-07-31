@@ -5,7 +5,7 @@ tls/
 .vscode/
 results/
 .DS_Store
-map/maps/markers.js
+map/static/data
 database.db
 
 # Byte-compiled / optimized / DLL files

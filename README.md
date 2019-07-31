@@ -4,7 +4,7 @@
 ## Contents
 1. [Description](#description)
 1. [Grinder Workflow](#grinder-workflow)
-1. [Grinder Map Example](#grinder-map-example)
+1. [Grinder Map](#grinder-map)
 1. [Requirements](#requirements)
 1. [Current Features](#current-features)
 1. [Setup and Configure Environment](#setup-and-configure-environment)
@@ -16,11 +16,15 @@
 The Grinder framework was created to automatically enumerate and fingerprint different hosts on the Internet using different back-end systems: search engines, such as Shodan or Censys, for discovering hosts and NMAP engine for fingerprinting and specific checks. The Grinder framework can be used in many different areas of researches, as a connected Python module in your own project or as an independent ready-to-use from the box tool.  
 ## Grinder Workflow
 ![Grinder Workflow](/docs/workflow.png?raw=true "Grinder Workflow")
-## Grinder Map Example
+## Grinder Map
+### Information
 Grinder Framework can easily build an interactive map with found hosts in your browser:
 ![Grinder Map 1](/docs/map_1.png?raw=true "Grinder Map 1")
 Also, Grinder can show you some basic information:
 ![Grinder Map 2](/docs/map_2.png?raw=true "Grinder Map 2")
+![Grinder Map 3](/docs/map_3.png?raw=true "Grinder Map 3")
+
+
 ## Requirements
 - [Python 3.6+](https://www.python.org/downloads/)
 - [Shodan](https://account.shodan.io/register) and [Censys](https://account.shodan.io/register) accounts  
@@ -32,7 +36,7 @@ Required only for TLS scanning. Version 3.0 has been tested.
 - [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner)  
 Required only for TLS scanning.
 ## Current Features
-### Already implemented
+### Already Implemented
 - Collecting hosts and additional information using Shodan and Censys search engines
 - Scanning ports and services with boosted multiprocessed Nmap Scanner wrapper
 - Scanning vulnerabilities and additional information about them with Vulners database and Shodan CVEs database
@@ -45,11 +49,12 @@ Required only for TLS scanning.
 - Confidence filtering system support
 - Special vendors scanning and filtering support
 
-### Development and future updates
+### Development and Future Updates
  - [Grinder Development Project](https://github.com/sdnewhop/grinder/projects/2?fullscreen=true)  
  
 The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
 ## Setup and Configure Environment
+### Grinder Installing
 1. Install [Nmap Security Scanner](https://nmap.org/download.html), if not installed.
 2. Clone the repository
 ```
@@ -90,6 +95,26 @@ export CENSYS_API_SECRET=YOUR_CENSYS_API_SECRET_HERE
 ```
 deactivate
 ```
+
+### Run Local Grinder Map Server
+1. First, complete all steps from the "Setup and Configure Environment/Grinder Installing" section.
+1. After the scan is completed, go to the "map" folder
+```
+cd map/
+```
+3. Run Flask (use `--help` key for more information)
+```
+flask run
+```
+4. Open in your browser
+```
+http://localhost:5000/
+```
+Also, Grinder map provides simple API methods such as `/api/viewall/`, `/api/viewraw/<host_id>`, you can learn more from list of application routes
+```
+flask routes
+```
+
 ## Build in Docker
 To build the Grinder framework as a docker image you can use the script `docker-build.sh`, and to run this image you can use the script `docker-run.sh`:
 ```bash

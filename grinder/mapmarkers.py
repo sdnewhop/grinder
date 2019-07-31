@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from json import dumps
+from json import dump
 
 from grinder.defaultvalues import DefaultValues
+from pathlib import Path
 
 
 class MapMarkers:
@@ -12,6 +13,7 @@ class MapMarkers:
     def update_markers(self, results: list, map_directory=None) -> None:
         if not map_directory:
             map_directory = DefaultValues.MARKERS_DIRECTORY
-        with open(f"{map_directory}/maps/markers.js", mode="w") as js_markers:
-            js_dump_results = dumps(results)
-            js_markers.write("var markers = {markers}".format(markers=js_dump_results))
+        path_to_save = Path(".").joinpath(map_directory).joinpath("static").joinpath("data")
+        path_to_save.mkdir(parents=True, exist_ok=True)
+        with open(path_to_save.joinpath("markers.json"), mode="w") as json_markers:
+            dump(results, json_markers, indent=4)

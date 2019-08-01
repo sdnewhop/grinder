@@ -11,6 +11,9 @@ from random import choice
 from subprocess import check_output, DEVNULL, TimeoutExpired
 from re import compile
 from termcolor import cprint
+from pathlib import Path
+from os import listdir
+from copy import deepcopy
 
 
 class TlsScanner:
@@ -34,8 +37,40 @@ class TlsScanner:
             else:
                 host_info.update({"tls_status": "offline"})
 
+    def sort_hosts_by_product(self, hosts: dict, product_limit: int = DefaultTlsScannerValues.PRODUCT_LIMIT):
+        if not product_limit:
+            return hosts
+        unique_products = list(set([host.get("product") for host in hosts.values()]))
+        print("Unique products:", str(unique_products))
+        fixed_hosts = {}
+        for product in unique_products:
+            current_product_quantity = 0
+            for ip, host in hosts.items():
+                if host.get("product") == product and current_product_quantity < product_limit:
+                    fixed_hosts.update({ip: host})
+                    current_product_quantity += 1
+        return fixed_hosts
+    
+    def _remove_already_scanned_hosts(self, hosts: dict):
+        copy_hosts = deepcopy(hosts)
+        for ip, info in copy_hosts:
+            vendor = info.get("vendor")
+            product = info.get("product")
+            port = info.get("port")
+            name_of_file = "{host}-{port}-{vendor}-{product}".format(
+                host=ip, port=str(port), vendor=vendor, product=product
+            ).replace(" ", "_")
+            if self._is_host_already_scanned(name_of_file):
+                hosts.pop(ip)
+        difference = len(list(copy_hosts.keys())) - len(list(hosts.keys()))
+        print(f"Remove already scanned hosts: {str(difference)}")
+        return hosts
+
+
     def sort_alive_hosts(self):
         nm = PortScanner()
+        self.hosts = self._remove_already_scanned_hosts(self.hosts)
+        self.hosts = self.sort_hosts_by_product(self.hosts)
         hosts_ip = list(self.hosts.keys())
         groups = self._grouper(self.n, hosts_ip)
         groups = [list(group) for group in groups]
@@ -60,14 +95,14 @@ class TlsScanner:
 
     def detect_tls_ports(
         self,
-        ssl_script_path: str = DefaultTlsScannerValues.SSL_NMAP_SCRIPT_PATH,
         host_timeout: int = DefaultTlsScannerValues.TLS_DETECTION_HOST_TIMEOUT,
+        tls_workers: int = DefaultTlsScannerValues.TLS_NMAP_WORKERS,
     ):
         hosts_in_nmap_format = [{"ip": ip, "port": ""} for ip in self.alive_hosts]
         ssl_scan = NmapProcessingManager(
             hosts=hosts_in_nmap_format,
-            arguments=f"-T4 -F -sC -sV --script=.{ssl_script_path} --version-intensity 1 --open --host-timeout={host_timeout}s",
-            workers=10,
+            arguments=f"-Pn -T4 -A -sT --top-ports 50 --host-timeout={host_timeout}s",
+            workers=tls_workers,
         )
         ssl_scan.start()
         scan_results = ssl_scan.get_results()
@@ -83,12 +118,12 @@ class TlsScanner:
                 ssl_cert = scripts.get("ssl-cert")
                 if not ssl_cert:
                     continue
-                if "Subject" in ssl_cert or "Issuer" in ssl_cert:
-                    if self.tls_ports.get(host):
-                        self.tls_ports[host].append(port)
-                    else:
-                        self.tls_ports[host] = [port]
-                    self.hosts[host].update({"ssl_cert": ssl_cert})
+                if self.tls_ports.get(host):
+                    self.tls_ports[host].append(port)
+                else:
+                    self.tls_ports[host] = [port]
+                self.hosts[host].update({"ssl_cert": ssl_cert})
+
             if self.tls_ports.get(host):
                 self.hosts[host].update({"tls_ports": self.tls_ports[host]})
 
@@ -149,6 +184,16 @@ class TlsScanner:
         print(f"└ ", end="")
         return tls_scanner_res
 
+    def _is_host_already_scanned(self, name_of_file):
+        if f"{name_of_file}.txt" in listdir(
+            Path(".")
+            .joinpath(DefaultValues.RESULTS_DIRECTORY)
+            .joinpath(DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)):
+            print("└ Host was already scanned")
+            return True
+        else:
+            return False
+
     @timer
     def start_tls_scan(
         self,
@@ -165,8 +210,21 @@ class TlsScanner:
                 "blue",
                 attrs=["bold"],
             )
+            vendor = self.hosts[host].get("vendor")
+            product = self.hosts[host].get("product")
+            name_of_file = "{host}-{port}-{vendor}-{product}".format(
+                host=host, port=str(port), vendor=vendor, product=product
+            ).replace(" ", "_")
+            print(f"│ Vendor: {vendor}")
+            print(f"│ Product: {product}")
             print(f"│ Host: {host}")
             print(f"│ Port: {port}")
+            print(f"│ File to save: {name_of_file}.txt")
+            
+            # Check if file already exists
+            if self._is_host_already_scanned(name_of_file):
+                continue
+
             try:
                 tls_scanner_res = self._run_tls_on_host(
                     scanner_path=scanner_path,
@@ -181,11 +239,6 @@ class TlsScanner:
                 continue
             if not tls_scanner_res:
                 continue
-            vendor = self.hosts[host].get("vendor")
-            product = self.hosts[host].get("product")
-            name_of_file = "{host}-{port}-{vendor}-{product}".format(
-                host=host, port=str(port), vendor=vendor, product=product
-            ).replace(" ", "_")
             self.save_tls_results(
                 dest_dir=DefaultValues.RESULTS_DIRECTORY,
                 sub_dir=DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR,
@@ -197,5 +250,8 @@ class TlsScanner:
     @create_results_directory()
     @create_subdirectory(subdirectory=DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)
     def save_tls_results(self, dest_dir: str, sub_dir: str, filename: str, result):
-        with open(f"./{dest_dir}/{sub_dir}/{filename}.txt", mode="w") as result_file:
+        with open(
+            Path(".")
+            .joinpath(dest_dir)
+            .joinpath(sub_dir).joinpath(f"{filename}.txt"), mode="w") as result_file:
             result_file.write(result)

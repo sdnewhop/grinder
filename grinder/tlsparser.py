@@ -56,6 +56,8 @@ class TlsParser:
     def _parse_attacks(self, results: str) -> (dict, dict):
         if "Cannot reach the Server" in results:
             return "error", "error"
+        if "Server does not seem to support SSL" in results:
+            return "error", "error"
         attacks = {}
         for attack in LIST_OF_ATTACKS:
             attack_res = findall(r"{attack}\s+: (\w+)".format(attack=attack), results)

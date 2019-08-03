@@ -53,15 +53,17 @@ class TlsScanner:
     
     def _remove_already_scanned_hosts(self, hosts: dict):
         copy_hosts = deepcopy(hosts)
-        for ip, info in copy_hosts:
+        for ip, info in copy_hosts.items():
             vendor = info.get("vendor")
             product = info.get("product")
             port = info.get("port")
-            name_of_file = "{host}-{port}-{vendor}-{product}".format(
-                host=ip, port=str(port), vendor=vendor, product=product
-            ).replace(" ", "_")
-            if self._is_host_already_scanned(name_of_file):
-                hosts.pop(ip)
+            for possible_port in [443, 8443, port]:
+                name_of_file = "{host}-{port}-{vendor}-{product}".format(
+                    host=ip, port=str(possible_port), vendor=vendor, product=product
+                ).replace(" ", "_")
+                if self._is_host_already_scanned(name_of_file):
+                    hosts.pop(ip)
+                    break
         difference = len(list(copy_hosts.keys())) - len(list(hosts.keys()))
         print(f"Remove already scanned hosts: {str(difference)}")
         return hosts
@@ -189,7 +191,7 @@ class TlsScanner:
             Path(".")
             .joinpath(DefaultValues.RESULTS_DIRECTORY)
             .joinpath(DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)):
-            print("└ Host was already scanned")
+            print(f"Host was already scanned: {name_of_file}")
             return True
         else:
             return False

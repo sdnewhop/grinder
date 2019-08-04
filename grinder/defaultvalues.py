@@ -35,14 +35,27 @@ class DefaultValues:
 
 
 class DefaultTlsParserValues:
-    ATTACKS_JSON = "tls_scanner_results.json"
+    PARSED_RESULTS_DIR = "tls_processed_data"
+
+    FULL_RESULTS_JSON = "tls_scanner_results.json"
+    UNIQUE_ATTACKS_JSON = "tls_scanner_attacks.json"
+    UNIQUE_BUGS_JSON = "tls_scanner_bugs.json"
+    UNIQUE_VULNERABILITIES_JSON = "tls_scanner_vulnerabilities.json"
+
+    FULL_RESULTS_CSV = "tls_scanner_results.csv"
+    UNIQUE_ATTACKS_CSV = "tls_scanner_attacks.csv"
+    UNIQUE_BUGS_CSV = "tls_scanner_bugs.csv"
+    UNIQUE_VULNERABILITIES_CSV = "tls_scanner_vulnerabilities.csv"
+
+    UNIQUE_GROUPPED_PRODUCTS_RESULTS_CSV = "tls_scanner_groupped.csv"
 
 
 class DefaultTlsScannerValues:
-    LENGTH_OF_HOSTS_SUBGROUPS = 5
-    NMAP_PING_SCAN_ARGS = "-n -sP -PE --max-retries=1"
-    TLS_DETECTION_HOST_TIMEOUT = 60
-    SSL_NMAP_SCRIPT_PATH = "/plugins/ssl-cert.nse"
+    PRODUCT_LIMIT = 50
+    LENGTH_OF_HOSTS_SUBGROUPS = 100
+    NMAP_PING_SCAN_ARGS = "-n -sP"
+    TLS_DETECTION_HOST_TIMEOUT = 180
+    TLS_NMAP_WORKERS = 10
     TLS_SCANNER_REPORT_DETAIL = "NORMAL"
     TLS_SCANNER_SCAN_DETAIL = "NORMAL"
     TLS_SCANNER_PATH = "./TLS-Scanner/apps/TLS-Scanner.jar"

@@ -797,16 +797,19 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreTlsScanner)
     def tls_scan(self, scanner_path):
         cprint("Start TLS scanning", "blue", attrs=["bold"])
-        if not self.shodan_processed_results:
-            self.shodan_processed_results = self.db.load_last_shodan_results()
-        if not self.censys_processed_results:
-            self.censys_processed_results = self.db.load_last_censys_results()
-        self.combined_results = {
-            **self.shodan_processed_results,
-            **self.censys_processed_results,
-        }
+        if not self.combined_results:
+            if not self.shodan_processed_results:
+                self.shodan_processed_results = self.db.load_last_shodan_results()
+            if not self.censys_processed_results:
+                self.censys_processed_results = self.db.load_last_censys_results()
+            self.combined_results = {
+                **self.shodan_processed_results,
+                **self.censys_processed_results,
+            }
+
         tls_scanner = TlsScanner(self.combined_results)
         tls_parser = TlsParser(self.combined_results)
+
         try:
             cprint(
                 "Checking for currently online and alive hosts", "blue", attrs=["bold"]

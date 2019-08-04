@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-from os import listdir
-from re import findall
+from collections import Counter, OrderedDict
+from csv import DictWriter
 from json import dump
-from pprint import pprint
+from os import listdir
 from pathlib import Path
+from re import findall
+
 from grinder.defaultvalues import (
     DefaultValues,
     DefaultTlsScannerValues,
     DefaultTlsParserValues,
 )
-from csv import DictWriter
-from collections import Counter, OrderedDict
 
+# Possible list of attacks from TLS-Scanner
 LIST_OF_ATTACKS = [
     "Padding Oracle",
     "Bleichenbacher",
@@ -29,6 +30,7 @@ LIST_OF_ATTACKS = [
     "EarlyCcs",
 ]
 
+# Possible list of bugs from TLS-Scanner
 LIST_OF_BUGS = [
     "Version Intolerant",
     "Ciphersuite Intolerant",
@@ -50,14 +52,24 @@ LIST_OF_BUGS = [
 
 
 class TlsParser:
-    def __init__(self, hosts: dict):
+    def __init__(self, hosts: dict) -> None:
         self.hosts: dict = hosts
 
-    def _parse_attacks(self, results: str) -> (dict, dict):
+    def _parse_attacks(self, results: str) -> (dict, dict) or (str, str):
+        """
+        Parse file with host results
+        :param results: results for some host
+        :return: dictionaries with attacks and bugs
+        """
+
+        # Return tuple with errors in case when
+        # Some error was happened during TLS-Scanning
         if "Cannot reach the Server" in results:
             return "error", "error"
         if "Server does not seem to support SSL" in results:
             return "error", "error"
+
+        # Parse attacks from results
         attacks = {}
         for attack in LIST_OF_ATTACKS:
             attack_res = findall(r"{attack}\s+: (\w+)".format(attack=attack), results)
@@ -66,6 +78,7 @@ class TlsParser:
             if attack_res[0] == "true":
                 attacks.update({attack: True})
 
+        # Parse bugs from results
         bugs = {}
         for bug in LIST_OF_BUGS:
             bug_res = findall(r"{bug}\s+: (\w+)".format(bug=bug), results)
@@ -76,7 +89,12 @@ class TlsParser:
 
         return attacks, bugs
 
-    def _search_vulnerabilities(self, host_ip):
+    def _search_vulnerabilities(self, host_ip: str) -> list:
+        """
+        Parse vulnerabilities from basic results (Shodan/Vulners)
+        :param host_ip: host to search vulnerabilities for
+        :return: list of vulnerabilities
+        """
         if not self.hosts.get(host_ip):
             return []
         if not self.hosts[host_ip].get("vulnerabilities"):
@@ -84,9 +102,9 @@ class TlsParser:
         vulns = self.hosts[host_ip].get("vulnerabilities")
         shodan_vulns = vulns.get("shodan_vulnerabilities") or []
         vulners_vulns = vulns.get("vulners_vulnerabilities") or []
-        if shodan_vulns:
+        if shodan_vulns and isinstance(shodan_vulns, dict):
             shodan_vulns = list(shodan_vulns.keys())
-        if vulners_vulns:
+        if vulners_vulns and isinstance(vulners_vulns, dict):
             vulners_vulns = list(vulners_vulns.keys())
         return list(set(list(shodan_vulns + vulners_vulns)))
 
@@ -95,6 +113,12 @@ class TlsParser:
         dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
         tls_dir: str = DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR,
     ) -> None:
+        """
+        Load all results from TLS scanning
+        :param dest_dir: directory with basic results
+        :param tls_dir: subdirectory with TLS results
+        :return: None
+        """
         all_results = {}
         full_path = Path(".").joinpath(dest_dir).joinpath(tls_dir)
 
@@ -140,20 +164,26 @@ class TlsParser:
         unique_bugs = self.count_unique_entities(all_results, ent_type="bugs")
         unique_vulnerabilities = self.count_unique_entities(all_results, ent_type="vulnerabilities")
 
-        self.save_results_json(all_results)
-        self.save_results_json(unique_attacks, filename="tls_scanner_attacks.json")
-        self.save_results_json(unique_bugs, filename="tls_scanner_bugs.json")
-        self.save_results_json(unique_vulnerabilities, filename="tls_scanner_vulnerabilities.json")
+        self.save_results_json(all_results, filename=DefaultTlsParserValues.FULL_RESULTS_JSON)
+        self.save_results_json(unique_attacks, filename=DefaultTlsParserValues.UNIQUE_ATTACKS_JSON)
+        self.save_results_json(unique_bugs, filename=DefaultTlsParserValues.UNIQUE_BUGS_JSON)
+        self.save_results_json(unique_vulnerabilities, filename=DefaultTlsParserValues.UNIQUE_VULNERABILITIES_JSON)
 
-        self.save_results_csv(all_results)
-        self.save_unique_results_csv(unique_attacks, filename="tls_scanner_attacks.csv")
-        self.save_unique_results_csv(unique_bugs, filename="tls_scanner_bugs.csv")
-        self.save_unique_results_csv(unique_vulnerabilities, filename="tls_scanner_vulnerabilities.csv")
+        self.save_results_csv(all_results, filename=DefaultTlsParserValues.FULL_RESULTS_CSV)
+        self.save_unique_results_csv(unique_attacks, filename=DefaultTlsParserValues.UNIQUE_ATTACKS_CSV)
+        self.save_unique_results_csv(unique_bugs, filename=DefaultTlsParserValues.UNIQUE_BUGS_CSV)
+        self.save_unique_results_csv(unique_vulnerabilities, filename=DefaultTlsParserValues.UNIQUE_VULNERABILITIES_CSV)
 
-        self.save_unique_groupped_results_csv(all_results, filename="tls_scanner_groupped.csv")
+        self.save_unique_groupped_results_csv(all_results, filename=DefaultTlsParserValues.UNIQUE_GROUPPED_PRODUCTS_RESULTS_CSV)
 
 
-    def count_unique_entities(self, results, ent_type="attacks"):
+    def count_unique_entities(self, results: dict, ent_type: str) -> dict:
+        """
+        Count unique entities (attacks, bugs, vulnerabilities, etc.)
+        :param results: dictionary with results to count in
+        :param ent_type: type of entity to count
+        :return: sorted entities in dictionary
+        """
         all_attacks = [host.get(ent_type) for host in results.values()]
         flat_list = [item for sublist in all_attacks for item in sublist]
         counter = Counter(flat_list)
@@ -164,11 +194,19 @@ class TlsParser:
 
     def save_results_json(
         self,
-        results,
+        results: dict or list,
+        filename: str,
         dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
         sub_dir: str = DefaultTlsParserValues.PARSED_RESULTS_DIR,
-        filename: str = DefaultTlsParserValues.ATTACKS_JSON,
-    ):
+    ) -> None:
+        """
+        Save some results to json file
+        :param results: results to save in file
+        :param filename: name of file
+        :param dest_dir: basic results dir
+        :param sub_dir: subdirectory in destination directory to save
+        :return: None
+        """
         full_path = Path(".").joinpath(dest_dir).joinpath(sub_dir)
         full_path.mkdir(parents=True, exist_ok=True)
         full_path = full_path.joinpath(filename)
@@ -180,11 +218,19 @@ class TlsParser:
 
     def save_results_csv(
             self,
-            results,
+            results: dict,
+            filename: str,
             dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
             sub_dir: str = DefaultTlsParserValues.PARSED_RESULTS_DIR,
-            filename: str = DefaultTlsParserValues.ATTACKS_CSV,
-        ):
+        ) -> None:
+            """
+            Save results to CSV file
+            :param results: results to save in file
+            :param filename: name of file
+            :param dest_dir: basic results dir
+            :param sub_dir: subdirectory in destination directory to save
+            :return: None
+            """
             full_path = Path(".").joinpath(dest_dir).joinpath(sub_dir)
             full_path.mkdir(parents=True, exist_ok=True)
             full_path = full_path.joinpath(filename)
@@ -205,11 +251,19 @@ class TlsParser:
 
     def save_unique_results_csv(
             self,
-            results,
+            results: dict,
+            filename: str,
             dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
             sub_dir: str = DefaultTlsParserValues.PARSED_RESULTS_DIR,
-            filename: str = DefaultTlsParserValues.ATTACKS_CSV,
-        ):
+        ) -> None:
+            """
+            Save unique results to CSV file
+            :param results: results to save in file
+            :param filename: name of file
+            :param dest_dir: basic results dir
+            :param sub_dir: subdirectory in destination directory to save
+            :return: None
+            """
             full_path = Path(".").joinpath(dest_dir).joinpath(sub_dir)
             full_path.mkdir(parents=True, exist_ok=True)
             full_path = full_path.joinpath(filename)
@@ -223,11 +277,20 @@ class TlsParser:
     
     def save_unique_groupped_results_csv(
         self,
-        results,
+        results: dict,
+        filename: str,
         dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
         sub_dir: str = DefaultTlsParserValues.PARSED_RESULTS_DIR,
-        filename: str = DefaultTlsParserValues.ATTACKS_CSV,
-    ):
+    ) -> None:
+        """
+        Save groupped results with unique attacks and bugs
+        for every vendor in total and for every product
+        :param results: results to save in file
+        :param filename: name of file
+        :param dest_dir: basic results dir
+        :param sub_dir: subdirectory in destination directory to save
+        :return: None
+        """
         full_path = Path(".").joinpath(dest_dir).joinpath(sub_dir)
         full_path.mkdir(parents=True, exist_ok=True)
         full_path = full_path.joinpath(filename)

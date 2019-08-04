@@ -36,8 +36,18 @@ class DefaultValues:
 
 class DefaultTlsParserValues:
     PARSED_RESULTS_DIR = "tls_processed_data"
-    ATTACKS_JSON = "tls_scanner_results.json"
-    ATTACKS_CSV = "tls_scanner_results.csv"
+
+    FULL_RESULTS_JSON = "tls_scanner_results.json"
+    UNIQUE_ATTACKS_JSON = "tls_scanner_attacks.json"
+    UNIQUE_BUGS_JSON = "tls_scanner_bugs.json"
+    UNIQUE_VULNERABILITIES_JSON = "tls_scanner_vulnerabilities.json"
+
+    FULL_RESULTS_CSV = "tls_scanner_results.csv"
+    UNIQUE_ATTACKS_CSV = "tls_scanner_attacks.csv"
+    UNIQUE_BUGS_CSV = "tls_scanner_bugs.csv"
+    UNIQUE_VULNERABILITIES_CSV = "tls_scanner_vulnerabilities.csv"
+
+    UNIQUE_GROUPPED_PRODUCTS_RESULTS_CSV = "tls_scanner_groupped.csv"
 
 
 class DefaultTlsScannerValues:

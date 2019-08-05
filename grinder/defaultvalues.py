@@ -94,8 +94,9 @@ class DefaultProcessManagerValues:
 class DefaultPlotValues:
     PLOT_DEFAULT_AUTOPCT = "%1.1f%%"
     PLOT_LABEL_FONT_SIZE = 6
-    PLOT_SUPTITLE_FONT_SIZE = 12
-    PLOT_DPI = 200
+    PLOT_SUPTITLE_FONT_SIZE = 10
+    PLOT_LEGEND_SIZE = 8
+    PLOT_DPI = 300
 
 
 class DefaultDatabaseValues:

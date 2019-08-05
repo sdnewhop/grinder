@@ -11,6 +11,7 @@ from time import sleep
 
 # from enforce import runtime_validation
 
+from grinder.vulnersreport import VulnersReport
 from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
 from grinder.dbhandling import GrinderDatabase
@@ -52,6 +53,7 @@ from grinder.errors import (
     GrinderCoreVulnersScanError,
     GrinderCoreRunScriptsError,
     GrinderCoreTlsScanner,
+    GrinderCoreVulnersReportError,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -96,6 +98,7 @@ class GrinderCore:
         shodan_api_key: str = "",
         censys_api_id: str = "",
         censys_api_secret: str = "",
+        vulners_api_key: str = ""
     ) -> None:
         self.shodan_processed_results: dict = {}
         self.censys_processed_results: dict = {}
@@ -111,6 +114,7 @@ class GrinderCore:
         self.shodan_api_key = shodan_api_key or DefaultValues.SHODAN_API_KEY
         self.censys_api_id = censys_api_id or DefaultValues.CENSYS_API_ID
         self.censys_api_secret = censys_api_secret or DefaultValues.CENSYS_API_SECRET
+        self.vulners_api_key = vulners_api_key or DefaultValues.VULNERS_API_KEY
 
         self.vendor_confidence: str = ""
         self.query_confidence: str = ""
@@ -386,6 +390,125 @@ class GrinderCore:
         :return list: processed search results
         """
         return self.load_results_from_file() or self.load_results_from_db()
+
+    def save_vulners_results(self, results: dict, name: str, dest_dir=DefaultValues.RESULTS_DIRECTORY) -> None:
+        """
+        Save results from vulners separately from another results
+        :param results: results to save
+        :param name: name of file
+        :param dest_dir: directory to save
+        :return: None
+        """
+        cprint(f"Save Vulners reports for {name}...", "blue", attrs=["bold"])
+        self.filemanager.write_results_json(
+            results,
+            dest_dir=dest_dir,
+            json_file=f"{name.replace(' ', '_')}.json",
+        )
+        bypass_list = ["vulners exploits by vulnerabilities", "vulners by cvss groups"]
+        self.filemanager.write_results_csv(
+            results.values() if name not in bypass_list else results,
+            dest_dir=dest_dir,
+            csv_file=f"{name.replace(' ', '_')}.csv",
+        )
+        self.filemanager.write_results_txt(
+            results,
+            dest_dir=dest_dir,
+            txt_file=f"{name.replace(' ', '_')}.txt",
+        )
+
+    def save_vulners_plots(self, results: dict or list, name: str, suptitle: str) -> None:
+        """
+        Create plots with vulners results
+        :param results: results to save
+        :param name: name of file and suptitle
+        :param suptitle: name of plot
+        :return: None
+        """
+        cprint(f"Create Vulners graphical plots for {name}...", "blue", attrs=["bold"])
+        plots = GrinderPlots()
+        plots.create_pie_chart(
+            results=results,
+            suptitle=f"{suptitle}",
+        )
+        plots.save_pie_chart(
+            relative_path=DefaultValues.PNG_VULNERS_RESULTS,
+            filename=f"{name.replace(' ', '_')}.png",
+        )
+
+    @exception_handler(expected_exception=GrinderCoreVulnersReportError)
+    def vulners_report(self) -> None:
+        """
+        Report information from Vulners API
+        :return: None
+        """
+        # If counter of entities is empty - skip vulners report
+        if not self.entities_count_all:
+            return
+
+        # Collect vulnerabilities from entity counter
+        vulnerabilities = {}
+        for entity in self.entities_count_all:
+            if not entity.get("entity") == "vulnerability":
+                continue
+            vulnerabilities = entity.get("results")
+
+        # Make reports for different types of statistics
+        vulners = VulnersReport(vulnerabilities, api_key=self.vulners_api_key)
+        vulners_vulnerabilities = vulners.get_vulnerabilities_report()
+        vulners_critical_vulnerabilities = vulners.get_critical_vulnerabilities_report(cve_data=vulners_vulnerabilities)
+        vulners_exploits_by_cve = vulners.get_exploits_for_vulnerabilities()
+        vulners_exploits_by_cpe = vulners.get_exploits_for_software(hosts=self.combined_results)
+        vulners_by_cvss_groups = vulners.sort_by_cvss_rating(cve_data=vulners_vulnerabilities)
+
+        # Save all results separately
+        if vulners_vulnerabilities:
+            self.save_vulners_results(vulners_vulnerabilities, name="vulners vulnerabilities")
+        if vulners_critical_vulnerabilities:
+            self.save_vulners_results(vulners_critical_vulnerabilities, name="vulners critical vulnerabilities")
+        if vulners_exploits_by_cve:
+            self.save_vulners_results(vulners_exploits_by_cve, name="vulners exploits by vulnerabilities")
+        if vulners_exploits_by_cpe:
+            self.save_vulners_results(vulners_exploits_by_cpe, name="vulners exploits by cpe")
+        if vulners_by_cvss_groups:
+            self.save_vulners_results(vulners_by_cvss_groups, name="vulners by cvss groups")
+
+        # Count length
+        length_vulnerabilities = len(vulnerabilities.keys())
+        length_critical_vulnerabilities = len(vulners_critical_vulnerabilities.keys())
+        length_references_vulnerabilities = len(vulners_exploits_by_cve.keys())
+        length_exploitable_hosts = len(vulners_exploits_by_cpe.keys())
+
+        critical_vulnerabilities_comparison = {
+            "Other": length_vulnerabilities - length_critical_vulnerabilities,
+            "Critical": length_critical_vulnerabilities
+        }
+        self.save_vulners_plots(critical_vulnerabilities_comparison,
+                                name="critical vulnerabilities",
+                                suptitle="Percentage of critical vulnerabilities")
+
+        vulnerabilities_with_exploits_comparison = {
+            "Other": length_vulnerabilities - length_references_vulnerabilities,
+            "Referenced in Exploits": length_references_vulnerabilities
+        }
+        self.save_vulners_plots(vulnerabilities_with_exploits_comparison,
+                                name="vulnerabilities referenced in exploits",
+                                suptitle="Percentage of vulnerabilities referenced in exploits documents")
+
+        cpes_with_exploits_comparison = {
+            "Other": len(self.combined_results) - length_exploitable_hosts,
+            "With Exploits": length_exploitable_hosts
+        }
+        self.save_vulners_plots(cpes_with_exploits_comparison,
+                                name="hosts with exploitable software",
+                                suptitle="Percentage of nodes with exploitable software")
+
+        vulners_cvss_comparison = {
+            key: len(value) for key, value in vulners_by_cvss_groups.items()
+        }
+        self.save_vulners_plots(vulners_cvss_comparison,
+                                name="CVSS vulnerabilities",
+                                suptitle="Percentage of vulnerabilities by CVSS v3.0 Ratings")
 
     @exception_handler(expected_exception=GrinderCoreSaveResultsError)
     def save_results(self, dest_dir=DefaultValues.RESULTS_DIRECTORY) -> None:

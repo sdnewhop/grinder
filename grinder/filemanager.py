@@ -107,6 +107,9 @@ class GrinderFileManager:
     @create_subdirectory(
         subdirectory=f"{DefaultValues.PNG_RESULTS_DIRECTORY}/{DefaultValues.PNG_LIMITED_RESULTS_DIRECTORY}"
     )
+    @create_subdirectory(
+        subdirectory=f"{DefaultValues.PNG_RESULTS_DIRECTORY}/{DefaultValues.PNG_VULNERS_RESULTS}"
+    )
     def write_results_png(
         self,
         plot,

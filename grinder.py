@@ -17,6 +17,7 @@ if __name__ == "__main__":
         shodan_api_key=args.shodan_key,
         censys_api_id=args.censys_id,
         censys_api_secret=args.censys_secret,
+        vulners_api_key=args.vulners_key,
     )
 
     if args.censys_max:
@@ -67,6 +68,8 @@ if __name__ == "__main__":
         core.count_unique_entities("country")
         core.count_unique_entities("vulnerability")
         core.count_unique_entities("continent")
+    if args.vulners_report:
+        core.vulners_report()
     if args.update_markers:
         core.update_map_markers()
     if args.create_plots:

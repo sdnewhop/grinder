@@ -30,6 +30,15 @@ class NmapConnectorException(Exception):
         return f"Error occured in Nmap Connector module: {self.error_args}"
 
 
+class VulnersConnectorException(Exception):
+    def __init__(self, error_args: Exception):
+        super().__init__(self)
+        self.error_args = error_args
+
+    def __str__(self):
+        return f"Error occured in Vulners Connector module: {self.error_args}"
+
+
 class NmapProcessingManagerException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
@@ -103,6 +112,61 @@ class GrinderScriptExecutor(Exception):
 
 
 class GrinderScriptExecutorRunScriptError(GrinderScriptExecutor):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorInitError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorGetVulnerabiltiesReportError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorGetCriticalVulnerabiltiesReportError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorGetCriticalVulnerabiltiesHostsReportError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorSortByCVSSRatingError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorSortByCVSSRatingHostsError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorExploitsByVulnerabilitiesError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorParseCpesError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorCountUniqueCpesError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorSearchCpeExploitsError(VulnersConnectorException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class VulnersConnectorGetExploitsForSoftwareError(VulnersConnectorException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 
@@ -207,6 +271,16 @@ class GrinderCoreSaveResultsError(GrinderCoreException):
         super().__init__(error_args)
 
 
+class GrinderCoreSaveVulnersResultsError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreSaveVulnersPlotsError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
 class GrinderCoreCountUniqueProductsError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
@@ -238,6 +312,11 @@ class GrinderCoreLoadResultsFromDbError(GrinderCoreException):
 
 
 class GrinderCoreLoadResultsError(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderCoreVulnersReportError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 

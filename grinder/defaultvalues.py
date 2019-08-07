@@ -5,6 +5,7 @@ class DefaultValues:
     SHODAN_API_KEY: str = "YOUR_DEFAULT_API_KEY"
     CENSYS_API_ID: str = "YOUR_CENSYS_API_ID"
     CENSYS_API_SECRET: str = "YOUR_CENSYS_API_SECRET"
+    VULNERS_API_KEY: str = "YOUR_VULNERS_API_KEY_HERE"
 
     CENSYS_DEFAULT_RESULTS_QUANTITY: int = 100000
     CENSYS_FREE_PLAN_RESULTS_QUANTITY: int = 1000
@@ -32,6 +33,7 @@ class DefaultValues:
     PNG_RESULTS_DIRECTORY: str = "png"
     PNG_ALL_RESULTS_DIRECTORY: str = "all_results"
     PNG_LIMITED_RESULTS_DIRECTORY: str = "limited_results"
+    PNG_VULNERS_RESULTS: str = "vulners_results"
 
 
 class DefaultTlsParserValues:
@@ -92,8 +94,9 @@ class DefaultProcessManagerValues:
 class DefaultPlotValues:
     PLOT_DEFAULT_AUTOPCT = "%1.1f%%"
     PLOT_LABEL_FONT_SIZE = 6
-    PLOT_SUPTITLE_FONT_SIZE = 12
-    PLOT_DPI = 200
+    PLOT_SUPTITLE_FONT_SIZE = 10
+    PLOT_LEGEND_SIZE = 8
+    PLOT_DPI = 300
 
 
 class DefaultDatabaseValues:

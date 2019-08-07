@@ -27,8 +27,13 @@ class GrinderInterface:
     def load_shodan_key_from_env(self) -> str:
         return environ.get("SHODAN_API_KEY")
 
+    @exception_handler(expected_exception=GrinderInterfaceLoadEnvironmentKeyError)
     def load_censys_keys_from_env(self) -> tuple:
         return environ.get("CENSYS_API_ID"), environ.get("CENSYS_API_SECRET")
+
+    @exception_handler(expected_exception=GrinderInterfaceLoadEnvironmentKeyError)
+    def load_vulners_key_from_env(self) -> str:
+        return environ.get("VULNERS_API_KEY")
 
     @exception_handler(expected_exception=GrinderInterfaceParseArgsError)
     def parse_args(self) -> Namespace:
@@ -59,6 +64,9 @@ class GrinderInterface:
         )
         parser.add_argument(
             "-sk", "--shodan-key", action="store", default=None, help="Shodan API key"
+        )
+        parser.add_argument(
+            "-vk", "--vulners-key", action="store", default=None, help="Vulners API key"
         )
         parser.add_argument(
             "-cu",
@@ -203,15 +211,24 @@ class GrinderInterface:
             default=None,
             help="Path to TLS-Scanner.jar (if TLS-Scanner directory not in Grinder root, else not required)"
         )
+        parser.add_argument(
+            "-vr",
+            "--vulners-report",
+            action="store_true",
+            default=False,
+            help="Make additional vulners reports"
+        )
 
         self.args = parser.parse_args()
         if not self.args.shodan_key:
             self.args.shodan_key = self.load_shodan_key_from_env()
+        if not self.args.vulners_key:
+            self.args.vulners_key = self.load_vulners_key_from_env()
         if not (self.args.censys_id or self.args.censys_secret):
             self.args.censys_id, self.args.censys_secret = (
                 self.load_censys_keys_from_env()
             )
-        if self.args.run and self.args.debug:
+        if self.args.debug:
             query_confidence_level = (
                 self.args.query_confidence or "all queries, any confidence"
             )
@@ -228,6 +245,9 @@ class GrinderInterface:
             )
             print(
                 f"Censys API SECRET: {self.args.censys_secret or DefaultValues.CENSYS_API_SECRET}"
+            )
+            print(
+                f"Vulners API key: {self.args.vulners_key or DefaultValues.VULNERS_API_KEY}"
             )
             print(f"Query confidence level: {query_confidence_level}")
             print(f"Vendor confidence level: {vendor_confidence_level}")

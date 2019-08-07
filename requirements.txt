@@ -46,6 +46,7 @@ termcolor==1.1.0
 toml==0.10.0
 typed-ast==1.4.0
 urllib3==1.24.2
+vulners==1.5.0
 Werkzeug==0.15.5
 wrapt==1.11.1
 XlsxWriter==1.1.6

@@ -59,6 +59,9 @@ fetch(window.location.origin + '/api/viewall')
                     icon: myIcon
                 })
                 .bindPopup(popup);
+            m.on('mouseover', function (e) {
+              this.openPopup();
+            });
             m.marker_index = i;
             markerClusters.addLayer(m);
         }
@@ -71,6 +74,6 @@ fetch(window.location.origin + '/api/viewall')
                 document.getElementById('force-refresh-ping-status').addEventListener('click', function() {
                     ping(event.layer.marker_index);
                 }, false);
-            }, 1500);
+            }, 500);
         });
     });

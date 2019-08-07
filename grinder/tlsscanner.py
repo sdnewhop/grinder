@@ -84,8 +84,9 @@ class TlsScanner:
         :param hosts: dictionary with hosts
         :return: hosts
         """
-        copy_hosts = deepcopy(hosts)
-        for ip, info in copy_hosts.items():
+        online_hosts = deepcopy(hosts)
+
+        for ip, info in hosts.items():
             vendor = info.get("vendor")
             product = info.get("product")
             port = info.get("port")
@@ -95,12 +96,12 @@ class TlsScanner:
                     host=ip, port=str(possible_port), vendor=vendor, product=product
                 ).replace(" ", "_")
                 if self._is_host_already_scanned(name_of_file):
-                    hosts.pop(ip)
+                    online_hosts.pop(ip)
                     break
-        difference = len(list(copy_hosts.keys())) - len(list(hosts.keys()))
+        difference = len(list(hosts.keys())) - len(list(online_hosts.keys()))
         # Return number of already scanned hosts
         print(f"Remove already scanned hosts: {str(difference)}")
-        return hosts
+        return online_hosts
 
     def sort_alive_hosts(self) -> None:
         """
@@ -110,9 +111,9 @@ class TlsScanner:
         :return: None
         """
         nm = PortScanner()
-        self.hosts = self._remove_already_scanned_hosts(self.hosts)
-        self.hosts = self.sort_hosts_by_product(self.hosts)
-        hosts_ip = list(self.hosts.keys())
+        online_hosts = self._remove_already_scanned_hosts(self.hosts)
+        online_hosts = self.sort_hosts_by_product(online_hosts)
+        hosts_ip = list(online_hosts.keys())
         groups = self._grouper(self.n, hosts_ip)
         groups = [list(group) for group in groups]
         groups_len = len(groups)

@@ -37,6 +37,27 @@ class VulnersReport:
             critical_cve_data.update({cve: cve_information})
         return critical_cve_data
 
+    def get_critical_vulnerabilities_hosts_report(self, cve_data: dict = None, hosts: dict = None):
+        cprint("Vulners: Separate hosts with critical vulnerabilities...", "blue", attrs=["bold"])
+        if not cve_data:
+            cve_data = self.get_critical_vulnerabilities_report()
+        critical_cves = list(cve_data.keys())
+        critical_cve_hosts = {}
+        for ip, host_info in hosts.items():
+            vulnerabilities = host_info.get("vulnerabilities")
+            if not vulnerabilities:
+                continue
+            all_vulnerabilities = []
+            if vulnerabilities.get("shodan_vulnerabilities"):
+                all_vulnerabilities.extend(list(vulnerabilities.get("shodan_vulnerabilities").keys()))
+            if vulnerabilities.get("vulners_vulnerabilities"):
+                all_vulnerabilities.extend(list(vulnerabilities.get("vulners_vulnerabilities").keys()))
+            all_unique_vulnerabilities = list(set(all_vulnerabilities))
+            check_if_got_critical = any(vulnerability in all_unique_vulnerabilities for vulnerability in critical_cves)
+            if check_if_got_critical:
+                critical_cve_hosts.update({ip: host_info})
+        return critical_cve_hosts
+
     def sort_by_cvss_rating(self, cve_data: dict = None):
         cprint("Vulners: Sort vulnerabilities by CVSS levels...", "blue", attrs=["bold"])
         if not cve_data:
@@ -73,6 +94,32 @@ class VulnersReport:
             else:
                 groupped_cve[level].append(cve)
         return groupped_cve
+
+    def sort_by_cvss_rating_hosts(self, cve_data: dict = None, hosts: dict = None):
+        cprint("Vulners: Sort nodes by CVSS levels...", "blue", attrs=["bold"])
+        if not cve_data:
+            cve_data = self.sort_by_cvss_rating()
+        groupped_cve_hosts = {}
+        for ip, host_info in hosts.items():
+            vulnerabilities = host_info.get("vulnerabilities")
+            if not vulnerabilities:
+                continue
+            all_vulnerabilities = []
+            if vulnerabilities.get("shodan_vulnerabilities"):
+                all_vulnerabilities.extend(list(vulnerabilities.get("shodan_vulnerabilities").keys()))
+            if vulnerabilities.get("vulners_vulnerabilities"):
+                all_vulnerabilities.extend(list(vulnerabilities.get("vulners_vulnerabilities").keys()))
+            all_unique_vulnerabilities = list(set(all_vulnerabilities))
+            for group, groupped_vulnerabilities in cve_data.items():
+                check_if_group_match = any(vulnerability in all_unique_vulnerabilities
+                                           for vulnerability in groupped_vulnerabilities)
+                if not check_if_group_match:
+                    continue
+                if not groupped_cve_hosts.get(group):
+                    groupped_cve_hosts[group] = [host_info]
+                else:
+                    groupped_cve_hosts[group].append(host_info)
+        return groupped_cve_hosts
 
     def get_exploits_for_vulnerabilities(self):
         cprint("Vulners: Collect all exploits references for collected vulnerabilities...", "blue", attrs=["bold"])

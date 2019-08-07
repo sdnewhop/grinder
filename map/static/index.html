@@ -50,12 +50,14 @@
             <br><b>Port:</b> {{basic.port}}
             <br><b>Protocol:</b> {{basic.protocol}}
             <br><b>Coordinates:</b> {{basic.latitude}}, {{basic.longitude}}
+            <br><b>Status: <span style="color:#d99f00" id="host-ping-status">awaiting...</span></b>
+            <b><a id="force-refresh-ping-status" title="Force refresh status" href="#">(refresh)</a></b>
             <br>
             <br>
 
             <div class="codebox">
                 <input type="button" class="btn btn-primary btn-sm btn-block" value="Show more" onclick="var spoiler = $(this).parents('.codebox').find('.content').slideToggle(); if ( this.value == 'Hide' ) { this.value = 'Show more'; } else { this.value = 'Hide'; };return false;">
-                <div class="content" name="spoiler" style="display: none;">
+                <div class="content" style="display: none;">
                     <br>
                     <br><a id="api-raw-data" title="API raw data" href="#" onclick="openInNewTab('{{api.raw}}');return false;"><b>Open raw data</b></a>
                     <br><a id="link-to-host" title="Link to host" href="#" onclick="openInNewTab('{{additionalContent.host}}');return false;"><b>Open host in browser</b></a>

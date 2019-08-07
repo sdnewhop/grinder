@@ -11,7 +11,7 @@ from time import sleep
 
 # from enforce import runtime_validation
 
-from grinder.vulnersreport import VulnersReport
+from grinder.vulnersconnector import VulnersConnector
 from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
 from grinder.dbhandling import GrinderDatabase
@@ -54,6 +54,8 @@ from grinder.errors import (
     GrinderCoreRunScriptsError,
     GrinderCoreTlsScanner,
     GrinderCoreVulnersReportError,
+    GrinderCoreSaveVulnersResultsError,
+    GrinderCoreSaveVulnersPlotsError,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -343,7 +345,7 @@ class GrinderCore:
         load_dir=DefaultValues.RESULTS_DIRECTORY,
         load_file=DefaultValues.JSON_RESULTS_FILE,
         load_json_dir=DefaultValues.JSON_RESULTS_DIRECTORY,
-    ) -> list:
+    ) -> dict:
         """
         Load saved results of latest previous scan from json file
 
@@ -391,6 +393,7 @@ class GrinderCore:
         """
         return self.load_results_from_file() or self.load_results_from_db()
 
+    @exception_handler(expected_exception=GrinderCoreSaveVulnersResultsError)
     def save_vulners_results(self, results: dict, name: str, dest_dir=DefaultValues.RESULTS_DIRECTORY) -> None:
         """
         Save results from vulners separately from another results
@@ -419,6 +422,7 @@ class GrinderCore:
             txt_file=f"{name.replace(' ', '_')}.txt",
         )
 
+    @exception_handler(expected_exception=GrinderCoreSaveVulnersPlotsError)
     def save_vulners_plots(self, results: dict or list, name: str, suptitle: str) -> None:
         """
         Create plots with vulners results
@@ -445,41 +449,62 @@ class GrinderCore:
         :return: None
         """
         # If counter of entities is empty - skip vulners report
-        if not self.entities_count_all:
+        if not self.entities_count_all or not self.combined_results:
             return
 
-        # Collect vulnerabilities from entity counter
+        # Collect only vulnerabilities from entities counter
         vulnerabilities = {}
         for entity in self.entities_count_all:
             if not entity.get("entity") == "vulnerability":
                 continue
-            vulnerabilities = entity.get("results")
+            if entity.get("results"):
+                vulnerabilities = entity.get("results")
+                break
 
-        # Make reports for different types of statistics
-        vulners = VulnersReport(vulnerabilities, api_key=self.vulners_api_key)
+        # Initialize reporter for different kind of vulnerabilities and exploits
+        vulners = VulnersConnector(api_key=self.vulners_api_key)
+        vulners.vulnerabilities = vulnerabilities
+        vulners.hosts = self.combined_results
+
+        # Search for critical vulnerabilities
         vulners_vulnerabilities = vulners.get_vulnerabilities_report()
-        vulners_critical_vulnerabilities = vulners.get_critical_vulnerabilities_report(cve_data=vulners_vulnerabilities)
-        vulners_critical_vulnerabilities_hosts = vulners.get_critical_vulnerabilities_hosts_report(cve_data=vulners_critical_vulnerabilities, hosts=self.combined_results)
-        vulners_exploits_by_cve = vulners.get_exploits_for_vulnerabilities()
-        vulners_exploits_by_cpe = vulners.get_exploits_for_software(hosts=self.combined_results)
-        vulners_by_cvss_groups = vulners.sort_by_cvss_rating(cve_data=vulners_vulnerabilities)
-        vulners_by_cvss_groups_hosts = vulners.sort_by_cvss_rating_hosts(cve_data=vulners_by_cvss_groups, hosts=self.combined_results)
+        vulners_critical_vulnerabilities = vulners.get_critical_vulnerabilities_report(
+            vulnerabilities_report=vulners_vulnerabilities
+        )
+        vulners_critical_vulnerabilities_hosts = vulners.get_critical_vulnerabilities_hosts_report(
+            critical_vulnerabilities_report=vulners_critical_vulnerabilities
+        )
 
-        # Save all results separately
-        if vulners_vulnerabilities:
-            self.save_vulners_results(vulners_vulnerabilities, name="vulners vulnerabilities")
-        if vulners_critical_vulnerabilities:
-            self.save_vulners_results(vulners_critical_vulnerabilities, name="vulners critical vulnerabilities")
-        if vulners_exploits_by_cve:
-            self.save_vulners_results(vulners_exploits_by_cve, name="vulners exploits by vulnerabilities")
-        if vulners_exploits_by_cpe:
-            self.save_vulners_results(vulners_exploits_by_cpe, name="vulners exploits by cpe")
-        if vulners_by_cvss_groups:
-            self.save_vulners_results(vulners_by_cvss_groups, name="vulners by cvss groups")
-        if vulners_critical_vulnerabilities_hosts:
-            self.save_vulners_results(vulners_critical_vulnerabilities_hosts, name="hosts with critical vulnerabilities")
-        if vulners_by_cvss_groups_hosts:
-            self.save_vulners_results(vulners_by_cvss_groups_hosts, name="hosts groupped by vulnerabilities")
+        # Group hosts and vulnerabilities into CVSS groups of vulns
+        vulners_by_cvss_groups = vulners.sort_by_cvss_rating(
+            vulnerabilities_report=vulners_vulnerabilities
+        )
+        vulners_by_cvss_groups_hosts = vulners.sort_by_cvss_rating_hosts(
+            cvss_groupped_vulnerabilties_report=vulners_by_cvss_groups
+        )
+
+        # Search for exploits for vulnerabilities and software
+        vulners_exploits_by_cve = vulners.get_exploits_for_vulnerabilities()
+        vulners_exploits_by_cpe = vulners.get_exploits_for_software()
+
+        # Pair of results with names to save
+        named_results_to_save = [
+            (vulners_vulnerabilities, "vulners vulnerabilities"),
+            (vulners_critical_vulnerabilities, "vulners critical vulnerabilities"),
+            (vulners_exploits_by_cve, "vulners exploits by vulnerabilities"),
+            (vulners_exploits_by_cpe, "vulners exploits by software"),
+            (vulners_by_cvss_groups, "vulners by cvss groups"),
+            (vulners_critical_vulnerabilities_hosts, "hosts with critical vulnerabilities"),
+            (vulners_by_cvss_groups_hosts, "hosts groupped by vulnerabilities")
+        ]
+        # Saver
+        for results, name in named_results_to_save:
+            if not results:
+                continue
+            self.save_vulners_results(
+                results,
+                name=name,
+            )
 
         # Count length
         length_vulnerabilities = len(vulnerabilities.keys())
@@ -489,49 +514,66 @@ class GrinderCore:
         length_hosts_with_critical_vulnerabilities = len(vulners_critical_vulnerabilities_hosts.keys())
         length_all_hosts = len(self.combined_results)
 
-        hosts_with_critical_vulnerabilities = {
+        # Set labels and definitions for plots
+        hosts_with_critical_vulnerabilities_comparison = {
             "Other": length_all_hosts - length_hosts_with_critical_vulnerabilities,
             "With Critical Vulnerabilities": length_hosts_with_critical_vulnerabilities
         }
-        self.save_vulners_plots(hosts_with_critical_vulnerabilities,
-                                name="hosts with critical vulnerabilities",
-                                suptitle="Percentage of nodes with critical vulnerabilities")
         critical_vulnerabilities_comparison = {
             "Other": length_vulnerabilities - length_critical_vulnerabilities,
             "Critical": length_critical_vulnerabilities
         }
-        self.save_vulners_plots(critical_vulnerabilities_comparison,
-                                name="critical vulnerabilities",
-                                suptitle="Percentage of critical vulnerabilities")
-
         vulnerabilities_with_exploits_comparison = {
             "Other": length_vulnerabilities - length_references_vulnerabilities,
             "Referenced in Exploits": length_references_vulnerabilities
         }
-        self.save_vulners_plots(vulnerabilities_with_exploits_comparison,
-                                name="vulnerabilities referenced in exploits",
-                                suptitle="Percentage of vulnerabilities referenced in exploits documents")
-
         cpes_with_exploits_comparison = {
             "Other": length_all_hosts - length_exploitable_hosts,
             "With Exploits": length_exploitable_hosts
         }
-        self.save_vulners_plots(cpes_with_exploits_comparison,
-                                name="hosts with exploitable software",
-                                suptitle="Percentage of nodes with exploitable software")
-
         vulners_cvss_comparison = {
             key: len(value) for key, value in vulners_by_cvss_groups.items()
         }
-        self.save_vulners_plots(vulners_cvss_comparison,
-                                name="CVSS vulnerabilities",
-                                suptitle="Percentage of vulnerabilities by CVSS v3.0 rating")
         vulners_cvss_hosts_comparison = {
             key: len(value) for key, value in vulners_by_cvss_groups_hosts.items()
         }
-        self.save_vulners_plots(vulners_cvss_hosts_comparison,
-                                name="hosts groupped by cvss rating",
-                                suptitle="Percentage of nodes divided into groups of CVSS rating vulnerabilities")
+
+        plots_information_to_save = [
+            {
+                "results": hosts_with_critical_vulnerabilities_comparison,
+                "name": "hosts with critical vulnerabilities",
+                "suptitle": "Percentage of nodes with critical vulnerabilities",
+            },
+            {
+                "results": critical_vulnerabilities_comparison,
+                "name": "critical vulnerabilities",
+                "suptitle": "Percentage of critical vulnerabilities",
+            },
+            {
+                "results": vulnerabilities_with_exploits_comparison,
+                "name": "vulnerabilities referenced in exploits",
+                "suptitle": "Percentage of vulnerabilities referenced in exploits documents",
+            },
+            {
+                "results": cpes_with_exploits_comparison,
+                "name": "hosts with exploitable software",
+                "suptitle": "Percentage of nodes with exploitable software",
+            },
+            {
+                "results": vulners_cvss_comparison,
+                "name": "CVSS vulnerabilities",
+                "suptitle": "Percentage of vulnerabilities by CVSS v3.0 rating",
+            },
+            {
+                "results": vulners_cvss_hosts_comparison,
+                "name": "hosts groupped by cvss rating",
+                "suptitle": "Percentage of nodes divided into groups of CVSS rating vulnerabilities"
+            }
+        ]
+        for entity_to_save in plots_information_to_save:
+            self.save_vulners_plots(entity_to_save.get("results"),
+                                    name=entity_to_save.get("name"),
+                                    suptitle=entity_to_save.get("suptitle"))
 
     @exception_handler(expected_exception=GrinderCoreSaveResultsError)
     def save_results(self, dest_dir=DefaultValues.RESULTS_DIRECTORY) -> None:

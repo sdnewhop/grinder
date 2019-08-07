@@ -27,7 +27,7 @@ class GrinderFileManager:
         load_dir=DefaultValues.RESULTS_DIRECTORY,
         load_file=DefaultValues.JSON_RESULTS_FILE,
         load_json_dir=DefaultValues.JSON_RESULTS_DIRECTORY,
-    ) -> None:
+    ) -> list:
         with open(f"{load_dir}/{load_json_dir}/{load_file}", mode="r") as saved_results:
             return loads(saved_results.read())
 

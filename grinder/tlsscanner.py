@@ -28,7 +28,8 @@ class TlsScanner:
         self.alive_hosts_with_ports: dict = {}
         self.n: int = n
 
-    def _grouper(self, n: int, iterable: Iterable, padding=None) -> Iterator:
+    @staticmethod
+    def _grouper(n: int, iterable: Iterable, padding=None) -> Iterator:
         """
         Make groups of n hosts
         :param n: quantity of hosts in group
@@ -49,8 +50,9 @@ class TlsScanner:
             else:
                 host_info.update({"tls_status": "offline"})
 
+    @staticmethod
     def sort_hosts_by_product(
-        self, hosts: dict, product_limit: int = DefaultTlsScannerValues.PRODUCT_LIMIT
+        hosts: dict, product_limit: int = DefaultTlsScannerValues.PRODUCT_LIMIT
     ) -> dict:
         """
         Sort hosts by unique products in limited quantity
@@ -260,7 +262,8 @@ class TlsScanner:
         print(f"└ ", end="")
         return tls_scanner_res
 
-    def _is_host_already_scanned(self, name_of_file) -> bool:
+    @staticmethod
+    def _is_host_already_scanned(name_of_file) -> bool:
         """
         Check if host was already scanned and results are in "TLS" directory
         :param name_of_file: name of file to check, without extension

@@ -2,12 +2,9 @@
 
 from csv import DictWriter
 from json import loads, dumps
+from pathlib import Path
 
-from grinder.decorators import (
-    exception_handler,
-    create_results_directory,
-    create_subdirectory,
-)
+from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
 from grinder.errors import GrinderFileManagerOpenError
 
@@ -18,7 +15,7 @@ class GrinderFileManager:
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def get_queries(self, queries_file=DefaultValues.QUERIES_FILE) -> list:
-        with open(queries_file, mode="r") as queries_file:
+        with open(Path(".").joinpath(queries_file), mode="r") as queries_file:
             return loads(queries_file.read())
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
@@ -28,7 +25,7 @@ class GrinderFileManager:
         load_file=DefaultValues.JSON_RESULTS_FILE,
         load_json_dir=DefaultValues.JSON_RESULTS_DIRECTORY,
     ) -> list:
-        with open(f"{load_dir}/{load_json_dir}/{load_file}", mode="r") as saved_results:
+        with open(Path(".").joinpath(load_dir).joinpath(load_json_dir).joinpath(load_file), mode="r") as saved_results:
             return loads(saved_results.read())
 
     @staticmethod
@@ -41,8 +38,6 @@ class GrinderFileManager:
         return dict_to_list_dictpairs
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
-    @create_results_directory()
-    @create_subdirectory(subdirectory=DefaultValues.JSON_RESULTS_DIRECTORY)
     def write_results_json(
         self,
         results_to_write: list or dict,
@@ -52,12 +47,13 @@ class GrinderFileManager:
     ) -> None:
         if not results_to_write:
             return
-        with open(f"{dest_dir}/{json_dir}/{json_file}", mode="w") as result_json_file:
+        path_to_json_file = Path(".").joinpath(dest_dir).joinpath(json_dir)
+        path_to_json_file.mkdir(parents=True, exist_ok=True)
+        path_to_json_file = path_to_json_file.joinpath(json_file)
+        with open(path_to_json_file, mode="w") as result_json_file:
             result_json_file.write(dumps(results_to_write, indent=4))
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
-    @create_results_directory()
-    @create_subdirectory(subdirectory=DefaultValues.CSV_RESULTS_DIRECTORY)
     def write_results_csv(
         self,
         results_to_write: list or dict,
@@ -67,7 +63,10 @@ class GrinderFileManager:
     ) -> None:
         if not results_to_write:
             return
-        with open(f"{dest_dir}/{csv_dir}/{csv_file}", mode="w") as result_csv_file:
+        path_to_csv_file = Path(".").joinpath(dest_dir).joinpath(csv_dir)
+        path_to_csv_file.mkdir(parents=True, exist_ok=True)
+        path_to_csv_file = path_to_csv_file.joinpath(csv_file)
+        with open(path_to_csv_file, mode="w") as result_csv_file:
             if isinstance(results_to_write, dict):
                 results_to_write = GrinderFileManager.csv_dict_fix(
                     results_to_write, csv_file
@@ -80,8 +79,6 @@ class GrinderFileManager:
                 writer.writerow(row)
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
-    @create_results_directory()
-    @create_subdirectory(subdirectory=DefaultValues.TXT_RESULTS_DIRECTORY)
     def write_results_txt(
         self,
         results_to_write: list or dict,
@@ -91,7 +88,10 @@ class GrinderFileManager:
     ) -> None:
         if not results_to_write:
             return
-        with open(f"{dest_dir}/{txt_dir}/{txt_file}", mode="w") as result_txt_file:
+        path_to_txt_file = Path(".").joinpath(dest_dir).joinpath(txt_dir)
+        path_to_txt_file.mkdir(parents=True, exist_ok=True)
+        path_to_txt_file = path_to_txt_file.joinpath(txt_file)
+        with open(path_to_txt_file, mode="w") as result_txt_file:
             if isinstance(results_to_write, list):
                 for item in results_to_write:
                     result_txt_file.write(f"{item}\n")
@@ -99,17 +99,6 @@ class GrinderFileManager:
                 result_txt_file.write(dumps(results_to_write))
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
-    @create_results_directory()
-    @create_subdirectory(subdirectory=DefaultValues.PNG_RESULTS_DIRECTORY)
-    @create_subdirectory(
-        subdirectory=f"{DefaultValues.PNG_RESULTS_DIRECTORY}/{DefaultValues.PNG_ALL_RESULTS_DIRECTORY}"
-    )
-    @create_subdirectory(
-        subdirectory=f"{DefaultValues.PNG_RESULTS_DIRECTORY}/{DefaultValues.PNG_LIMITED_RESULTS_DIRECTORY}"
-    )
-    @create_subdirectory(
-        subdirectory=f"{DefaultValues.PNG_RESULTS_DIRECTORY}/{DefaultValues.PNG_VULNERS_RESULTS}"
-    )
     def write_results_png(
         self,
         plot,
@@ -120,4 +109,7 @@ class GrinderFileManager:
     ) -> None:
         if not plot:
             return
-        plot.savefig(f"{dest_dir}/{png_dir}/{sub_dir}/{png_file}")
+        path_to_png_file = Path(".").joinpath(dest_dir).joinpath(png_dir).joinpath(sub_dir)
+        path_to_png_file.mkdir(parents=True, exist_ok=True)
+        path_to_png_file = path_to_png_file.joinpath(png_file)
+        plot.savefig(path_to_png_file)

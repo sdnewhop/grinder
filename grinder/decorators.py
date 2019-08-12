@@ -32,7 +32,7 @@ def timer(function):
         result = function(*args, **kwargs)
         end = time()
         seconds = round(end - start, 2)
-        print(f"Done in {seconds}s ({str(strftime('%M:%S', gmtime(seconds)))})")
+        print(f"Done in {seconds}s ({str(strftime('%H:%M:%S', gmtime(seconds)))})")
         return result
 
     return wrapper

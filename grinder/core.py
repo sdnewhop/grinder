@@ -416,11 +416,6 @@ class GrinderCore:
             dest_dir=dest_dir,
             csv_file=f"{name.replace(' ', '_')}.csv",
         )
-        self.filemanager.write_results_txt(
-            results,
-            dest_dir=dest_dir,
-            txt_file=f"{name.replace(' ', '_')}.txt",
-        )
 
     @exception_handler(expected_exception=GrinderCoreSaveVulnersPlotsError)
     def save_vulners_plots(self, results: dict or list, name: str, suptitle: str) -> None:
@@ -609,11 +604,6 @@ class GrinderCore:
                 dest_dir=dest_dir,
                 csv_file=DefaultValues.CSV_RESULTS_FILE,
             )
-            self.filemanager.write_results_txt(
-                list(self.combined_results.values()),
-                dest_dir=dest_dir,
-                txt_file=DefaultValues.TXT_RESULTS_FILE,
-            )
 
         if self.entities_count_all:
             for entity in self.entities_count_all:
@@ -627,11 +617,6 @@ class GrinderCore:
                     dest_dir=dest_dir,
                     csv_file=f'{entity.get("entity")}.csv',
                 )
-                self.filemanager.write_results_txt(
-                    entity.get("results"),
-                    dest_dir=dest_dir,
-                    txt_file=f'{entity.get("entity")}.txt',
-                )
 
         if self.entities_count_limit:
             for entity in self.entities_count_limit:
@@ -644,11 +629,6 @@ class GrinderCore:
                     entity.get("results"),
                     dest_dir=dest_dir,
                     csv_file=f'limited_{entity.get("entity")}.csv',
-                )
-                self.filemanager.write_results_txt(
-                    entity.get("results"),
-                    dest_dir=dest_dir,
-                    txt_file=f'limited_{entity.get("entity")}.txt',
                 )
 
     @exception_handler(expected_exception=GrinderCoreIsHostExistedError)

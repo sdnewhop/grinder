@@ -11,7 +11,7 @@ from typing import Iterator, Iterable
 from nmap import PortScanner
 from termcolor import cprint
 
-from grinder.decorators import create_results_directory, create_subdirectory, timer, exception_handler
+from grinder.decorators import timer, exception_handler
 from grinder.defaultvalues import DefaultTlsScannerValues, DefaultValues
 from grinder.errors import GrinderCoreTlsScanner
 from grinder.nmapprocessmanager import NmapProcessingManager
@@ -336,9 +336,8 @@ class TlsScanner:
             )
         print(f"TLS scan for {alive_hosts_quantity} hosts: ", end="")
 
-    @create_results_directory()
-    @create_subdirectory(subdirectory=DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)
-    def save_tls_results(self, dest_dir: str, sub_dir: str, filename: str, result) -> None:
+    @staticmethod
+    def save_tls_results(dest_dir: str, sub_dir: str, filename: str, result) -> None:
         """
         Save results of TLS-Scanner scanning in *.txt file
         :param dest_dir: destination directory with results ("results" by default)
@@ -347,8 +346,8 @@ class TlsScanner:
         :param result: result to save in file
         :return: None
         """
-        with open(
-            Path(".")
-            .joinpath(dest_dir)
-            .joinpath(sub_dir).joinpath(f"{filename}.txt"), mode="w") as result_file:
+        path_to_txt_file = Path(".").joinpath(dest_dir).joinpath(sub_dir)
+        path_to_txt_file.mkdir(parents=True, exist_ok=True)
+        path_to_txt_file = path_to_txt_file.joinpath(f"{filename}.txt")
+        with open(path_to_txt_file, mode="w") as result_file:
             result_file.write(result)

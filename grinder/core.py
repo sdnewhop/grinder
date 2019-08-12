@@ -4,10 +4,9 @@ Basic core module for grinder. All functions from
 Other modules must be wrapped here for proper usage.
 """
 
-from typing import NamedTuple, List
+from typing import NamedTuple, List, Dict
 from termcolor import cprint
 from re import findall
-from time import sleep
 
 # from enforce import runtime_validation
 
@@ -128,13 +127,14 @@ class GrinderCore:
 
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)
-    def shodan_search(self, query: str, results_count=None) -> list:
+    def shodan_search(self, query: str, results_count: int = None) -> List[dict]:
         """
         Search in shodan database with ShodanConnector
         module.
 
-        :param query (str): search query for shodan
-        :return list: raw shodan results in list
+        :param results_count: quantity of results to scan for
+        :param query: search query for shodan
+        :return: raw shodan results in list
         """
 
         # Skip default values
@@ -148,12 +148,15 @@ class GrinderCore:
                 self.shodan_results_limit
                 or DefaultValues.SHODAN_DEFAULT_RESULTS_QUANTITY
             )
+
         shodan = ShodanConnector(api_key=self.shodan_api_key)
         shodan.search(query, results_count)
         shodan_raw_results = shodan.get_results()
+
         print(f"│ Shodan results count: {shodan.get_shodan_count()}")
         print(f"│ Real results count: {shodan.get_real_count()}")
         print(f"└ ", end="")
+
         return shodan_raw_results
 
     @exception_handler(expected_exception=GrinderCoreSetCensysMaxResultsError)
@@ -161,8 +164,8 @@ class GrinderCore:
         """
         Set maximum results quantity for Censys queries (1000 is maximum for free API plan)
 
-        :param results_count (int): maximum results quantity
-        :return None:
+        :param results_count: maximum results quantity
+        :return: None
         """
         self.censys_results_limit = results_count
 
@@ -171,21 +174,21 @@ class GrinderCore:
         """
         Set maximum results quantity for Shodan queries
 
-        :param results_count (int): maximum results quantity
-        :return None:
+        :param results_count: maximum results quantity
+        :return: None
         """
         self.shodan_results_limit = results_count
 
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)
-    def censys_search(self, query: str, results_count=None) -> list:
+    def censys_search(self, query: str, results_count: int = None) -> List[dict]:
         """
         Search in censys database with CensysConnector
         module.
 
-        :param query (str): search query for censys
-        :param results_count (int): maximum results quantity
-        :return list: raw censys results in list
+        :param query: search query for censys
+        :param results_count: maximum results quantity
+        :return: raw censys results in list
         """
 
         # Skip default values
@@ -208,27 +211,33 @@ class GrinderCore:
         )
         censys.search(query, results_count)
         censys_raw_results = censys.get_results()
+
         print(f"│ Censys results count: {censys.get_results_count()}")
         print(f"└ ", end="")
+
         return censys_raw_results
 
     @exception_handler(expected_exception=GrinderCoreUpdateMapMarkersError)
-    def update_map_markers(self, search_results=None) -> None:
+    def update_map_markers(self, search_results: dict = None) -> None:
         """
         Update map markers in JavaScript map
 
-        :param search_results (dict): processed results in dict
-        :return None:
+        :param search_results: processed results in dict
+        :return: None
         """
         cprint("Updating current map markers...", "blue", attrs=["bold"])
         if search_results is None:
             search_results = list(self.combined_results.values())
         MapMarkers().update_markers(search_results)
 
-    def __get_proper_entity_name(self, entity_name):
+    @staticmethod
+    def __get_proper_entity_name(entity_name: str) -> str:
         """
-        Quick fix to convert entity names, 
+        Quick fix to convert entity names,
         like vendor - vendors, port - ports etc.
+
+        :param entity_name: name of entity
+        :return: modified entity name
         """
         if entity_name.lower() in ["continent", "port", "product", "vendor"]:
             return entity_name + "s"
@@ -242,11 +251,12 @@ class GrinderCore:
         """
         Create graphics and plots
 
-        :return None:
+        :return: None
         """
         cprint("Create graphical plots...", "blue", attrs=["bold"])
         plots = GrinderPlots()
         limited_plots = GrinderPlots()
+
         # Save all results without limits
         for entity in self.entities_count_all:
             if not entity.get("results"):
@@ -260,6 +270,7 @@ class GrinderCore:
                 relative_path=DefaultValues.PNG_ALL_RESULTS_DIRECTORY,
                 filename=f'{entity.get("entity")}.png',
             )
+
         # Save results with maximum limit
         for limited_entity in self.entities_count_limit:
             if not limited_entity.get("results"):
@@ -277,13 +288,13 @@ class GrinderCore:
             )
 
     @exception_handler(expected_exception=GrinderCoreConvertToContinentsError)
-    def count_continents(self) -> dict:
+    def count_continents(self) -> Dict[str, int]:
         """
         Count unique continents based on country. This method is custom
         because we need to convert our countries to continents before
         we put it in analysis.
 
-        :return dict: dictionary {'country':Count of products in that country}
+        :return: dictionary {'country': number of products in that country}
         """
         continents: dict = {}
         for entity in self.entities_count_all:
@@ -293,17 +304,17 @@ class GrinderCore:
         self.entities_count_all.append({"entity": "continent", "results": continents})
         return continents
 
-    def count_vulnerabilities(self, max_vulnerabilities=10) -> List[str]:
+    def count_vulnerabilities(self, max_vulnerabilities: int = 10) -> List[str]:
         """
         Count unique vulnerabilities from Shodan and Vulners.com API scan
 
-        :return dict: dictionary {'vulnerability': number of affected services}
+        :param max_vulnerabilities: maximum quantity of vulnerabilities
+        :return: full CVE list with entities in format {'vulnerability': number of affected services}
         """
         full_cve_list: list = []
         for host in self.combined_results.values():
             shodan_cve_list: list = []
             vulners_cve_list: list = []
-            host_vulnerabilities: list = []
 
             vulnerabilities = host.get("vulnerabilities")
             if not vulnerabilities:
@@ -342,17 +353,17 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreLoadResultsFromFileError)
     def load_results_from_file(
         self,
-        load_dir=DefaultValues.RESULTS_DIRECTORY,
-        load_file=DefaultValues.JSON_RESULTS_FILE,
-        load_json_dir=DefaultValues.JSON_RESULTS_DIRECTORY,
+        load_dir: str = DefaultValues.RESULTS_DIRECTORY,
+        load_file: str = DefaultValues.JSON_RESULTS_FILE,
+        load_json_dir: str = DefaultValues.JSON_RESULTS_DIRECTORY,
     ) -> dict:
         """
         Load saved results of latest previous scan from json file
 
-        :param load_dir (str): base directory with results
-        :param load_file (str): json results filename
-        :param load_json_dir (str): directory with json results to load from
-        :return list: processed search results
+        :param load_dir: base directory with results
+        :param load_file: json results filename
+        :param load_json_dir: directory with json results to load from
+        :return: processed search results
         """
         try:
             self.combined_results = self.filemanager.load_data_from_file(
@@ -373,7 +384,7 @@ class GrinderCore:
         """
         Load saved results of latest previous scan from database
 
-        :return list: processed search results
+        :return: processed search results
         """
         try:
             self.combined_results = self.db.load_last_results()
@@ -389,7 +400,7 @@ class GrinderCore:
         """
         Load saved results from file or from database (any)
 
-        :return list: processed search results
+        :return: processed search results
         """
         return self.load_results_from_file() or self.load_results_from_db()
 
@@ -571,12 +582,12 @@ class GrinderCore:
                                     suptitle=entity_to_save.get("suptitle"))
 
     @exception_handler(expected_exception=GrinderCoreSaveResultsError)
-    def save_results(self, dest_dir=DefaultValues.RESULTS_DIRECTORY) -> None:
+    def save_results(self, dest_dir: str = DefaultValues.RESULTS_DIRECTORY) -> None:
         """
         Save all scan results to all formats
 
-        :param dest_dir (str): directory to save results
-        :return None:
+        :param dest_dir: directory to save results
+        :return: None
         """
         cprint("Save all results...", "blue", attrs=["bold"])
         # If all scan results were empty after refreshing
@@ -636,33 +647,33 @@ class GrinderCore:
         """
         Check if current host is existed in current results. 
 
-        :param ip (str): host ip
-        :return bool: answer to question "Is current host already scanned?"
+        :param ip: host ip
+        :return: answer to question "Is current host already scanned?"
         """
         return self.shodan_processed_results.get(
             ip
         ) or self.censys_processed_results.get(ip)
 
-    def set_unique_entities_quantity(self, max_entitities):
+    def set_unique_entities_quantity(self, max_entities: int) -> None:
         """
         Set maximum limit of unique entities for count
 
-        :param max_entities (int): number of entities
-        :return Nones:
+        :param max_entities: number of entities
+        :return: None
         """
-        self.max_entities = max_entitities
+        self.max_entities = max_entities
 
     @exception_handler(expected_exception=GrinderCoreCountUniqueProductsError)
     def count_unique_entities(
-        self, entity_name, search_results=None, max_entities=None
+        self, entity_name: str, search_results: dict = None, max_entities: int = None
     ) -> None:
         """
         Count every unique entity (like country, protocol, port, etc.)
 
-        :param entity_name (str): name of entity ('country', 'proto', etc.)
-        :param search_results (dict): results to count from
-        :param max_entities (int): max entities in count
-        :return None:
+        :param entity_name: name of entity ('country', 'proto', etc.)
+        :param search_results: results to count from
+        :param max_entities: max entities in count
+        :return: None
         """
         cprint(f"Count unique {entity_name}...", "blue", attrs=["bold"])
         if not max_entities:
@@ -696,10 +707,10 @@ class GrinderCore:
         Parse raw results from shodan. Results were received from
         ShodanConnector module.
 
-        :param current_host (dict): current host information
-        :param query (str): current active query on which we found this host
-        :param product_info (dict): information about current product
-        :return None:
+        :param current_host: current host information
+        :param query: current active query on which we found this host
+        :param product_info: information about current product
+        :return: None
         """
         if not (
             current_host.get("location").get("latitude")
@@ -737,10 +748,10 @@ class GrinderCore:
         Parse raw results from censys. Results were received from
         CensysConnector module.
 
-        :param current_host (dict): current host information
-        :param query (str): current active query on which we found this host
-        :param product_info (dict): information about current product
-        :return None:
+        :param current_host: current host information
+        :param query: current active query on which we found this host
+        :param product_info: information about current product
+        :return: None
         """
         if not (current_host.get("lat") and current_host.get("lng")):
             return
@@ -770,7 +781,7 @@ class GrinderCore:
         Initialize database in case of first-time using. Here we are create
         database and put basic structures in it.
 
-        :return None:
+        :return: None
         """
         self.db.create_db()
         self.db.initiate_scan()
@@ -780,7 +791,7 @@ class GrinderCore:
         """
         Close current database after use
 
-        :return None:
+        :return: None
         """
         self.db.close()
 
@@ -789,7 +800,7 @@ class GrinderCore:
         """
         Update time when we finish scan
 
-        :return None:
+        :return: None
         """
         self.db.update_end_time()
 
@@ -798,9 +809,9 @@ class GrinderCore:
         """
         Update all results counters when we finish scan
 
-        :param total_products (int): quantity of all products
-        :param total_results (int): quantity of all results
-        :return None:
+        :param total_products: quantity of all products
+        :param total_results: quantity of all results
+        :return: None
         """
         self.db.update_results_count(total_products, total_results)
 
@@ -809,7 +820,7 @@ class GrinderCore:
         """
         Add basic information from json file with queries into database.
 
-        :return None:
+        :return: None
         """
         self.db.add_basic_scan_data(
             vendor=product_info.get("vendor"),
@@ -823,8 +834,8 @@ class GrinderCore:
         """
         Save current query-based results to database
 
-        :param query (str): current search query
-        :return None:
+        :param query: current search query
+        :return: None
         """
         results_by_query = list(
             filter(
@@ -842,8 +853,8 @@ class GrinderCore:
         """
         Save current query-based results to database
 
-        :param query (str): current search query
-        :return None:
+        :param query: current search query
+        :return: None
         """
         results_by_query = list(
             filter(
@@ -861,7 +872,7 @@ class GrinderCore:
         """
         Save all results to database
 
-        :return None:
+        :return: None
         """
         cprint("Save all results to database...", "blue", attrs=["bold"])
         for product_info in self.queries_file:
@@ -881,8 +892,8 @@ class GrinderCore:
         """
         Check if current query confidence is valid
 
-        :param query_confidence (str): query confidence to check
-        :return None:
+        :param query_confidence: query confidence to check
+        :return: bool answer to question "Is current query confidence level is valid?"
         """
         # If current query confidence level is not set - every query is ok
         if not self.query_confidence:
@@ -967,7 +978,12 @@ class GrinderCore:
         }
 
     @exception_handler(expected_exception=GrinderCoreTlsScanner)
-    def tls_scan(self, scanner_path):
+    def tls_scan(self, scanner_path: str) -> None:
+        """
+        Initiate TLS configuration scanning
+        :param scanner_path: path to scanner itself
+        :return: None
+        """
         cprint("Start TLS scanning", "blue", attrs=["bold"])
         if not self.combined_results:
             if not self.shodan_processed_results:
@@ -1037,16 +1053,17 @@ class GrinderCore:
         host_timeout: int = DefaultNmapScanValues.HOST_TIMEOUT,
         arguments: str = DefaultNmapScanValues.ARGUMENTS,
         workers: int = DefaultNmapScanValues.WORKERS,
-    ):
+    ) -> None:
         """
         Initiate Nmap scan on hosts
 
-        :param ports (str): ports to scan
-        :param top_ports (int): quantity of top-ports to scan
-        :param sudo (bool): sudo if needed
-        :param arguments (str): Nmap arguments
-        :param workers (int): number of Nmap workers
-        :return None:
+        :param ports: ports to scan
+        :param top_ports: quantity of top-ports to scan
+        :param sudo: sudo if needed
+        :param host_timeout: timeout for host in case of very long scanning
+        :param arguments: Nmap arguments
+        :param workers: number of Nmap workers
+        :return: None
         """
         cprint("Start Nmap scanning", "blue", attrs=["bold"])
         cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])
@@ -1098,7 +1115,17 @@ class GrinderCore:
         workers: int = DefaultVulnersScanValues.WORKERS,
         host_timeout: int = DefaultVulnersScanValues.HOST_TIMEOUT,
         vulners_path: str = DefaultVulnersScanValues.VULNERS_SCRIPT_PATH,
-    ):
+    ) -> None:
+        """
+        Almost the same as Nmap scan but with slightly different features
+        :param sudo:
+        :param ports:
+        :param top_ports:
+        :param workers:
+        :param host_timeout:
+        :param vulners_path:
+        :return:
+        """
         cprint("Start Vulners API scanning", "blue", attrs=["bold"])
         cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])
         if not self.shodan_processed_results:
@@ -1166,8 +1193,8 @@ class GrinderCore:
         """
         Set vendor confidence level for search
 
-        :param confidence (str): confidence level
-        :return None:
+        :param confidence: confidence level
+        :return: None
         """
         self.vendor_confidence = confidence
 
@@ -1175,8 +1202,8 @@ class GrinderCore:
         """
         Set query confidence level for search
 
-        :param confidence (str): confidence level
-        :return None:
+        :param confidence: confidence level
+        :return: None
         """
         self.query_confidence = confidence
 
@@ -1184,8 +1211,8 @@ class GrinderCore:
         """
         Set list of vendors to search for
 
-        :param vendors (list): list of vendors
-        :return None:
+        :param vendors: list of vendors
+        :return: None
         """
         self.vendors = vendors
 
@@ -1194,7 +1221,7 @@ class GrinderCore:
         """
         Filter queries by vendor confidence (not the same as query confidence)
 
-        :return None:
+        :return: None
         """
         if not self.vendor_confidence:
             return
@@ -1232,7 +1259,7 @@ class GrinderCore:
         """
         Filter queries by vendors
 
-        :return None:
+        :return: None
         """
         # Make list of all existed products
         if not self.vendors:
@@ -1265,12 +1292,12 @@ class GrinderCore:
         )
 
     @exception_handler(expected_exception=GrinderCoreRunScriptsError)
-    def run_scripts(self, queries_filename):
+    def run_scripts(self, queries_filename: str):
         """
         Initiate script execution
 
-        :param queries_filename (str): name of json file with input data
-            such as queries (shodan_queries, censys_queries)
+        :param queries_filename: name of json file with input data
+            such as queries (shodan_queries, censys_queries, etc.)
         :return None
         """
         cprint("Start Custom Scripts scanning", "blue", attrs=["bold"])
@@ -1334,7 +1361,7 @@ class GrinderCore:
         earlier), and we process every product in queries file (parsing, 
         processing, etc.). Basically it is the main search method in module.
 
-        :param queries_filename (str): name of json file with input data
+        :param queries_filename: name of json file with input data
             such as queries (shodan_queries, censys_queries)
         :return dict: all processed results from searches in format like
             {

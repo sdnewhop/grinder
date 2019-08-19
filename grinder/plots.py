@@ -19,8 +19,8 @@ class GrinderPlots:
 
     @exception_handler(expected_exception=GrinderPlotsSavePieChartError)
     def save_pie_chart(self, relative_path: str, filename: str) -> None:
-        GrinderFileManager.write_results_png(
-            self,
+        filemanager = GrinderFileManager()
+        filemanager.write_results_png(
             self.plot,
             png_file=filename,
             dest_dir=DefaultValues.RESULTS_DIRECTORY,
@@ -51,14 +51,13 @@ class GrinderPlots:
         plot.figure()
         plot.subplots_adjust(bottom=0.05, left=0.40, right=0.90, top=0.90, hspace=0.35)
 
-        explode = [0 for x in range(len(keys))]
+        explode = [0 for _ in range(len(keys))]
         max_value = max(values)
         explode[list(values).index(max_value)] = 0.1
 
         patches, texts = plot.pie(
             values,
             labels=percents,
-            #autopct=self.__adjust_autopct(values),
             explode=explode,
             textprops={"fontsize": DefaultPlotValues.PLOT_LABEL_FONT_SIZE},
         )

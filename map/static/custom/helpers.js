@@ -12,8 +12,7 @@ function ping(index) {
         return response.json();
     }).then(function(pingStatus) {
         console.log(pingStatus);
-        document.getElementById('host-ping-status').innerHTML = (pingStatus.status === 'online' ||
-            pingStatus.status === 'offline') ? pingStatus.status : 'error';
+        document.getElementById('host-ping-status').innerHTML = pingStatus.status ? pingStatus.status : pingStatus.error;
         document.getElementById('host-ping-status').style.color = (pingStatus.status === 'online') ? 'green' : 'red';
     });
 }

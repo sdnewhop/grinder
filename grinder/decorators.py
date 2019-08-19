@@ -25,34 +25,6 @@ def exception_handler(expected_exception):
     return real_decorator
 
 
-def create_results_directory(directory: str = None):
-    def real_decorator(function):
-        def func_wrapper(*args, **kwargs):
-            full_results_path = f"./{kwargs.get('dest_dir') or directory}"
-            if not path.exists(full_results_path):
-                makedirs(full_results_path)
-            return function(*args, **kwargs)
-
-        return func_wrapper
-
-    return real_decorator
-
-
-def create_subdirectory(subdirectory: str, rootdirectory: str = None):
-    def real_decorator(function):
-        def func_wrapper(*args, **kwargs):
-            full_results_path = (
-                f"./{kwargs.get('dest_dir') or rootdirectory}/{subdirectory}"
-            )
-            if not path.exists(full_results_path):
-                makedirs(full_results_path)
-            return function(*args, **kwargs)
-
-        return func_wrapper
-
-    return real_decorator
-
-
 def timer(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
@@ -60,7 +32,7 @@ def timer(function):
         result = function(*args, **kwargs)
         end = time()
         seconds = round(end - start, 2)
-        print(f"Done in {seconds}s ({str(strftime('%M:%S', gmtime(seconds)))})")
+        print(f"Done in {seconds}s ({str(strftime('%H:%M:%S', gmtime(seconds)))})")
         return result
 
     return wrapper

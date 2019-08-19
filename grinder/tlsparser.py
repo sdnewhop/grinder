@@ -55,7 +55,8 @@ class TlsParser:
     def __init__(self, hosts: dict) -> None:
         self.hosts: dict = hosts
 
-    def _parse_attacks(self, results: str) -> (dict, dict) or (str, str):
+    @staticmethod
+    def _parse_attacks(results: str) -> (dict, dict) or (str, str):
         """
         Parse file with host results
         :param results: results for some host
@@ -174,10 +175,11 @@ class TlsParser:
         self.save_unique_results_csv(unique_bugs, filename=DefaultTlsParserValues.UNIQUE_BUGS_CSV)
         self.save_unique_results_csv(unique_vulnerabilities, filename=DefaultTlsParserValues.UNIQUE_VULNERABILITIES_CSV)
 
-        self.save_unique_groupped_results_csv(all_results, filename=DefaultTlsParserValues.UNIQUE_GROUPPED_PRODUCTS_RESULTS_CSV)
+        self.save_unique_groupped_results_csv(all_results,
+                                              filename=DefaultTlsParserValues.UNIQUE_GROUPPED_PRODUCTS_RESULTS_CSV)
 
-
-    def count_unique_entities(self, results: dict, ent_type: str) -> dict:
+    @staticmethod
+    def count_unique_entities(results: dict, ent_type: str) -> dict:
         """
         Count unique entities (attacks, bugs, vulnerabilities, etc.)
         :param results: dictionary with results to count in
@@ -192,8 +194,8 @@ class TlsParser:
         )
         return entities_sorted_by_value
 
+    @staticmethod
     def save_results_json(
-        self,
         results: dict or list,
         filename: str,
         dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
@@ -216,67 +218,67 @@ class TlsParser:
             except:
                 raise Exception("Can not save hosts to json file")
 
+    @staticmethod
     def save_results_csv(
-            self,
-            results: dict,
-            filename: str,
-            dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
-            sub_dir: str = DefaultTlsParserValues.PARSED_RESULTS_DIR,
-        ) -> None:
-            """
-            Save results to CSV file
-            :param results: results to save in file
-            :param filename: name of file
-            :param dest_dir: basic results dir
-            :param sub_dir: subdirectory in destination directory to save
-            :return: None
-            """
-            full_path = Path(".").joinpath(dest_dir).joinpath(sub_dir)
-            full_path.mkdir(parents=True, exist_ok=True)
-            full_path = full_path.joinpath(filename)
-            csv_columns = ["ip", "vendor", "product", "port", "attacks", "bugs", "vulnerabilities"]
+        results: dict,
+        filename: str,
+        dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
+        sub_dir: str = DefaultTlsParserValues.PARSED_RESULTS_DIR,
+    ) -> None:
+        """
+        Save results to CSV file
+        :param results: results to save in file
+        :param filename: name of file
+        :param dest_dir: basic results dir
+        :param sub_dir: subdirectory in destination directory to save
+        :return: None
+        """
+        full_path = Path(".").joinpath(dest_dir).joinpath(sub_dir)
+        full_path.mkdir(parents=True, exist_ok=True)
+        full_path = full_path.joinpath(filename)
+        csv_columns = ["ip", "vendor", "product", "port", "attacks", "bugs", "vulnerabilities"]
 
-            with open(full_path, "w") as csv_file:
-                writer = DictWriter(csv_file, fieldnames=csv_columns)
-                writer.writeheader()
+        with open(full_path, "w") as csv_file:
+            writer = DictWriter(csv_file, fieldnames=csv_columns)
+            writer.writeheader()
 
-                sorted_by_vendor = sorted(results.items(), key=lambda item: item[1].get("product"))
-                results = OrderedDict(sorted_by_vendor)
+            sorted_by_vendor = sorted(results.items(), key=lambda item: item[1].get("product"))
+            results = OrderedDict(sorted_by_vendor)
 
-                for ip, data in results.items():
-                    data.update({"ip": ip})
-                    data.update({"attacks": list(data["attacks"].keys())})
-                    data.update({"bugs": list(data["bugs"].keys())})
-                    writer.writerow(data) 
+            for ip, data in results.items():
+                data.update({"ip": ip})
+                data.update({"attacks": list(data["attacks"].keys())})
+                data.update({"bugs": list(data["bugs"].keys())})
+                writer.writerow(data)
 
+    @staticmethod
     def save_unique_results_csv(
-            self,
-            results: dict,
-            filename: str,
-            dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
-            sub_dir: str = DefaultTlsParserValues.PARSED_RESULTS_DIR,
-        ) -> None:
-            """
-            Save unique results to CSV file
-            :param results: results to save in file
-            :param filename: name of file
-            :param dest_dir: basic results dir
-            :param sub_dir: subdirectory in destination directory to save
-            :return: None
-            """
-            full_path = Path(".").joinpath(dest_dir).joinpath(sub_dir)
-            full_path.mkdir(parents=True, exist_ok=True)
-            full_path = full_path.joinpath(filename)
-            csv_columns = ["name", "quantity"]
+        results: dict,
+        filename: str,
+        dest_dir: str = DefaultValues.RESULTS_DIRECTORY,
+        sub_dir: str = DefaultTlsParserValues.PARSED_RESULTS_DIR,
+    ) -> None:
+        """
+        Save unique results to CSV file
+        :param results: results to save in file
+        :param filename: name of file
+        :param dest_dir: basic results dir
+        :param sub_dir: subdirectory in destination directory to save
+        :return: None
+        """
+        full_path = Path(".").joinpath(dest_dir).joinpath(sub_dir)
+        full_path.mkdir(parents=True, exist_ok=True)
+        full_path = full_path.joinpath(filename)
+        csv_columns = ["name", "quantity"]
 
-            with open(full_path, "w") as csv_file:
-                writer = DictWriter(csv_file, fieldnames=csv_columns)
-                writer.writeheader()
-                for name, quantity in results.items():
-                    writer.writerow({"name": name, "quantity": quantity})
-    
+        with open(full_path, "w") as csv_file:
+            writer = DictWriter(csv_file, fieldnames=csv_columns)
+            writer.writeheader()
+            for name, quantity in results.items():
+                writer.writerow({"name": name, "quantity": quantity})
+
+    @staticmethod
     def save_unique_groupped_results_csv(
-        self,
         results: dict,
         filename: str,
         dest_dir: str = DefaultValues.RESULTS_DIRECTORY,

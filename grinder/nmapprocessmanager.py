@@ -87,10 +87,12 @@ class NmapProcessingManager:
     def start(self):
         self.organize_processes()
 
-    def get_results(self) -> dict:
+    @staticmethod
+    def get_results() -> dict:
         return NmapProcessingResults.RESULTS
 
-    def get_results_count(self) -> int:
+    @staticmethod
+    def get_results_count() -> int:
         return len(NmapProcessingResults.RESULTS)
 
     def __del__(self):

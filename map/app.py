@@ -3,7 +3,7 @@ from pathlib import Path
 from sys import exit
 from json import load
 from platform import system
-from subprocess import run, PIPE
+from subprocess import run, PIPE, TimeoutExpired
 
 
 MARKERS: list = []
@@ -20,7 +20,7 @@ def ping(host: str) -> bool:
     """
     param = "-n" if system().lower() == "windows" else "-c"
     command = ["ping", param, "1", host]
-    return run(command, stdout=PIPE, stderr=PIPE).returncode == 0
+    return run(command, stdout=PIPE, stderr=PIPE, timeout=3).returncode == 0
 
 
 @app.before_first_request
@@ -100,8 +100,10 @@ def api_raw_host_ping(host_id: str or int) -> wrappers.Response:
             return jsonify({"status": "online"})
         else:
             return jsonify({"status": "offline"})
+    except (TimeoutExpired, TimeoutError):
+        return jsonify({"error": "timeout"})
     except:
-        return jsonify({"error": "can not ping host"})
+        return jsonify({"error": "ping error"})
 
 
 @app.route("/api/viewall", methods=["GET"])

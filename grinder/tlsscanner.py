@@ -11,7 +11,7 @@ from typing import Iterator, Iterable
 from nmap import PortScanner
 from termcolor import cprint
 
-from grinder.decorators import create_results_directory, create_subdirectory, timer, exception_handler
+from grinder.decorators import timer, exception_handler
 from grinder.defaultvalues import DefaultTlsScannerValues, DefaultValues
 from grinder.errors import GrinderCoreTlsScanner
 from grinder.nmapprocessmanager import NmapProcessingManager
@@ -28,7 +28,8 @@ class TlsScanner:
         self.alive_hosts_with_ports: dict = {}
         self.n: int = n
 
-    def _grouper(self, n: int, iterable: Iterable, padding=None) -> Iterator:
+    @staticmethod
+    def _grouper(n: int, iterable: Iterable, padding=None) -> Iterator:
         """
         Make groups of n hosts
         :param n: quantity of hosts in group
@@ -49,8 +50,9 @@ class TlsScanner:
             else:
                 host_info.update({"tls_status": "offline"})
 
+    @staticmethod
     def sort_hosts_by_product(
-        self, hosts: dict, product_limit: int = DefaultTlsScannerValues.PRODUCT_LIMIT
+        hosts: dict, product_limit: int = DefaultTlsScannerValues.PRODUCT_LIMIT
     ) -> dict:
         """
         Sort hosts by unique products in limited quantity
@@ -84,8 +86,9 @@ class TlsScanner:
         :param hosts: dictionary with hosts
         :return: hosts
         """
-        copy_hosts = deepcopy(hosts)
-        for ip, info in copy_hosts.items():
+        online_hosts = deepcopy(hosts)
+
+        for ip, info in hosts.items():
             vendor = info.get("vendor")
             product = info.get("product")
             port = info.get("port")
@@ -95,12 +98,12 @@ class TlsScanner:
                     host=ip, port=str(possible_port), vendor=vendor, product=product
                 ).replace(" ", "_")
                 if self._is_host_already_scanned(name_of_file):
-                    hosts.pop(ip)
+                    online_hosts.pop(ip)
                     break
-        difference = len(list(copy_hosts.keys())) - len(list(hosts.keys()))
+        difference = len(list(hosts.keys())) - len(list(online_hosts.keys()))
         # Return number of already scanned hosts
         print(f"Remove already scanned hosts: {str(difference)}")
-        return hosts
+        return online_hosts
 
     def sort_alive_hosts(self) -> None:
         """
@@ -110,9 +113,9 @@ class TlsScanner:
         :return: None
         """
         nm = PortScanner()
-        self.hosts = self._remove_already_scanned_hosts(self.hosts)
-        self.hosts = self.sort_hosts_by_product(self.hosts)
-        hosts_ip = list(self.hosts.keys())
+        online_hosts = self._remove_already_scanned_hosts(self.hosts)
+        online_hosts = self.sort_hosts_by_product(online_hosts)
+        hosts_ip = list(online_hosts.keys())
         groups = self._grouper(self.n, hosts_ip)
         groups = [list(group) for group in groups]
         groups_len = len(groups)
@@ -259,7 +262,8 @@ class TlsScanner:
         print(f"└ ", end="")
         return tls_scanner_res
 
-    def _is_host_already_scanned(self, name_of_file) -> bool:
+    @staticmethod
+    def _is_host_already_scanned(name_of_file) -> bool:
         """
         Check if host was already scanned and results are in "TLS" directory
         :param name_of_file: name of file to check, without extension
@@ -335,9 +339,8 @@ class TlsScanner:
             )
         print(f"TLS scan for {alive_hosts_quantity} hosts: ", end="")
 
-    @create_results_directory()
-    @create_subdirectory(subdirectory=DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)
-    def save_tls_results(self, dest_dir: str, sub_dir: str, filename: str, result) -> None:
+    @staticmethod
+    def save_tls_results(dest_dir: str, sub_dir: str, filename: str, result) -> None:
         """
         Save results of TLS-Scanner scanning in *.txt file
         :param dest_dir: destination directory with results ("results" by default)
@@ -346,8 +349,8 @@ class TlsScanner:
         :param result: result to save in file
         :return: None
         """
-        with open(
-            Path(".")
-            .joinpath(dest_dir)
-            .joinpath(sub_dir).joinpath(f"{filename}.txt"), mode="w") as result_file:
+        path_to_txt_file = Path(".").joinpath(dest_dir).joinpath(sub_dir)
+        path_to_txt_file.mkdir(parents=True, exist_ok=True)
+        path_to_txt_file = path_to_txt_file.joinpath(f"{filename}.txt")
+        with open(path_to_txt_file, mode="w") as result_file:
             result_file.write(result)

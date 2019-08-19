@@ -186,7 +186,7 @@ class GrinderDatabase:
 
     @exception_handler(expected_exception=GrinderDatabaseAddScanDataError)
     def add_shodan_scan_data(
-        self, query: str, results_count: int, results: dict
+        self, query: dict, results_count: int, results: dict or list
     ) -> None:
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(
@@ -223,7 +223,7 @@ class GrinderDatabase:
 
     @exception_handler(expected_exception=GrinderDatabaseAddScanDataError)
     def add_censys_scan_data(
-        self, query: str, results_count: int, results: dict
+        self, query: dict, results_count: int, results: dict or list
     ) -> None:
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(

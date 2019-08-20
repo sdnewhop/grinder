@@ -16,6 +16,13 @@ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/
     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
     subdomains: ['a', 'b', 'c']
 }).addTo(map);
+L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}{r}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    subdomains: 'abcd',
+    minZoom: 0,
+    maxZoom: 20,
+    ext: 'png'
+}).addTo(map);
 
 var source = document.getElementById('grinder-popup').innerHTML;
 var template = Handlebars.compile(source);
@@ -59,8 +66,8 @@ fetch(window.location.origin + '/api/viewall')
                     icon: myIcon
                 })
                 .bindPopup(popup);
-            m.on('mouseover', function (e) {
-              this.openPopup();
+            m.on('mouseover', function(e) {
+                this.openPopup();
             });
             m.marker_index = i;
             markerClusters.addLayer(m);

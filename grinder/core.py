@@ -405,12 +405,17 @@ class GrinderCore:
         return self.load_results_from_file() or self.load_results_from_db()
 
     @exception_handler(expected_exception=GrinderCoreSaveVulnersResultsError)
-    def save_vulners_results(self, results: dict, name: str, dest_dir=DefaultValues.RESULTS_DIRECTORY) -> None:
+    def save_vulners_results(self,
+                             results: dict,
+                             name: str,
+                             dest_dir=DefaultValues.RESULTS_DIRECTORY,
+                             hosts_results=None) -> None:
         """
         Save results from vulners separately from another results
         :param results: results to save
         :param name: name of file
         :param dest_dir: directory to save
+        :param hosts_result: results with all hosts
         :return: None
         """
         cprint(f"Save Vulners reports for {name}...", "blue", attrs=["bold"])
@@ -427,6 +432,13 @@ class GrinderCore:
             dest_dir=dest_dir,
             csv_file=f"{name.replace(' ', '_')}.csv",
         )
+        if name == "vulners exploits by vulnerabilities":
+            self.filemanager.write_results_csv_exploits_to_cve(
+                results,
+                dest_dir=dest_dir,
+                csv_file=f"{name.replace(' ', '_')}.csv",
+                hosts_results=hosts_results
+            )
 
     @exception_handler(expected_exception=GrinderCoreSaveVulnersPlotsError)
     def save_vulners_plots(self, results: dict or list, name: str, suptitle: str) -> None:
@@ -510,6 +522,7 @@ class GrinderCore:
             self.save_vulners_results(
                 results,
                 name=name,
+                hosts_results=self.combined_results,
             )
 
         # Count length

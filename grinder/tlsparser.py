@@ -28,6 +28,8 @@ LIST_OF_ATTACKS = [
     "DROWN",
     "Heartbleed",
     "EarlyCcs",
+    "Invalid Curve",
+    "Invalid Curve Ephemerals",
 ]
 
 # Possible list of bugs from TLS-Scanner

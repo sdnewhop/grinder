@@ -269,14 +269,20 @@ class TlsScanner:
         :param name_of_file: name of file to check, without extension
         :return: answer to question "Is current host was already scanned?"
         """
-        if f"{name_of_file}.txt" in listdir(
-            Path(".")
-            .joinpath(DefaultValues.RESULTS_DIRECTORY)
-            .joinpath(DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)):
+        results_dir = Path(".").joinpath(
+            DefaultValues.RESULTS_DIRECTORY
+        ).joinpath(DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)
+        if f"{name_of_file}.txt" not in listdir(results_dir):
+            return False
+        else:
+            with open(results_dir.joinpath(f"{name_of_file}.txt"), mode="r") as res_file:
+                file_contains = res_file.read()
+                if ("Cannot reach the Server. Is it online?" in file_contains
+                        and "online error caught" not in file_contains):
+                    print(f"Host {name_of_file} was offline. Try to rescan.")
+                    return False
             print(f"Host was already scanned: {name_of_file}")
             return True
-        else:
-            return False
 
     @timer
     def start_tls_scan(

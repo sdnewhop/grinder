@@ -278,22 +278,27 @@ class VulnersConnector:
         except ValueError as wrong_key:
             print("Error:", wrong_key)
             return {}
-        references = vulners_api.referencesList(list(self.vulnerabilities.keys()))
-        if not references:
-            return {}
 
+        right_filter = [f"cvelist:{vulnerability}" for vulnerability in self.vulnerabilities.keys()]
         exploits = {}
-        for cve, cve_references in references.items():
-            for id, reference in cve_references.items():
-                for entity in reference:
-                    bulletin = entity.get("bulletinFamily")
-                    if not bulletin:
-                        continue
-                    if bulletin.lower() == "exploit":
-                        if exploits.get(cve):
-                            exploits[cve].append(entity)
-                        else:
-                            exploits.update({cve: [entity]})
+        length_of_right_filters = len(right_filter)
+        for index, cve in enumerate(right_filter):
+            cve_without_filter = cve.replace("cvelist:", "")
+            try:
+                cve_references = vulners_api.searchExploit(cve)
+            except:
+                continue
+            print(f" - Found {len(cve_references)} exploits for {cve_without_filter} "
+                  f"({index}/{length_of_right_filters}, total CVEs: {len(exploits.keys())})")
+            if not cve_references:
+                continue
+            cve_exploits = []
+            for possible_exploit in cve_references:
+                if possible_exploit.get("bulletinFamily") != "exploit":
+                    continue
+                cve_exploits.append(possible_exploit)
+            if cve_exploits:
+                exploits.update({cve_without_filter: cve_exploits})
         return exploits
 
     @exception_handler(expected_exception=VulnersConnectorParseCpesError)

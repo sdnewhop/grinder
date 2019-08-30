@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from csv import DictWriter
+from csv import DictWriter, QUOTE_ALL
+from csv import writer as csv_writer
 from json import loads, dumps
 from pathlib import Path
 
@@ -77,6 +78,56 @@ class GrinderFileManager:
             writer.writeheader()
             for row in results_to_write:
                 writer.writerow(row)
+
+    @exception_handler(expected_exception=GrinderFileManagerOpenError)
+    def write_results_csv_exploits_to_cve(
+        self,
+        results_to_write: list or dict,
+        dest_dir: str,
+        csv_file: str,
+        hosts_results: dict,
+        csv_dir=DefaultValues.CSV_RESULTS_DIRECTORY,
+    ) -> None:
+        if not results_to_write:
+            return
+        vulnerabilities_mapping = {}
+        for host, info in hosts_results.items():
+            if not info.get("vulnerabilities"):
+                continue
+            for vulnerabilities_db, vulnerabilities_info in info.get("vulnerabilities").items():
+                if not vulnerabilities_info:
+                    continue
+                list_of_vulns = vulnerabilities_info.keys()
+                for vulnerability in list_of_vulns:
+                    if vulnerabilities_mapping.get(vulnerability):
+                        if info.get("product") not in vulnerabilities_mapping[vulnerability]:
+                            vulnerabilities_mapping[vulnerability].append(info.get("product"))
+                    else:
+                        vulnerabilities_mapping.update({vulnerability: [info.get("product")]})
+
+        path_to_csv_file = Path(".").joinpath(dest_dir).joinpath(csv_dir)
+        path_to_csv_file.mkdir(parents=True, exist_ok=True)
+        path_to_csv_file = path_to_csv_file.joinpath(csv_file)
+        with open(path_to_csv_file, mode="w", newline='') as result_csv_file:
+            _writer = csv_writer(result_csv_file, delimiter=',',
+                                 quotechar='"', quoting=QUOTE_ALL)
+            _writer.writerow(["CVE with exploit", "Affected Products", "Exploit title", "Bulletin family", 
+            				  "Exploit description", "id", "Exploit HREF", "type", "CVSS Score", 
+            				  "CVSS Vector", "Vulners HREF"])
+            for cve, exploits in results_to_write.items():
+                for exploit in exploits:
+                    _writer.writerow([cve,
+                                      ", ".join(vulnerabilities_mapping.get(cve)),
+                                      exploit.get("title"),
+                                      exploit.get("bulletinFamily"),
+                                      exploit.get("description"),
+                                      exploit.get("id"),
+                                      exploit.get("href"),
+                                      exploit.get("type"),
+                                      exploit.get("cvss", {}).get("score"),
+                                      exploit.get("cvss", {}).get("vector"),
+                                      exploit.get("vhref"),
+                                      ])
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def write_results_txt(

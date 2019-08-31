@@ -320,7 +320,11 @@ class GrinderDatabase:
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_last_results(self) -> dict:
         """
-        Load latest scan result from database (from shodan + censys)
+        Load latest scan results from database, without scan linking.
+        This function collects last result from censys scan and
+        last result from shodan scan, and combine it together
+        with union select. Needed if you only need to load
+        any last results combination.
         :return: dict with results
         """
         with self.connection as db_connection:
@@ -331,15 +335,15 @@ class GrinderDatabase:
                     SELECT max(id) FROM scan_information
                     WHERE scan_total_results != 0
                     )
-                AND results != '[]'
                 UNION SELECT results FROM censys_results
                 WHERE scan_information_id = (
                     SELECT max(id) FROM scan_information
                     WHERE scan_total_results != 0
                     )
-                AND results != '[]'
                 """
             ).fetchall()
+            if not sql_results:
+                return {}
             results_parsed = [json_loads(item[0]) for item in sql_results]
             results_combined = [
                 result for query_result in results_parsed for result in query_result
@@ -349,7 +353,12 @@ class GrinderDatabase:
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_last_results_by_name(self, engine_table: str, scan_name: str = "") -> dict:
         """
-        Load special results, with engine (shodan, censys) and scan name
+        Load last results with some particular scan that can be
+        passed via 'scan_name' variable. This function returns results
+        only from one backend system (censys, shodan) at time,
+        and only the latest _one_.
+        If 'scan_name' is not setted, any last result from
+        censys or shodan scan will be loaded.
         :param engine_table: shodan_results, censys_results, etc.
         :param scan_name: name of scanning - "servers", "sd-wans", etc.
         :return: dict with results
@@ -365,20 +374,59 @@ class GrinderDatabase:
                     WHERE scan_total_results != 0
                     {scan_name_fill}
                     )
-                AND results != '[]'
                 """.format(engine_table_fill=engine_table, scan_name_fill=scan_name or "")
             ).fetchall()
+            if not sql_results:
+                return {}
             results_parsed = [json_loads(item[0]) for item in sql_results]
             results_combined = [
                 result for query_result in results_parsed for result in query_result
             ]
             return {host.get("ip"): host for host in results_combined}
 
-    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
-    def load_full_last_results_by_name(self) -> dict:
+    def load_all_results_by_name(self, engine_table: str, scan_name: str = "") -> dict:
         """
-        Load all last results for current query list
-        from shodan + censys to make incremental scan
+        Load collection of all results from one backend system (censys, shodan).
+        For exampe, you can load all records from Shodan with 'servers' scan,
+        and this function will sort only unique hosts from all of the history
+        of 'servers' scanning
+        :param engine_table: shodan_results, censys_results, etc.
+        :param scan_name: name of scanning - "servers", "sd-wans", etc.
+        :return: dict with results
+        """
+        if scan_name:
+            scan_name = f"AND scan_table.scan_name = \"{scan_name}\""
+        with self.connection as db_connection:
+            sql_results = db_connection.execute(
+                """
+                SELECT results 
+                FROM {engine_table_fill} res_table
+                JOIN scan_information scan_table
+                WHERE scan_table.id = res_table.scan_information_id 
+                {scan_name_fill}
+                AND results != '[]'
+                """.format(engine_table_fill=engine_table, scan_name_fill=scan_name or "")
+            ).fetchall()
+            if not sql_results:
+                return {}
+            results_parsed = [json_loads(item[0]) for item in sql_results]
+            results_combined = [
+                result for query_result in results_parsed for result in query_result
+            ]
+            final_results = {}
+            for host in results_combined:
+                if host.get("ip") in final_results.keys():
+                    continue
+                final_results.update({host.get("ip"): host})
+            return final_results
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_multiple_last_results_by_name(self) -> dict:
+        """
+        Load last results with some 'scan_name' from multiple
+        backend systems (shodan + censys at once). This function
+        sort all of the host into one dictionary and returns
+        unique results from last scan of some 'scan_name'
         :return: dictionary with all results, like "combined" results
         """
         shodan_results = self.load_last_results_by_name(engine_table="shodan_results", scan_name=self.scan_name)
@@ -416,6 +464,22 @@ class GrinderDatabase:
         :return: dict with results by name
         """
         return self.load_last_results_by_name(engine_table="censys_results", scan_name=self.scan_name)
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_all_shodan_results_by_scan_name(self) -> dict:
+        """
+        Return all combined shodan results by some scan name (filename.json)
+        :return: dict with results by name
+        """
+        return self.load_all_results_by_name(engine_table="shodan_results", scan_name=self.scan_name)
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_all_censys_results_by_scan_name(self) -> dict:
+        """
+        Return all combined censys results by some scan name (filename.json)
+        :return: dict with results by name
+        """
+        return self.load_all_results_by_name(engine_table="censys_results", scan_name=self.scan_name)
 
     @exception_handler(expected_exception=GrinderDatabaseCloseError)
     def close(self) -> None:

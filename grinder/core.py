@@ -800,13 +800,20 @@ class GrinderCore:
         self.db.create_db()
         self.db.initiate_scan(queries_filename)
 
+    @exception_handler(expected_exception=GrinderCoreLoadResultsFromDbError)
     def __increment_prev_scan_results(self):
         """
         Load already scanned before results (for this query file)
         :return: None
         """
-        self.shodan_processed_results = self.db.load_last_shodan_results_by_scan_name()
-        self.censys_processed_results = self.db.load_last_censys_results_by_scan_name()
+        self.shodan_processed_results = self.db.load_all_shodan_results_by_scan_name()
+        self.censys_processed_results = self.db.load_all_censys_results_by_scan_name()
+        self.combined_results = {
+            **self.shodan_processed_results,
+            **self.censys_processed_results
+        }
+        if self.combined_results:
+            print(f"Results from previous scans were loaded: {len(self.combined_results)} hosts")
 
     @exception_handler(expected_exception=GrinderCoreCloseDatabaseError)
     def __close_database(self) -> None:
@@ -1391,7 +1398,7 @@ class GrinderCore:
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)
-    def batch_search(self, queries_filename: str) -> dict:
+    def batch_search(self, queries_filename: str, not_incremental: bool = False) -> dict:
         """
         Run batch search for all products from input JSON product list file.
         Here we are try to load JSON file with queries for different search
@@ -1401,6 +1408,7 @@ class GrinderCore:
 
         :param queries_filename: name of json file with input data
             such as queries (shodan_queries, censys_queries)
+        :param not_incremental: turn off incremental scan
         :return dict: all processed results from searches in format like
             {
                 host_ip: {
@@ -1429,7 +1437,8 @@ class GrinderCore:
             print("Filter method is not valid.")
             return self.combined_results
         self.__init_database(self.__separate_filename_wo_extension(queries_filename))
-        self.__increment_prev_scan_results()
+        if not_incremental is False:
+            self.__increment_prev_scan_results()
 
         for product_info in self.queries_file:
             self.__process_current_product_queries(product_info)

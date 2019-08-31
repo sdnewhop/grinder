@@ -23,9 +23,14 @@ from grinder.errors import (
 class GrinderDatabase:
     @exception_handler(expected_exception=GrinderDatabaseOpenError)
     def __init__(self):
+        """
+        Initialize sqlite3 database to work with. Turn on
+        foreign keys to make linked tables with scan info.
+        """
         self.connection = sqlite3.connect(DefaultDatabaseValues.DB_NAME)
         self.connection.execute("PRAGMA foreign_keys = ON")
 
+        self.scan_name = None
         self.scan_date = None
         self.scan_start_time = None
         self.scan_end_time = None
@@ -33,12 +38,21 @@ class GrinderDatabase:
 
     @exception_handler(expected_exception=GrinderDatabaseCreateError)
     def create_db(self) -> None:
+        """
+        Create necessary tables. For example, basically
+        we need next tables:
+        - scan_information - basic table with all main information about scan
+        - scan_data - information about product, vendor, script running and confidence
+        - shodan_results/censys_results - for results from backend search engines
+        :return: None
+        """
         with self.connection as db_connection:
             db_connection.execute(
                 """
                 CREATE TABLE IF NOT EXISTS
                 scan_information(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    scan_name TEXT,
                     scan_date TEXT,
                     scan_start_time TEXT,
                     scan_end_time TEXT,
@@ -99,9 +113,18 @@ class GrinderDatabase:
             )
 
     @exception_handler(expected_exception=GrinderDatabaseInitialScanError)
-    def initiate_scan(self) -> None:
+    def initiate_scan(self, queries_filename: str) -> None:
+        """
+        Start scan and initialize start values. For example,
+        we need to save scan date, scan time and name of the
+        scan to load this results again after a while
+        with a new scan (incremental scanning)
+        :param queries_filename: filename in format like "servers", "sd-wans"
+        :return: None
+        """
         self.scan_date = datetime.today().strftime("%Y-%m-%d")
         self.scan_start_time = datetime.now()
+        self.scan_name = queries_filename
 
         with self.connection as db_connection:
             db_connection.execute(
@@ -109,17 +132,24 @@ class GrinderDatabase:
                 INSERT OR REPLACE INTO
                 scan_information(
                     scan_date,
-                    scan_start_time
-                ) VALUES (?, ?)
+                    scan_start_time,
+                    scan_name
+                ) VALUES (?, ?, ?)
                 """,
                 (
                     str(self.scan_date),
                     str(self.scan_start_time.time().strftime("%H:%M:%S")),
+                    str(self.scan_name),
                 ),
             )
 
     @exception_handler(expected_exception=GrinderDatabaseUpdateTimeError)
     def update_end_time(self) -> None:
+        """
+        Update end scanning variables. For example, end
+        of scanning time, and scan duration.
+        :return: None
+        """
         self.scan_end_time = datetime.now()
         self.scan_duration = self.scan_end_time - self.scan_start_time
         with self.connection as db_connection:
@@ -144,6 +174,13 @@ class GrinderDatabase:
 
     @exception_handler(expected_exception=GrinderDatabaseUpdateResultsCountError)
     def update_results_count(self, total_products: int, total_results: int) -> None:
+        """
+        Update results count, total results and total
+        scanned products.
+        :param total_products: total quantity of products
+        :param total_results: total quantity of results
+        :return: None
+        """
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(
                 """
@@ -164,6 +201,14 @@ class GrinderDatabase:
     def add_basic_scan_data(
         self, vendor: str, product: str, script: str, vendor_confidence: str
     ) -> None:
+        """
+        Add scan data information for current product, vendor
+        :param vendor: vendor name, like "Cisco"
+        :param product: product name, like "LinkSys"
+        :param script: script that need to be runned, empty if none
+        :param vendor_confidence: confidence of vendor - certain, firm, tentative
+        :return: None
+        """
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(
                 """
@@ -188,6 +233,13 @@ class GrinderDatabase:
     def add_shodan_scan_data(
         self, query: dict, results_count: int, results: dict or list
     ) -> None:
+        """
+        Add results from shodan for current query
+        :param query: result for current query
+        :param results_count: quantity of results
+        :param results: results itself
+        :return: None
+        """
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(
                 """
@@ -225,6 +277,13 @@ class GrinderDatabase:
     def add_censys_scan_data(
         self, query: dict, results_count: int, results: dict or list
     ) -> None:
+        """
+        Add results from censys for current query
+        :param query: result for current query
+        :param results_count: quantity of results
+        :param results: results itself
+        :return: None
+        """
         with self.connection as db_connection:
             current_scan_id = db_connection.execute(
                 """
@@ -259,7 +318,11 @@ class GrinderDatabase:
             )
 
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
-    def load_last_results(self):
+    def load_last_results(self) -> dict:
+        """
+        Load latest scan result from database (from shodan + censys)
+        :return: dict with results
+        """
         with self.connection as db_connection:
             sql_results = db_connection.execute(
                 """
@@ -284,17 +347,26 @@ class GrinderDatabase:
             return {host.get("ip"): host for host in results_combined}
 
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
-    def load_last_shodan_results(self):
+    def load_last_results_by_name(self, engine_table: str, scan_name: str = "") -> dict:
+        """
+        Load special results, with engine (shodan, censys) and scan name
+        :param engine_table: shodan_results, censys_results, etc.
+        :param scan_name: name of scanning - "servers", "sd-wans", etc.
+        :return: dict with results
+        """
+        if scan_name:
+            scan_name = f"AND scan_name = \"{scan_name}\""
         with self.connection as db_connection:
             sql_results = db_connection.execute(
                 """
-                SELECT results FROM shodan_results
+                SELECT results FROM {engine_table_fill}
                 WHERE scan_information_id = (
                     SELECT max(id) FROM scan_information
                     WHERE scan_total_results != 0
+                    {scan_name_fill}
                     )
                 AND results != '[]'
-                """
+                """.format(engine_table_fill=engine_table, scan_name_fill=scan_name or "")
             ).fetchall()
             results_parsed = [json_loads(item[0]) for item in sql_results]
             results_combined = [
@@ -303,27 +375,55 @@ class GrinderDatabase:
             return {host.get("ip"): host for host in results_combined}
 
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
-    def load_last_censys_results(self):
-        with self.connection as db_connection:
-            sql_results = db_connection.execute(
-                """
-                SELECT results FROM censys_results
-                WHERE scan_information_id = (
-                    SELECT max(id) FROM scan_information
-                    WHERE scan_total_results != 0
-                    )
-                AND results != '[]'
-                """
-            ).fetchall()
-            results_parsed = [json_loads(item[0]) for item in sql_results]
-            results_combined = [
-                result for query_result in results_parsed for result in query_result
-            ]
-            return {host.get("ip"): host for host in results_combined}
+    def load_full_last_results_by_name(self) -> dict:
+        """
+        Load all last results for current query list
+        from shodan + censys to make incremental scan
+        :return: dictionary with all results, like "combined" results
+        """
+        shodan_results = self.load_last_results_by_name(engine_table="shodan_results", scan_name=self.scan_name)
+        censys_results = self.load_last_results_by_name(engine_table="censys_results", scan_name=self.scan_name)
+        return {**shodan_results, **censys_results}
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_last_shodan_results(self) -> dict:
+        """
+        Return latest results from shodan only
+        :return: dict with shodan results
+        """
+        return self.load_last_results_by_name(engine_table="shodan_results")
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_last_censys_results(self) -> dict:
+        """
+        Return latest results from censys only
+        :return: dict with censys results
+        """
+        return self.load_last_results_by_name(engine_table="censys_results")
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_last_shodan_results_by_scan_name(self) -> dict:
+        """
+        Return latest shodan results by some scan name (filename.json)
+        :return: dict with results by name
+        """
+        return self.load_last_results_by_name(engine_table="shodan_results", scan_name=self.scan_name)
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_last_censys_results_by_scan_name(self) -> dict:
+        """
+        Return latest censys results by some scan name (filename.json)
+        :return: dict with results by name
+        """
+        return self.load_last_results_by_name(engine_table="censys_results", scan_name=self.scan_name)
 
     @exception_handler(expected_exception=GrinderDatabaseCloseError)
-    def close(self):
+    def close(self) -> None:
+        """
+        Close database forced
+        :return: None
+        """
         self.connection.close()
 
     def __del__(self):
-        self.close()
+        self.connection.close()

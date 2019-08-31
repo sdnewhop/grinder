@@ -218,6 +218,13 @@ class GrinderInterface:
             default=False,
             help="Make additional vulners reports"
         )
+        parser.add_argument(
+            "-ni",
+            "--not-incremental",
+            action="store_true",
+            default=False,
+            help="Turn off incrememental scan - make clean scan (without previous results)"
+        )
 
         self.args = parser.parse_args()
         if not self.args.shodan_key:

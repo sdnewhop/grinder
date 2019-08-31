@@ -7,6 +7,7 @@ Other modules must be wrapped here for proper usage.
 from typing import NamedTuple, List, Dict
 from termcolor import cprint
 from re import findall
+from ntpath import basename
 
 # from enforce import runtime_validation
 
@@ -789,7 +790,7 @@ class GrinderCore:
             )
 
     @exception_handler(expected_exception=GrinderCoreInitDatabaseCallError)
-    def __init_database(self) -> None:
+    def __init_database(self, queries_filename: str) -> None:
         """
         Initialize database in case of first-time using. Here we are create
         database and put basic structures in it.
@@ -797,7 +798,15 @@ class GrinderCore:
         :return: None
         """
         self.db.create_db()
-        self.db.initiate_scan()
+        self.db.initiate_scan(queries_filename)
+
+    def __increment_prev_scan_results(self):
+        """
+        Load already scanned before results (for this query file)
+        :return: None
+        """
+        self.shodan_processed_results = self.db.load_last_shodan_results_by_scan_name()
+        self.censys_processed_results = self.db.load_last_censys_results_by_scan_name()
 
     @exception_handler(expected_exception=GrinderCoreCloseDatabaseError)
     def __close_database(self) -> None:
@@ -1364,6 +1373,22 @@ class GrinderCore:
                             "nse_script"
                         ] = nse_script_res
 
+    @staticmethod
+    def __separate_filename_wo_extension(original_filepath: str) -> str:
+        """
+        This function separates filename from path and extension.
+        For example, queries/servers.json -> servers
+        :param original_filepath: original filepath
+        :return: only name
+        """
+        full_filename = basename(original_filepath)
+        if not full_filename:
+            return original_filepath
+        splitted_name = full_filename.split(".")
+        if not splitted_name:
+            return original_filepath
+        return str(splitted_name[0])
+
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)
     def batch_search(self, queries_filename: str) -> dict:
@@ -1403,7 +1428,8 @@ class GrinderCore:
         if not self.queries_file:
             print("Filter method is not valid.")
             return self.combined_results
-        self.__init_database()
+        self.__init_database(self.__separate_filename_wo_extension(queries_filename))
+        self.__increment_prev_scan_results()
 
         for product_info in self.queries_file:
             self.__process_current_product_queries(product_info)

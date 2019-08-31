@@ -306,6 +306,11 @@ class GrinderCoreLoadResultsFromFileError(GrinderCoreException):
         super().__init__(error_args)
 
 
+class GrinderCoreForceUpdateCombinedResults(GrinderCoreException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
 class GrinderCoreLoadResultsFromDbError(GrinderCoreException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)

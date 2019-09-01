@@ -153,22 +153,18 @@ class GrinderDatabase:
         self.scan_end_time = datetime.now()
         self.scan_duration = self.scan_end_time - self.scan_start_time
         with self.connection as db_connection:
-            current_scan_id = db_connection.execute(
-                """
-                SELECT max(id) FROM scan_information
-                """
-            ).fetchone()[0]
             db_connection.execute(
                 """
                 UPDATE scan_information
                     SET scan_end_time = ?,
                         scan_duration = ?
-                    WHERE id = ?
+                    WHERE id = (
+                        SELECT max(id) FROM scan_information
+                    )
                 """,
                 (
                     str(self.scan_end_time.time().strftime("%H:%M:%S")),
                     str(self.scan_duration),
-                    current_scan_id,
                 ),
             )
 
@@ -182,19 +178,19 @@ class GrinderDatabase:
         :return: None
         """
         with self.connection as db_connection:
-            current_scan_id = db_connection.execute(
-                """
-                SELECT max(id) FROM scan_information
-                """
-            ).fetchone()[0]
             db_connection.execute(
                 """
                 UPDATE scan_information
                     SET scan_total_products = ?,
                         scan_total_results = ?
-                    WHERE id = ?
+                    WHERE id = (
+                        SELECT max(id) FROM scan_information
+                    )
                 """,
-                (total_products, total_results, current_scan_id),
+                (
+                    total_products,
+                    total_results
+                ),
             )
 
     @exception_handler(expected_exception=GrinderDatabaseAddBasicScanDataError)
@@ -210,11 +206,6 @@ class GrinderDatabase:
         :return: None
         """
         with self.connection as db_connection:
-            current_scan_id = db_connection.execute(
-                """
-                SELECT max(id) FROM scan_information
-                """
-            ).fetchone()[0]
             db_connection.execute(
                 """
                 INSERT OR REPLACE INTO
@@ -224,9 +215,16 @@ class GrinderDatabase:
                     product,
                     script,
                     vendor_confidence
-                ) VALUES (?, ?, ?, ?, ?)
+                ) VALUES (
+                    (SELECT max(id) FROM scan_information),
+                    ?, ?, ?, ?)
                 """,
-                (current_scan_id, vendor, product, script, vendor_confidence),
+                (
+                    vendor,
+                    product,
+                    script,
+                    vendor_confidence
+                ),
             )
 
     @exception_handler(expected_exception=GrinderDatabaseAddScanDataError)
@@ -241,16 +239,6 @@ class GrinderDatabase:
         :return: None
         """
         with self.connection as db_connection:
-            current_scan_id = db_connection.execute(
-                """
-                SELECT max(id) FROM scan_information
-                """
-            ).fetchone()[0]
-            current_scan_data_id = db_connection.execute(
-                """
-                SELECT max(id) FROM scan_data
-                """
-            ).fetchone()[0]
             db_connection.execute(
                 """
                 INSERT OR REPLACE INTO
@@ -261,11 +249,16 @@ class GrinderDatabase:
                     query_confidence,
                     results_count,
                     results
-                ) VALUES (?, ?, ?, ?, ?, ?)
+                ) VALUES (
+                    (SELECT max(id) FROM scan_data),
+                    (SELECT max(id) FROM scan_information),
+                    ?,
+                    ?,
+                    ?,
+                    json(?)
+                )
                 """,
                 (
-                    current_scan_data_id,
-                    current_scan_id,
                     query.get("query"),
                     query.get("query_confidence"),
                     results_count,
@@ -285,16 +278,6 @@ class GrinderDatabase:
         :return: None
         """
         with self.connection as db_connection:
-            current_scan_id = db_connection.execute(
-                """
-                SELECT max(id) FROM scan_information
-                """
-            ).fetchone()[0]
-            current_scan_data_id = db_connection.execute(
-                """
-                SELECT max(id) FROM scan_data
-                """
-            ).fetchone()[0]
             db_connection.execute(
                 """
                 INSERT OR REPLACE INTO
@@ -305,11 +288,16 @@ class GrinderDatabase:
                     query_confidence,
                     results_count,
                     results
-                ) VALUES (?, ?, ?, ?, ?, ?)
+                ) VALUES (
+                    (SELECT max(id) FROM scan_data),
+                    (SELECT max(id) FROM scan_information),
+                    ?,
+                    ?,
+                    ?,
+                    json(?)
+                )
                 """,
                 (
-                    current_scan_data_id,
-                    current_scan_id,
                     query.get("query"),
                     query.get("query_confidence"),
                     results_count,
@@ -330,16 +318,18 @@ class GrinderDatabase:
         with self.connection as db_connection:
             sql_results = db_connection.execute(
                 """
-                SELECT results FROM shodan_results
+                SELECT json_extract(results, '$')
+                FROM shodan_results
                 WHERE scan_information_id = (
                     SELECT max(id) FROM scan_information
                     WHERE scan_total_results != 0
-                    )
-                UNION SELECT results FROM censys_results
+                )
+                UNION SELECT json_extract(results, '$')
+                FROM censys_results
                 WHERE scan_information_id = (
                     SELECT max(id) FROM scan_information
                     WHERE scan_total_results != 0
-                    )
+                )
                 """
             ).fetchall()
             if not sql_results:
@@ -368,12 +358,13 @@ class GrinderDatabase:
         with self.connection as db_connection:
             sql_results = db_connection.execute(
                 """
-                SELECT results FROM {engine_table_fill}
+                SELECT json_extract(results, '$')
+                FROM {engine_table_fill}
                 WHERE scan_information_id = (
                     SELECT max(id) FROM scan_information
                     WHERE scan_total_results != 0
                     {scan_name_fill}
-                    )
+                )
                 """.format(engine_table_fill=engine_table, scan_name_fill=scan_name or "")
             ).fetchall()
             if not sql_results:
@@ -399,7 +390,7 @@ class GrinderDatabase:
         with self.connection as db_connection:
             sql_results = db_connection.execute(
                 """
-                SELECT results 
+                SELECT json_extract(results, '$')
                 FROM {engine_table_fill} res_table
                 JOIN scan_information scan_table
                 WHERE scan_table.id = res_table.scan_information_id 

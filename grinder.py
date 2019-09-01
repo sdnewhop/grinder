@@ -34,7 +34,10 @@ if __name__ == "__main__":
         core.set_vendors(args.vendors)
 
     search_results = (
-        core.batch_search(queries_filename=args.queries_file)
+        core.batch_search(
+            queries_filename=args.queries_file,
+            not_incremental=args.not_incremental
+        )
         if args.run
         else core.load_results()
     )

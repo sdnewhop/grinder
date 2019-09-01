@@ -7,6 +7,7 @@ Other modules must be wrapped here for proper usage.
 from typing import NamedTuple, List, Dict
 from termcolor import cprint
 from re import findall
+from ntpath import basename
 
 # from enforce import runtime_validation
 
@@ -55,6 +56,7 @@ from grinder.errors import (
     GrinderCoreVulnersReportError,
     GrinderCoreSaveVulnersResultsError,
     GrinderCoreSaveVulnersPlotsError,
+    GrinderCoreForceUpdateCombinedResults,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -379,8 +381,31 @@ class GrinderCore:
                 "Json file with results not found. Try to load results from database."
             )
 
+    @exception_handler(expected_exception=GrinderCoreForceUpdateCombinedResults)
+    def __force_update_combined_results(self) -> None:
+        """
+        If somehow combined_results is need to be updated,
+        this function can update it.
+        :return: None
+        """
+        # Merge all search results into one dictionary
+        # This dictionary looks like:
+        # {
+        #     ip: {
+        #         product,
+        #         vendor,
+        #         query
+        #         ...
+        #         },
+        #     ...
+        # }
+        self.combined_results = {
+            **self.shodan_processed_results,
+            **self.censys_processed_results,
+        }
+
     @exception_handler(expected_exception=GrinderCoreLoadResultsFromDbError)
-    def load_results_from_db(self) -> list:
+    def load_results_from_db(self) -> list or dict:
         """
         Load saved results of latest previous scan from database
 
@@ -603,19 +628,13 @@ class GrinderCore:
         :return: None
         """
         cprint("Save all results...", "blue", attrs=["bold"])
-        # If all scan results were empty after refreshing
+
+        # If all scan results were empty
         if not self.combined_results and not self.shodan_processed_results and not self.censys_processed_results:
             return
-
-        if not self.combined_results and (self.shodan_processed_results or self.censys_processed_results):
-            # Refresh combined results in any case
-            self.combined_results = {
-                **self.shodan_processed_results,
-                **self.censys_processed_results,
-            }
-
-        if not self.combined_results:
-            return
+        # If some results are exists, but combined results are empty - refresh it
+        elif not self.combined_results:
+            self.__force_update_combined_results()
 
         if self.combined_results:
             self.filemanager.write_results_json(
@@ -789,7 +808,7 @@ class GrinderCore:
             )
 
     @exception_handler(expected_exception=GrinderCoreInitDatabaseCallError)
-    def __init_database(self) -> None:
+    def __init_database(self, queries_filename: str) -> None:
         """
         Initialize database in case of first-time using. Here we are create
         database and put basic structures in it.
@@ -797,7 +816,19 @@ class GrinderCore:
         :return: None
         """
         self.db.create_db()
-        self.db.initiate_scan()
+        self.db.initiate_scan(queries_filename)
+
+    @exception_handler(expected_exception=GrinderCoreLoadResultsFromDbError)
+    def __increment_prev_scan_results(self):
+        """
+        Load already scanned before results (for this query file)
+        :return: None
+        """
+        self.shodan_processed_results = self.db.load_all_shodan_results_by_scan_name()
+        self.censys_processed_results = self.db.load_all_censys_results_by_scan_name()
+        self.__force_update_combined_results()
+        if self.combined_results:
+            print(f"Results from previous scans were loaded: {len(self.combined_results)} hosts")
 
     @exception_handler(expected_exception=GrinderCoreCloseDatabaseError)
     def __close_database(self) -> None:
@@ -974,22 +1005,6 @@ class GrinderCore:
                     current_host, query, product_info
                 )
 
-        # Merge all search results into one dictionary
-        # This dictionary looks like:
-        # {
-        #     ip: {
-        #         product,
-        #         vendor,
-        #         query
-        #         ...
-        #         },
-        #     ...
-        # }
-        self.combined_results = {
-            **self.shodan_processed_results,
-            **self.censys_processed_results,
-        }
-
     @exception_handler(expected_exception=GrinderCoreTlsScanner)
     def tls_scan(self, scanner_path: str) -> None:
         """
@@ -998,16 +1013,6 @@ class GrinderCore:
         :return: None
         """
         cprint("Start TLS scanning", "blue", attrs=["bold"])
-        if not self.combined_results:
-            if not self.shodan_processed_results:
-                self.shodan_processed_results = self.db.load_last_shodan_results()
-            if not self.censys_processed_results:
-                self.censys_processed_results = self.db.load_last_censys_results()
-            self.combined_results = {
-                **self.shodan_processed_results,
-                **self.censys_processed_results,
-            }
-
         tls_scanner = TlsScanner(self.combined_results)
         tls_parser = TlsParser(self.combined_results)
 
@@ -1087,16 +1092,10 @@ class GrinderCore:
         if host_timeout:
             arguments = f"{arguments} --host-timeout {str(host_timeout)}s"
 
-        if not self.shodan_processed_results:
-            self.shodan_processed_results = self.db.load_last_shodan_results()
-        if not self.censys_processed_results:
-            self.censys_processed_results = self.db.load_last_censys_results()
-
         # Make ip:port list of all results
-        all_hosts = {**self.shodan_processed_results, **self.censys_processed_results}
         all_hosts = [
             {"ip": host.get("ip"), "port": host.get("port")}
-            for host in all_hosts.values()
+            for host in self.combined_results.values()
         ]
 
         cprint(
@@ -1141,16 +1140,11 @@ class GrinderCore:
         """
         cprint("Start Vulners API scanning", "blue", attrs=["bold"])
         cprint(f"Number of workers: {workers}", "blue", attrs=["bold"])
-        if not self.shodan_processed_results:
-            self.shodan_processed_results = self.db.load_last_shodan_results()
-        if not self.censys_processed_results:
-            self.censys_processed_results = self.db.load_last_censys_results()
 
         # Make ip:port list of all results
-        all_hosts = {**self.shodan_processed_results, **self.censys_processed_results}
         all_hosts = [
             {"ip": host.get("ip"), "port": host.get("port")}
-            for host in all_hosts.values()
+            for host in self.combined_results.values()
         ]
 
         # Check for top-ports if defined
@@ -1364,9 +1358,25 @@ class GrinderCore:
                             "nse_script"
                         ] = nse_script_res
 
+    @staticmethod
+    def __separate_filename_wo_extension(original_filepath: str) -> str:
+        """
+        This function separates filename from path and extension.
+        For example, queries/servers.json -> servers
+        :param original_filepath: original filepath
+        :return: only name
+        """
+        full_filename = basename(original_filepath)
+        if not full_filename:
+            return original_filepath
+        splitted_name = full_filename.split(".")
+        if not splitted_name:
+            return original_filepath
+        return str(splitted_name[0])
+
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)
-    def batch_search(self, queries_filename: str) -> dict:
+    def batch_search(self, queries_filename: str, not_incremental: bool = False) -> dict:
         """
         Run batch search for all products from input JSON product list file.
         Here we are try to load JSON file with queries for different search
@@ -1376,6 +1386,7 @@ class GrinderCore:
 
         :param queries_filename: name of json file with input data
             such as queries (shodan_queries, censys_queries)
+        :param not_incremental: turn off incremental scan
         :return dict: all processed results from searches in format like
             {
                 host_ip: {
@@ -1403,9 +1414,13 @@ class GrinderCore:
         if not self.queries_file:
             print("Filter method is not valid.")
             return self.combined_results
-        self.__init_database()
+        self.__init_database(self.__separate_filename_wo_extension(queries_filename))
+        if not_incremental is False:
+            self.__increment_prev_scan_results()
 
         for product_info in self.queries_file:
             self.__process_current_product_queries(product_info)
 
+        # Force create combined results container
+        self.__force_update_combined_results()
         return self.combined_results

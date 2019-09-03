@@ -11,6 +11,8 @@ class DefaultValues:
     CENSYS_FREE_PLAN_RESULTS_QUANTITY: int = 1000
     SHODAN_DEFAULT_RESULTS_QUANTITY: int = 100000
 
+    SHODAN_MAX_VULNERABILITIES_REFERENCES: int = 3
+
     QUERIES_FILE: str = "queries_test.json"
     MARKERS_DIRECTORY: str = "map"
 

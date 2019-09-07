@@ -8,6 +8,7 @@ results/
 map/static/data
 database.db
 .idea/
+tests/test.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

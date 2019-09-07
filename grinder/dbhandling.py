@@ -22,12 +22,14 @@ from grinder.errors import (
 
 class GrinderDatabase:
     @exception_handler(expected_exception=GrinderDatabaseOpenError)
-    def __init__(self):
+    def __init__(self, db_name: str = ""):
         """
         Initialize sqlite3 database to work with. Turn on
         foreign keys to make linked tables with scan info.
+
+        :param db_name: name of database file
         """
-        self.connection = sqlite3.connect(DefaultDatabaseValues.DB_NAME)
+        self.connection = sqlite3.connect(db_name or DefaultDatabaseValues.DB_NAME)
         self.connection.execute("PRAGMA foreign_keys = ON")
 
         self.scan_name = None
@@ -355,26 +357,30 @@ class GrinderDatabase:
         """
         if scan_name:
             scan_name = f"AND scan_name = \"{scan_name}\""
-        with self.connection as db_connection:
-            sql_results = db_connection.execute(
-                """
-                SELECT json_extract(results, '$')
-                FROM {engine_table_fill}
-                WHERE scan_information_id = (
-                    SELECT max(id) FROM scan_information
-                    WHERE scan_total_results != 0
-                    {scan_name_fill}
-                )
-                """.format(engine_table_fill=engine_table, scan_name_fill=scan_name or "")
-            ).fetchall()
-            if not sql_results:
-                return {}
-            results_parsed = [json_loads(item[0]) for item in sql_results]
-            results_combined = [
-                result for query_result in results_parsed for result in query_result
-            ]
-            return {host.get("ip"): host for host in results_combined}
+        try:
+            with self.connection as db_connection:
+                sql_results = db_connection.execute(
+                    """
+                    SELECT json_extract(results, '$')
+                    FROM {engine_table_fill}
+                    WHERE scan_information_id = (
+                        SELECT max(id) FROM scan_information
+                        WHERE scan_total_results != 0
+                        {scan_name_fill}
+                    )
+                    """.format(engine_table_fill=engine_table, scan_name_fill=scan_name or "")
+                ).fetchall()
+                if not sql_results:
+                    return {}
+                results_parsed = [json_loads(item[0]) for item in sql_results]
+                results_combined = [
+                    result for query_result in results_parsed for result in query_result
+                ]
+                return {host.get("ip"): host for host in results_combined}
+        except sqlite3.OperationalError:
+            return {}
 
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_all_results_by_name(self, engine_table: str, scan_name: str = "") -> dict:
         """
         Load collection of all results from one backend system (censys, shodan).
@@ -481,4 +487,9 @@ class GrinderDatabase:
         self.connection.close()
 
     def __del__(self):
-        self.connection.close()
+        """
+        Check if attribute is available and close db
+        :return:
+        """
+        if hasattr(self, "connection"):
+            self.connection.close()

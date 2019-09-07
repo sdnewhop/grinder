@@ -6,6 +6,7 @@ from os import listdir
 from pathlib import Path
 from re import findall
 
+from grinder.plots import GrinderPlots
 from grinder.defaultvalues import (
     DefaultValues,
     DefaultTlsScannerValues,
@@ -27,9 +28,7 @@ LIST_OF_ATTACKS = [
     "Sweet 32",
     "DROWN",
     "Heartbleed",
-    "EarlyCcs",
-    "Invalid Curve",
-    "Invalid Curve Ephemerals",
+    "EarlyCcs"
 ]
 
 # Possible list of bugs from TLS-Scanner
@@ -87,6 +86,8 @@ class TlsParser:
             bug_res = findall(r"{bug}\s+: (\w+)".format(bug=bug), results)
             if not bug_res:
                 continue
+            if bug == "CS Length Intolerant \(>512 Byte\)":
+                bug = bug.replace("\\", "")
             if bug_res[0] == "true":
                 bugs.update({bug: True})
 
@@ -110,6 +111,89 @@ class TlsParser:
         if vulners_vulns and isinstance(vulners_vulns, dict):
             vulners_vulns = list(vulners_vulns.keys())
         return list(set(list(shodan_vulns + vulners_vulns)))
+
+    @staticmethod
+    def save_plots(results: dict, suptitle: str, filename: str, directory: str = DefaultValues.PNG_TLS_RESULTS):
+        plots = GrinderPlots()
+        plots.create_pie_chart(results, suptitle)
+        plots.save_pie_chart(
+            relative_path=directory,
+            filename=filename
+        )
+
+    def save_plots_per_product(self, all_results: dict):
+        unique_products = list(set([info.get("product") for info in all_results.values()]))
+        unique_vendors = list(set([info.get("vendor") for info in all_results.values()]))
+        for product in unique_products:
+            product_hosts = {}
+            for ip, info in all_results.items():
+                if info.get("product") != product:
+                    continue
+                product_hosts.update({ip: info})
+            unique_attacks = self.count_unique_entities(product_hosts, ent_type="attacks")
+            unique_bugs = self.count_unique_entities(product_hosts, ent_type="bugs")
+            product_to_name = product.replace(" ", "_")
+            self.save_plots(unique_attacks,
+                            f"Quantity of unique attacks for {product}",
+                            f"tls_attacks_{product_to_name}.png",
+                            DefaultValues.PNG_TLS_ATTACKS_BY_PRODUCTS)
+            self.save_plots(unique_bugs,
+                            f"Quantity of unique bugs for {product}",
+                            f"tls_bugs_{product_to_name}.png",
+                            DefaultValues.PNG_TLS_BUGS_BY_PRODUCTS)
+        for vendor in unique_vendors:
+            vendor_hosts = {}
+            for ip, info in all_results.items():
+                if info.get("vendor") != vendor:
+                    continue
+                vendor_hosts.update({ip: info})
+            unique_attacks = self.count_unique_entities(vendor_hosts, ent_type="attacks")
+            unique_bugs = self.count_unique_entities(vendor_hosts, ent_type="bugs")
+            vendor_to_name = vendor.replace(" ", "_")
+            self.save_plots(unique_attacks,
+                            f"Quantity of unique attacks for {vendor}",
+                            f"tls_attacks_{vendor_to_name}.png",
+                            DefaultValues.PNG_TLS_ATTACKS_BY_VENDORS)
+            self.save_plots(unique_bugs,
+                            f"Quantity of unique bugs for {vendor}",
+                            f"tls_bugs_{vendor_to_name}.png",
+                            DefaultValues.PNG_TLS_BUGS_BY_VENDORS)
+        for attack in LIST_OF_ATTACKS:
+            attack_hosts = {}
+            for ip, info in all_results.items():
+                if attack not in info.get("attacks").keys():
+                    continue
+                attack_hosts.update({ip: info})
+            unique_vendors = self.count_unique_entities(attack_hosts, ent_type="vendor", flat_list_flag=False)
+            unique_products = self.count_unique_entities(attack_hosts, ent_type="product", flat_list_flag=False)
+            attack_to_name = attack.replace(" ", "_")
+            self.save_plots(unique_vendors,
+                            f"Quantity of unique vendors for {attack}",
+                            f"tls_attacks_{attack_to_name}.png",
+                            DefaultValues.PNG_TLS_VENDORS_BY_ATTACKS)
+            self.save_plots(unique_products,
+                            f"Quantity of unique products for {attack}",
+                            f"tls_attacks_{attack_to_name}.png",
+                            DefaultValues.PNG_TLS_PRODUCTS_BY_ATTACKS)
+        for bug in LIST_OF_BUGS:
+            bug_hosts = {}
+            for ip, info in all_results.items():
+                if bug == "CS Length Intolerant \(>512 Byte\)":
+                    bug = bug.replace("\\", "")
+                if bug not in info.get("bugs").keys():
+                    continue
+                bug_hosts.update({ip: info})
+            unique_vendors = self.count_unique_entities(bug_hosts, ent_type="vendor", flat_list_flag=False)
+            unique_products = self.count_unique_entities(bug_hosts, ent_type="product", flat_list_flag=False)
+            bug_to_name = bug.replace(" ", "_")
+            self.save_plots(unique_vendors,
+                            f"Quantity of unique vendors for {bug}",
+                            f"tls_bugs_{bug_to_name}.png",
+                            DefaultValues.PNG_TLS_VENDORS_BY_BUGS)
+            self.save_plots(unique_products,
+                            f"Quantity of unique products for {bug}",
+                            f"tls_bugs_{bug_to_name}.png",
+                            DefaultValues.PNG_TLS_PRODUCTS_BY_BUGS)
 
     def load_tls_scan_results(
         self,
@@ -167,6 +251,10 @@ class TlsParser:
         unique_bugs = self.count_unique_entities(all_results, ent_type="bugs")
         unique_vulnerabilities = self.count_unique_entities(all_results, ent_type="vulnerabilities")
 
+        self.save_plots_per_product(all_results)
+        self.save_plots(unique_attacks, "Quantity of unique attacks", "tls_attacks.png")
+        self.save_plots(unique_bugs, "Quantity of unique bugs", "tls_bugs.png")
+
         self.save_results_json(all_results, filename=DefaultTlsParserValues.FULL_RESULTS_JSON)
         self.save_results_json(unique_attacks, filename=DefaultTlsParserValues.UNIQUE_ATTACKS_JSON)
         self.save_results_json(unique_bugs, filename=DefaultTlsParserValues.UNIQUE_BUGS_JSON)
@@ -181,15 +269,19 @@ class TlsParser:
                                               filename=DefaultTlsParserValues.UNIQUE_GROUPPED_PRODUCTS_RESULTS_CSV)
 
     @staticmethod
-    def count_unique_entities(results: dict, ent_type: str) -> dict:
+    def count_unique_entities(results: dict, ent_type: str, flat_list_flag: bool = True) -> dict:
         """
         Count unique entities (attacks, bugs, vulnerabilities, etc.)
         :param results: dictionary with results to count in
         :param ent_type: type of entity to count
+        :param flat_list: is list need to be flattened
         :return: sorted entities in dictionary
         """
         all_attacks = [host.get(ent_type) for host in results.values()]
-        flat_list = [item for sublist in all_attacks for item in sublist]
+        if flat_list_flag:
+            flat_list = [item for sublist in all_attacks for item in sublist]
+        else:
+            flat_list = all_attacks
         counter = Counter(flat_list)
         entities_sorted_by_value = dict(
             sorted(counter.items(), key=lambda x: x[1], reverse=True)

@@ -36,6 +36,15 @@ class DefaultValues:
     PNG_ALL_RESULTS_DIRECTORY: str = "all_results"
     PNG_LIMITED_RESULTS_DIRECTORY: str = "limited_results"
     PNG_VULNERS_RESULTS: str = "vulners_results"
+    PNG_TLS_RESULTS: str = "tls_results"
+    PNG_TLS_ATTACKS_BY_PRODUCTS: str = "tls_attacks_by_products"
+    PNG_TLS_BUGS_BY_PRODUCTS: str = "tls_bugs_by_products"
+    PNG_TLS_ATTACKS_BY_VENDORS: str = "tls_attacks_by_vendors"
+    PNG_TLS_BUGS_BY_VENDORS: str = "tls_bugs_by_vendors"
+    PNG_TLS_VENDORS_BY_ATTACKS: str = "tls_vendors_by_attacks"
+    PNG_TLS_VENDORS_BY_BUGS: str = "tls_vendors_by_bugs"
+    PNG_TLS_PRODUCTS_BY_ATTACKS: str = "tls_products_by_attacks"
+    PNG_TLS_PRODUCTS_BY_BUGS: str = "tls_products_by_bugs"
 
 
 class DefaultTlsParserValues:

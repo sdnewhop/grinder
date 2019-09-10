@@ -231,8 +231,8 @@ def test_initiate_scan_error() -> None:
 
 def test_initiate_scan_success(connection: Connection_instance) -> None:
     """
-    Check if database initiate scan process
-    is successfully finished
+    Check if we can successfully initiate
+    start scan values - time, name, date, etc.
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -260,9 +260,9 @@ def test_initiate_scan_success(connection: Connection_instance) -> None:
 
 def test_update_end_time_error(connection: Connection_instance) -> None:
     """
-    Check if database process of current scan
-    time updating is properly handled when
-    error is coming
+    Check if we can properly handle errors
+    that can be raised by update timer
+    method
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -277,7 +277,8 @@ def test_update_end_time_error(connection: Connection_instance) -> None:
 
 def test_update_end_time_success(connection: Connection_instance) -> None:
     """
-    Check if end time of scanning is successfully updated
+    Check if we can successfully update time
+    of scan - time when scan was finished
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -298,8 +299,9 @@ def test_update_end_time_success(connection: Connection_instance) -> None:
 
 def test_update_results_count_error(connection: Connection_instance) -> None:
     """
-    Update last scan results count - check for
-    properly error handling
+    Check if we can properly handle errors
+    that will be raised with results counter
+    update method
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -314,8 +316,9 @@ def test_update_results_count_error(connection: Connection_instance) -> None:
 
 def test_update_results_count_success(connection: Connection_instance) -> None:
     """
-    Update last scan results count - check if values
-    are properly set
+    Check if we can successfully and correctly
+    update final counters of scan (when scan
+    will be finished)
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -336,7 +339,9 @@ def test_update_results_count_success(connection: Connection_instance) -> None:
 
 def test_add_basic_scan_data_error(connection: Connection_instance) -> None:
     """
-    Test scan data adding with error handling
+    This test checks if we can properly
+    handle all errors that will be raised in
+    method of adding basic scan data into database
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -360,7 +365,8 @@ def test_add_basic_scan_data_error(connection: Connection_instance) -> None:
 
 def test_add_basic_scan_data_success(connection: Connection_instance) -> None:
     """
-    Test basic scan data adding without errors
+    Check if we can successfully add some
+    basic scan data to database
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -389,7 +395,8 @@ def test_add_basic_scan_data_success(connection: Connection_instance) -> None:
 
 def test_add_shodan_scan_data_error(connection: Connection_instance) -> None:
     """
-    Check adding of shodan scan data result with error handling
+    Check if we can properly handle errors that will be raised
+    with add scan data method
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -412,7 +419,8 @@ def test_add_shodan_scan_data_error(connection: Connection_instance) -> None:
 
 def test_add_shodan_scan_data_success(connection: Connection_instance) -> None:
     """
-    Check if we can successfully put shodan results into database
+    This test checks if we can successfully put scan data
+    results into database (for Shodan in this case)
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -441,7 +449,8 @@ def test_add_shodan_scan_data_success(connection: Connection_instance) -> None:
 
 def test_add_censys_scan_data_error(connection: Connection_instance) -> None:
     """
-    Check adding of censys scan data result with error handling
+    Check if we can properly handle errors that will be raised
+    with add scan data method
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -464,7 +473,8 @@ def test_add_censys_scan_data_error(connection: Connection_instance) -> None:
 
 def test_add_censys_scan_data_success(connection: Connection_instance) -> None:
     """
-    Check if we can successfully put shodan results into database
+    This test checks if we can successfully put scan data
+    results into database (for Censys in this case)
     :param connection: sqlite3.Connection object
     :return: None
     """
@@ -493,8 +503,9 @@ def test_add_censys_scan_data_success(connection: Connection_instance) -> None:
 
 def test_load_last_results_error() -> None:
     """
-    Check if exceptions correctly handled with
-    load last results function
+    Check if we can correctly catch exceptions
+    that will be raised by last results
+    loader
     :return: None
     """
     connection_backup = db.connection
@@ -510,7 +521,7 @@ def test_load_last_results_error() -> None:
 def test_load_last_results_success() -> None:
     """
     Check if last results from database
-    were successfully loaded
+    is correct and can be successfully loaded
     :return: None
     """
     assert db.load_last_results() == {"pyvalue": {"ip": "pyvalue"}}
@@ -518,8 +529,9 @@ def test_load_last_results_success() -> None:
 
 def test_load_last_results_by_name_error() -> None:
     """
-    Check if exceptions correctly handled with
-    load last results by name function
+    This test checks if we can catch
+    proper exceptions in case of errors
+    in last results loader by name
     :return: None
     """
     connection_backup = db.connection
@@ -534,8 +546,8 @@ def test_load_last_results_by_name_error() -> None:
 
 def test_load_last_results_by_name_success() -> None:
     """
-    Check if last results taken from database
-    by name is valid
+    Check if we can successfully load all last results
+    by name from different backend engines (Shodan, Censys)
     :return: None
     """
     assert db.load_last_results_by_name(
@@ -558,8 +570,9 @@ def test_load_last_results_by_name_success() -> None:
 
 def test_load_all_results_by_name_error() -> None:
     """
-    Check if all results taken from database
-    are correctly handling in case of error
+    This test checks if we can properly
+    catch and handle exception that will
+    be raised from all results loader
     :return: None
     """
     connection_backup = db.connection
@@ -568,14 +581,14 @@ def test_load_all_results_by_name_error() -> None:
     with raises(GrinderDatabaseLoadResultsError):
         db.load_all_results_by_name()
     with raises(GrinderDatabaseException):
-        db.load_last_results_by_name()
+        db.load_all_results_by_name()
     db.connection = connection_backup
 
 
-def test_load_all_results_by_name_success() -> None:
+def test_load_all_results_by_name_shodan_success() -> None:
     """
-    Check if we can properly take results of all
-    scans from our db
+    This test checks if we can successfully
+    load latest scan results from Shodan
     :return: None
     """
     assert db.load_all_results_by_name(
@@ -583,10 +596,21 @@ def test_load_all_results_by_name_success() -> None:
     ) == {"pyvalue": {"ip": "pyvalue"}}
 
 
+def test_load_all_results_by_name_censys_success() -> None:
+    """
+    This test checks if we can successfully
+    load latest scan results from Censys
+    :return: None
+    """
+    assert db.load_all_results_by_name(
+        scan_name="pytest", engine_table="censys_results"
+    ) == {"pyvalue": {"ip": "pyvalue"}}
+
+
 def test_load_multiple_last_results_by_name_error() -> None:
     """
-    Check if we can handle error in getting
-    results for shodan and censys from our database
+    This test checks if we will catch proper
+    exception in case of handler error
     :return: None
     """
     connection_backup = db.connection
@@ -601,8 +625,9 @@ def test_load_multiple_last_results_by_name_error() -> None:
 
 def test_load_multiple_last_resuls_by_name_success() -> None:
     """
-    Check if we can successfully load results
-    by name from shodan and censys
+    This test checks if we can successfully load
+    _all_ latest results from Shodan and Censys
+    that connected with last scan.
     :return: None
     """
     assert db.load_multiple_last_results_by_name() == {"pyvalue": {"ip": "pyvalue"}}
@@ -610,8 +635,9 @@ def test_load_multiple_last_resuls_by_name_success() -> None:
 
 def test_custom_database_getters_handlers_error() -> None:
     """
-    Check if all exceptions are correct and handled
-    as expected
+    Test error handlers for custom database handlers.
+    It is important that proper errors will
+    raise in case of errors in database handlers.
     :return: None
     """
     possible_functions = [
@@ -635,7 +661,12 @@ def test_custom_database_getters_handlers_error() -> None:
 
 def test_custom_database_getters_handlers_success() -> None:
     """
-    Test different custom functions with predefined values
+    Test different handlers for function that you can see
+    upper. Basically, this tests is not "proper" in
+    tests way - we dont divide all results and last results here
+    because they are identical in this case :)
+    So let's pretend that this test just check
+    that all of that wrappers return expected results.
     :return: None
     """
     expected_dict = {"pyvalue": {"ip": "pyvalue"}}

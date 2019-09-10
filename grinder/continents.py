@@ -11,6 +11,12 @@ class GrinderContinents:
     @staticmethod
     @exception_handler(expected_exception=GrinderContinentsConvertError)
     def convert_continents(unique_countries: dict) -> dict:
+        """
+        This function counts the number of continents
+        that mapped from unique countries
+        :param unique_countries: dictionary with unique countries
+        :return: continents with quantity
+        """
         full_names = {
             "AF": "Africa",
             "AN": "Antarctica",

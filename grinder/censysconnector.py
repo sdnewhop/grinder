@@ -27,8 +27,10 @@ class CensysConnector:
     ):
         try:
             self.api = CensysIPv4(api_id=api_id, api_secret=api_secret)
-        except CensysUnauthorizedException as api_error:
-            print(f"Censys API error: {api_error}")
+        except CensysUnauthorizedException as invalid_api_err:
+            print(f"Censys invalid API keys error: {invalid_api_err}")
+        except CensysException as api_err:
+            print(f"Censys API error: {api_err}")
         self.results: list = []
         self.censys_results_count: int = 0
         self.search_fields = [

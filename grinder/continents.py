@@ -28,17 +28,25 @@ class GrinderContinents:
         }
 
         continents: dict = {}
-        for country in unique_countries.keys():
+        for country, quantity in unique_countries.items():
+            if quantity == 0:
+                continue
             try:
                 cntry_code = country_to_code(country, cn_name_format="default")
                 continent_key = code_to_continent(cntry_code)
                 continent = full_names.get(continent_key)
             except KeyError:
+                # In this case we know, that our country is not valid.
+                # We can check, if it is "Antarctica" somehow,
+                # than we will put it as continent. In another case just
+                # pass it.
+                if country != "Antarctica":
+                    continue
                 continent = country
 
-            if continent not in continents:
-                continents[continent] = unique_countries.get(country)
+            if continent not in continents.keys():
+                continents[continent] = quantity
             else:
-                continents[continent] += unique_countries.get(country)
+                continents[continent] += quantity
 
         return continents

@@ -2,7 +2,7 @@
 
 from csv import DictWriter, QUOTE_ALL
 from csv import writer as csv_writer
-from json import loads, dumps
+from json import loads, dumps, load, dump
 from pathlib import Path
 
 from grinder.decorators import exception_handler
@@ -17,7 +17,7 @@ class GrinderFileManager:
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def get_queries(self, queries_file=DefaultValues.QUERIES_FILE) -> list:
         with open(Path(".").joinpath(queries_file), mode="r") as queries_file:
-            return loads(queries_file.read())
+            return load(queries_file)
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def load_data_from_file(
@@ -52,7 +52,7 @@ class GrinderFileManager:
         path_to_json_file.mkdir(parents=True, exist_ok=True)
         path_to_json_file = path_to_json_file.joinpath(json_file)
         with open(path_to_json_file, mode="w") as result_json_file:
-            result_json_file.write(dumps(results_to_write, indent=4))
+            dump(results_to_write, result_json_file, indent=4)
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def write_results_csv(
@@ -112,8 +112,8 @@ class GrinderFileManager:
             _writer = csv_writer(result_csv_file, delimiter=',',
                                  quotechar='"', quoting=QUOTE_ALL)
             _writer.writerow(["CVE with exploit", "Affected Products", "Exploit title", "Bulletin family", 
-            				  "Exploit description", "id", "Exploit HREF", "type", "CVSS Score", 
-            				  "CVSS Vector", "Vulners HREF"])
+                              "Exploit description", "id", "Exploit HREF", "type", "CVSS Score",
+                              "CVSS Vector", "Vulners HREF"])
             for cve, exploits in results_to_write.items():
                 for exploit in exploits:
                     _writer.writerow([cve,

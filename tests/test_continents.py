@@ -29,14 +29,19 @@ def test_continents_valid_countries() -> None:
         "New Zealand": 1,
         # South and Central America,
         "Argentina": 1,
-        "Bolivia": 1
+        "Bolivia": 1,
     }
-    continents = GrinderContinents.convert_continents(
-        unique_countries=unique_countries
+    continents = GrinderContinents.convert_continents(unique_countries=unique_countries)
+    assert sorted(continents.keys()) == sorted(
+        [
+            "Africa",
+            "Asia",
+            "Europe",
+            "North America",
+            "Oceania",
+            "South and Central America",
+        ]
     )
-    assert sorted(continents.keys()) == sorted([
-        "Africa", "Asia", "Europe", "North America", "Oceania", "South and Central America"
-    ])
     for continent, quantity in continents.items():
         assert quantity == 2
 
@@ -48,13 +53,8 @@ def test_continents_invalid_countries() -> None:
     continents dict.
     :return: None
     """
-    invalid_data = {
-        "not_valid_at_all_country": 1,
-        "another_not_valid_country": 2
-    }
-    continents = GrinderContinents.convert_continents(
-        unique_countries=invalid_data
-    )
+    invalid_data = {"not_valid_at_all_country": 1, "another_not_valid_country": 2}
+    continents = GrinderContinents.convert_continents(unique_countries=invalid_data)
     assert isinstance(continents, dict) and len(continents.items()) == 0
 
 
@@ -65,12 +65,8 @@ def test_continents_antarctica_as_country() -> None:
     or if search engine just can not detect it properly.
     :return: None
     """
-    antarctica_case = {
-        "Antarctica": 1
-    }
-    continents = GrinderContinents.convert_continents(
-        unique_countries=antarctica_case
-    )
+    antarctica_case = {"Antarctica": 1}
+    continents = GrinderContinents.convert_continents(unique_countries=antarctica_case)
     assert continents == antarctica_case
 
 
@@ -80,9 +76,7 @@ def test_continents_empty_countries() -> None:
     with countries (or without countries, if more correct)
     :return: None
     """
-    continents = GrinderContinents.convert_continents(
-        unique_countries={}
-    )
+    continents = GrinderContinents.convert_continents(unique_countries={})
     assert continents == {}
 
 
@@ -91,12 +85,8 @@ def test_continents_countries_with_zero_quantity() -> None:
     Check behavior when country quantity set as 0
     :return: None
     """
-    unique_countries = {
-        "Ethiopia": 0
-    }
-    continents = GrinderContinents.convert_continents(
-        unique_countries=unique_countries
-    )
+    unique_countries = {"Ethiopia": 0}
+    continents = GrinderContinents.convert_continents(unique_countries=unique_countries)
     assert continents == {}
 
 

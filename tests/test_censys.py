@@ -7,7 +7,7 @@ from grinder.censysconnector import CensysConnector
 from grinder.errors import (
     CensysConnectorInitError,
     CensysConnectorSearchError,
-    CensysConnectorGetResultsError
+    CensysConnectorGetResultsError,
 )
 
 
@@ -57,7 +57,9 @@ def test_censysconnector_init_not_configured_api(capsys) -> None:
         assert expected_output in output
 
 
-def test_censysconnector_init_valid_api(censys_id_value: str, censys_secret_value: str) -> None:
+def test_censysconnector_init_valid_api(
+    censys_id_value: str, censys_secret_value: str
+) -> None:
     """
     Check if we can properly initialize api with
     proper API IP and proper API SECRET. Check
@@ -72,7 +74,9 @@ def test_censysconnector_init_valid_api(censys_id_value: str, censys_secret_valu
     assert isinstance(censys_connector.api, CensysIPv4)
 
 
-def test_censysconnector_init_error(censys_id_value: str, censys_secret_value: str) -> None:
+def test_censysconnector_init_error(
+    censys_id_value: str, censys_secret_value: str
+) -> None:
     """
     Raise CensysConnector error and check output of it,
     this function is not very useful but still required
@@ -153,7 +157,9 @@ def test_censysconnector_search_not_initialized_api(capsys) -> None:
         assert expected_output in output
 
 
-def test_censysconnector_search_error(censys_id_value: str, censys_secret_value: str) -> None:
+def test_censysconnector_search_error(
+    censys_id_value: str, censys_secret_value: str
+) -> None:
     """
     Raise CensysConnector error and check output of it
     :param censys_id_value: censys id
@@ -170,7 +176,9 @@ def test_censysconnector_search_error(censys_id_value: str, censys_secret_value:
         assert "Error occured in Censys Connector module" in str(init_err.value)
 
 
-def test_censysconnector_get_raw_results(censys_id_value: str, censys_secret_value: str) -> None:
+def test_censysconnector_get_raw_results(
+    censys_id_value: str, censys_secret_value: str
+) -> None:
     """
     Check raw results keys
     :param censys_id_value: censys id
@@ -194,7 +202,9 @@ def test_censysconnector_get_raw_results(censys_id_value: str, censys_secret_val
         )
 
 
-def test_censysconnector_get_results(censys_id_value: str, censys_secret_value: str) -> None:
+def test_censysconnector_get_results(
+    censys_id_value: str, censys_secret_value: str
+) -> None:
     """
     Check results parser
     :param censys_id_value: censys id
@@ -211,7 +221,9 @@ def test_censysconnector_get_results(censys_id_value: str, censys_secret_value: 
         )
 
 
-def test_censysconnector_get_results_error(censys_id_value: str, censys_secret_value: str) -> None:
+def test_censysconnector_get_results_error(
+    censys_id_value: str, censys_secret_value: str
+) -> None:
     """
     Raise CensysConnector error and check output of it
     :param censys_id_value: censys id

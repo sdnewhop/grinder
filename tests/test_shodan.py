@@ -5,10 +5,7 @@ from pprint import pprint
 
 from grinder.defaultvalues import DefaultValues
 from grinder.shodanconnector import ShodanConnector
-from grinder.errors import (
-    ShodanConnectorInitError,
-    ShodanConnectorSearchError
-)
+from grinder.errors import ShodanConnectorInitError, ShodanConnectorSearchError
 
 
 @fixture
@@ -121,5 +118,10 @@ def test_shodanconnector_get_vulnerabilities(shodan_key_value: str) -> None:
     vulnerabilities = api.get_vulnerabilities()
     for ip, cve_list in vulnerabilities.items():
         for cve, information in cve_list.items():
-            assert sorted(information.keys()) == sorted(["cvss", "references", "summary"])
-            assert len(information.get("references")) <= DefaultValues.SHODAN_MAX_VULNERABILITIES_REFERENCES
+            assert sorted(information.keys()) == sorted(
+                ["cvss", "references", "summary"]
+            )
+            assert (
+                len(information.get("references"))
+                <= DefaultValues.SHODAN_MAX_VULNERABILITIES_REFERENCES
+            )

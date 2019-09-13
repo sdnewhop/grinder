@@ -23,7 +23,7 @@ class TestDatabaseValues:
     Default database values for tests
     """
 
-    TEST_DB_NAME = "test.db"
+    TEST_DB_NAME = str(Path(".").joinpath("test_data").joinpath("test_database").joinpath("test_database.db"))
 
 
 def setup_module() -> None:
@@ -32,6 +32,7 @@ def setup_module() -> None:
     :return: None
     """
     global db
+    Path(".").joinpath("test_data").joinpath("test_database").mkdir(parents=True, exist_ok=True)
     db = GrinderDatabase(db_name=TestDatabaseValues.TEST_DB_NAME)
     db.create_db()
 

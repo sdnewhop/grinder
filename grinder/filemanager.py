@@ -31,6 +31,14 @@ class GrinderFileManager:
 
     @staticmethod
     def csv_dict_fix(results_to_write: dict, field_name: str) -> list:
+        """
+        Converts dict
+        from: {"one": 1, "two": 2}
+        to: [{"test": "one", "count": 1}, {"test": "two", "count": 2}]
+        :param results_to_write:
+        :param field_name:
+        :return:
+        """
         dict_to_list_dictpairs: list = []
         for item in results_to_write.items():
             dict_to_list_dictpairs.append(
@@ -72,7 +80,6 @@ class GrinderFileManager:
                 results_to_write = GrinderFileManager.csv_dict_fix(
                     results_to_write, csv_file
                 )
-
             maximum_fields = max(results_to_write, key=len)
             writer = DictWriter(result_csv_file, fieldnames=maximum_fields.keys())
             writer.writeheader()
@@ -128,26 +135,6 @@ class GrinderFileManager:
                                       exploit.get("cvss", {}).get("vector"),
                                       exploit.get("vhref"),
                                       ])
-
-    @exception_handler(expected_exception=GrinderFileManagerOpenError)
-    def write_results_txt(
-        self,
-        results_to_write: list or dict,
-        dest_dir: str,
-        txt_file: str,
-        txt_dir=DefaultValues.TXT_RESULTS_DIRECTORY,
-    ) -> None:
-        if not results_to_write:
-            return
-        path_to_txt_file = Path(".").joinpath(dest_dir).joinpath(txt_dir)
-        path_to_txt_file.mkdir(parents=True, exist_ok=True)
-        path_to_txt_file = path_to_txt_file.joinpath(txt_file)
-        with open(path_to_txt_file, mode="w") as result_txt_file:
-            if isinstance(results_to_write, list):
-                for item in results_to_write:
-                    result_txt_file.write(f"{item}\n")
-            if isinstance(results_to_write, dict):
-                result_txt_file.write(dumps(results_to_write))
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def write_results_png(

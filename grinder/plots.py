@@ -13,12 +13,22 @@ from grinder.filemanager import GrinderFileManager
 
 
 class GrinderPlots:
+    """
+    Pie charts and plots creator
+    """
+
     def __init__(self):
         self.plot = None
         self.results_figure_id: int = 0
 
     @exception_handler(expected_exception=GrinderPlotsSavePieChartError)
     def save_pie_chart(self, relative_path: str, filename: str) -> None:
+        """
+        Save pie chart with filemanager in png
+        :param relative_path: subdirectory to save
+        :param filename: filename to save
+        :return: None
+        """
         filemanager = GrinderFileManager()
         if self.plot:
             filemanager.write_results_png(
@@ -31,6 +41,12 @@ class GrinderPlots:
 
     @exception_handler(expected_exception=GrinderPlotsAdjustAutopctError)
     def __adjust_autopct(self, values: list):
+        """
+        Percents adjuster to show on plot
+        :param values: values to adjust
+        :return: function of adjustment
+        """
+
         def percent_and_count(pct):
             total = sum(values)
             val = int(round(pct * total / 100.0))
@@ -40,6 +56,13 @@ class GrinderPlots:
 
     @exception_handler(expected_exception=GrinderPlotsCreatePieChartError)
     def create_pie_chart(self, results: dict, suptitle: str) -> None:
+        """
+        Create pie chart based on results,
+        add suptitle to picture
+        :param results: results to create plot
+        :param suptitle: suptitle of plot
+        :return: None
+        """
         if not results.values():
             return
         values = [value for value in results.values()]
@@ -63,10 +86,13 @@ class GrinderPlots:
             explode=explode,
             textprops={"fontsize": DefaultPlotValues.PLOT_LABEL_FONT_SIZE},
         )
-        plot.legend(patches, [f"{key} - {percent}" for key, percent in zip(keys, percents)],
-                    loc="upper left",
-                    bbox_to_anchor=(-0.65, 1),
-                    prop={'size': DefaultPlotValues.PLOT_LEGEND_SIZE})
+        plot.legend(
+            patches,
+            [f"{key} - {percent}" for key, percent in zip(keys, percents)],
+            loc="upper left",
+            bbox_to_anchor=(-0.65, 1),
+            prop={"size": DefaultPlotValues.PLOT_LEGEND_SIZE},
+        )
 
         plot.axis("equal")
         plot.suptitle(suptitle, fontsize=DefaultPlotValues.PLOT_SUPTITLE_FONT_SIZE)

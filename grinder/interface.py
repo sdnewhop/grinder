@@ -19,24 +19,45 @@ class GrinderInterface:
 
     @staticmethod
     def check_python_version() -> None:
+        """
+        This function checks a python version to be
+        sure that all of the features will be supported.
+        :return: None
+        """
         if version_info < (3, 6):
             print("Required python version is 3.6 or greater.")
             exit(1)
 
     @exception_handler(expected_exception=GrinderInterfaceLoadEnvironmentKeyError)
     def load_shodan_key_from_env(self) -> str:
+        """
+        Return Shodan API key from environment variable
+        :return: Shodan API key
+        """
         return environ.get("SHODAN_API_KEY")
 
     @exception_handler(expected_exception=GrinderInterfaceLoadEnvironmentKeyError)
     def load_censys_keys_from_env(self) -> tuple:
+        """
+        Return Censys API ID, API Secret from environment variables
+        :return: pair API ID + API Secret
+        """
         return environ.get("CENSYS_API_ID"), environ.get("CENSYS_API_SECRET")
 
     @exception_handler(expected_exception=GrinderInterfaceLoadEnvironmentKeyError)
     def load_vulners_key_from_env(self) -> str:
+        """
+        Return Vulners API key from environment variable
+        :return: Vulners API key
+        """
         return environ.get("VULNERS_API_KEY")
 
     @exception_handler(expected_exception=GrinderInterfaceParseArgsError)
     def parse_args(self) -> Namespace:
+        """
+        Arguments parser for CLI arguments
+        :return: namespace/dictionary with CLI argument values
+        """
         if len(argv) == 1:
             print(f"Usage: {argv[0]} -h for help")
             exit(1)
@@ -209,21 +230,21 @@ class GrinderInterface:
             "--tls-scan-path",
             action="store",
             default=None,
-            help="Path to TLS-Scanner.jar (if TLS-Scanner directory not in Grinder root, else not required)"
+            help="Path to TLS-Scanner.jar (if TLS-Scanner directory not in Grinder root, else not required)",
         )
         parser.add_argument(
             "-vr",
             "--vulners-report",
             action="store_true",
             default=False,
-            help="Make additional vulners reports"
+            help="Make additional vulners reports",
         )
         parser.add_argument(
             "-ni",
             "--not-incremental",
             action="store_true",
             default=False,
-            help="Turn off incrememental scan - make clean scan (without previous results)"
+            help="Turn off incrememental scan - make clean scan (without previous results)",
         )
 
         self.args = parser.parse_args()
@@ -265,5 +286,10 @@ class GrinderInterface:
 
     @exception_handler(expected_exception=GrinderInterfaceGetShodanKeyError)
     def get_shodan_key(self) -> str:
+        """
+        Return Shodan key if key is presented
+        in arguments
+        :return: Shodan API key
+        """
         if self.args.shodan_key:
             return self.args.shodan_key

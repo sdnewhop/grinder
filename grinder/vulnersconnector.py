@@ -279,7 +279,9 @@ class VulnersConnector:
             print("Error:", wrong_key)
             return {}
 
-        right_filter = [f"cvelist:{vulnerability}" for vulnerability in self.vulnerabilities.keys()]
+        right_filter = [
+            f"cvelist:{vulnerability}" for vulnerability in self.vulnerabilities.keys()
+        ]
         exploits = {}
         length_of_right_filters = len(right_filter)
         for index, cve in enumerate(right_filter):
@@ -288,8 +290,10 @@ class VulnersConnector:
                 cve_references = vulners_api.searchExploit(cve)
             except:
                 continue
-            print(f" - Found {len(cve_references)} exploits for {cve_without_filter} "
-                  f"({index}/{length_of_right_filters}, total CVEs: {len(exploits.keys())})")
+            print(
+                f" - Found {len(cve_references)} exploits for {cve_without_filter} "
+                f"({index}/{length_of_right_filters}, total CVEs: {len(exploits.keys())})"
+            )
             if not cve_references:
                 continue
             cve_exploits = []
@@ -392,7 +396,9 @@ class VulnersConnector:
         cpe_with_exploits = {}
         for cpe in unique_cpe:
             cpe_results = vulners_api.cpeVulnerabilities(cpe)
-            print(f" - Software: {cpe}, available databases: {list(cpe_results.keys())}")
+            print(
+                f" - Software: {cpe}, available databases: {list(cpe_results.keys())}"
+            )
             if not cpe_results:
                 continue
             cpe_exploit_list = cpe_results.get(database_name)

@@ -11,7 +11,17 @@ from grinder.errors import GrinderScriptExecutorRunScriptError
 class NmapScriptExecutor:
     @staticmethod
     @exception_handler(expected_exception=GrinderScriptExecutorRunScriptError)
-    def run_script(host_info, nse_script, host_timeout=60):
+    def run_script(host_info, nse_script, host_timeout=60) -> dict or None:
+        """
+        This function and class provide methods to run custom .nse
+        scripts on particular hosts. Note - this scripts will be
+        executed one by one for every host. Arguments of script
+        execution can be fixed in Nmap connector call.
+        :param host_info: information about current host
+        :param nse_script: .nse script to run on host
+        :param host_timeout: maximum timeout in seconds per host scan
+        :return: results of script execution
+        """
         if not (
             isinstance(nse_script, str)
             and (nse_script.endswith(".nse") or nse_script.endswith(".lua"))

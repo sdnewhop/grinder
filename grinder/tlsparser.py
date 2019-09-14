@@ -28,7 +28,7 @@ LIST_OF_ATTACKS = [
     "Sweet 32",
     "DROWN",
     "Heartbleed",
-    "EarlyCcs"
+    "EarlyCcs",
 ]
 
 # Possible list of bugs from TLS-Scanner
@@ -113,68 +113,108 @@ class TlsParser:
         return list(set(list(shodan_vulns + vulners_vulns)))
 
     @staticmethod
-    def save_plots(results: dict, suptitle: str, filename: str, directory: str = DefaultValues.PNG_TLS_RESULTS):
+    def save_plots(
+        results: dict,
+        suptitle: str,
+        filename: str,
+        directory: str = DefaultValues.PNG_TLS_RESULTS,
+    ) -> None:
+        """
+        Save graphic plots for parsed TLS attacks and bugs
+        :param results: results to build pie charts for
+        :param suptitle: title of plot
+        :param filename: filename to save
+        :param directory: directory to save
+        :return: None
+        """
         plots = GrinderPlots()
         plots.create_pie_chart(results, suptitle)
-        plots.save_pie_chart(
-            relative_path=directory,
-            filename=filename
-        )
+        plots.save_pie_chart(relative_path=directory, filename=filename)
 
-    def save_plots_per_product(self, all_results: dict):
-        unique_products = list(set([info.get("product") for info in all_results.values()]))
-        unique_vendors = list(set([info.get("vendor") for info in all_results.values()]))
+    def save_plots_per_product(self, all_results: dict) -> None:
+        """
+        Create all possible plots and charts for
+        attacks and bugs, products and vendors
+        :param all_results: all results that need to be processed
+        :return: None
+        """
+        unique_products = list(
+            set([info.get("product") for info in all_results.values()])
+        )
+        unique_vendors = list(
+            set([info.get("vendor") for info in all_results.values()])
+        )
         for product in unique_products:
             product_hosts = {}
             for ip, info in all_results.items():
                 if info.get("product") != product:
                     continue
                 product_hosts.update({ip: info})
-            unique_attacks = self.count_unique_entities(product_hosts, ent_type="attacks")
+            unique_attacks = self.count_unique_entities(
+                product_hosts, ent_type="attacks"
+            )
             unique_bugs = self.count_unique_entities(product_hosts, ent_type="bugs")
             product_to_name = product.replace(" ", "_")
-            self.save_plots(unique_attacks,
-                            f"Quantity of unique attacks for {product}",
-                            f"tls_attacks_{product_to_name}.png",
-                            DefaultValues.PNG_TLS_ATTACKS_BY_PRODUCTS)
-            self.save_plots(unique_bugs,
-                            f"Quantity of unique bugs for {product}",
-                            f"tls_bugs_{product_to_name}.png",
-                            DefaultValues.PNG_TLS_BUGS_BY_PRODUCTS)
+            self.save_plots(
+                unique_attacks,
+                f"Quantity of unique attacks for {product}",
+                f"tls_attacks_{product_to_name}.png",
+                DefaultValues.PNG_TLS_ATTACKS_BY_PRODUCTS,
+            )
+            self.save_plots(
+                unique_bugs,
+                f"Quantity of unique bugs for {product}",
+                f"tls_bugs_{product_to_name}.png",
+                DefaultValues.PNG_TLS_BUGS_BY_PRODUCTS,
+            )
         for vendor in unique_vendors:
             vendor_hosts = {}
             for ip, info in all_results.items():
                 if info.get("vendor") != vendor:
                     continue
                 vendor_hosts.update({ip: info})
-            unique_attacks = self.count_unique_entities(vendor_hosts, ent_type="attacks")
+            unique_attacks = self.count_unique_entities(
+                vendor_hosts, ent_type="attacks"
+            )
             unique_bugs = self.count_unique_entities(vendor_hosts, ent_type="bugs")
             vendor_to_name = vendor.replace(" ", "_")
-            self.save_plots(unique_attacks,
-                            f"Quantity of unique attacks for {vendor}",
-                            f"tls_attacks_{vendor_to_name}.png",
-                            DefaultValues.PNG_TLS_ATTACKS_BY_VENDORS)
-            self.save_plots(unique_bugs,
-                            f"Quantity of unique bugs for {vendor}",
-                            f"tls_bugs_{vendor_to_name}.png",
-                            DefaultValues.PNG_TLS_BUGS_BY_VENDORS)
+            self.save_plots(
+                unique_attacks,
+                f"Quantity of unique attacks for {vendor}",
+                f"tls_attacks_{vendor_to_name}.png",
+                DefaultValues.PNG_TLS_ATTACKS_BY_VENDORS,
+            )
+            self.save_plots(
+                unique_bugs,
+                f"Quantity of unique bugs for {vendor}",
+                f"tls_bugs_{vendor_to_name}.png",
+                DefaultValues.PNG_TLS_BUGS_BY_VENDORS,
+            )
         for attack in LIST_OF_ATTACKS:
             attack_hosts = {}
             for ip, info in all_results.items():
                 if attack not in info.get("attacks").keys():
                     continue
                 attack_hosts.update({ip: info})
-            unique_vendors = self.count_unique_entities(attack_hosts, ent_type="vendor", flat_list_flag=False)
-            unique_products = self.count_unique_entities(attack_hosts, ent_type="product", flat_list_flag=False)
+            unique_vendors = self.count_unique_entities(
+                attack_hosts, ent_type="vendor", flat_list_flag=False
+            )
+            unique_products = self.count_unique_entities(
+                attack_hosts, ent_type="product", flat_list_flag=False
+            )
             attack_to_name = attack.replace(" ", "_")
-            self.save_plots(unique_vendors,
-                            f"Quantity of unique vendors for {attack}",
-                            f"tls_attacks_{attack_to_name}.png",
-                            DefaultValues.PNG_TLS_VENDORS_BY_ATTACKS)
-            self.save_plots(unique_products,
-                            f"Quantity of unique products for {attack}",
-                            f"tls_attacks_{attack_to_name}.png",
-                            DefaultValues.PNG_TLS_PRODUCTS_BY_ATTACKS)
+            self.save_plots(
+                unique_vendors,
+                f"Quantity of unique vendors for {attack}",
+                f"tls_attacks_{attack_to_name}.png",
+                DefaultValues.PNG_TLS_VENDORS_BY_ATTACKS,
+            )
+            self.save_plots(
+                unique_products,
+                f"Quantity of unique products for {attack}",
+                f"tls_attacks_{attack_to_name}.png",
+                DefaultValues.PNG_TLS_PRODUCTS_BY_ATTACKS,
+            )
         for bug in LIST_OF_BUGS:
             bug_hosts = {}
             for ip, info in all_results.items():
@@ -183,17 +223,25 @@ class TlsParser:
                 if bug not in info.get("bugs").keys():
                     continue
                 bug_hosts.update({ip: info})
-            unique_vendors = self.count_unique_entities(bug_hosts, ent_type="vendor", flat_list_flag=False)
-            unique_products = self.count_unique_entities(bug_hosts, ent_type="product", flat_list_flag=False)
+            unique_vendors = self.count_unique_entities(
+                bug_hosts, ent_type="vendor", flat_list_flag=False
+            )
+            unique_products = self.count_unique_entities(
+                bug_hosts, ent_type="product", flat_list_flag=False
+            )
             bug_to_name = bug.replace(" ", "_")
-            self.save_plots(unique_vendors,
-                            f"Quantity of unique vendors for {bug}",
-                            f"tls_bugs_{bug_to_name}.png",
-                            DefaultValues.PNG_TLS_VENDORS_BY_BUGS)
-            self.save_plots(unique_products,
-                            f"Quantity of unique products for {bug}",
-                            f"tls_bugs_{bug_to_name}.png",
-                            DefaultValues.PNG_TLS_PRODUCTS_BY_BUGS)
+            self.save_plots(
+                unique_vendors,
+                f"Quantity of unique vendors for {bug}",
+                f"tls_bugs_{bug_to_name}.png",
+                DefaultValues.PNG_TLS_VENDORS_BY_BUGS,
+            )
+            self.save_plots(
+                unique_products,
+                f"Quantity of unique products for {bug}",
+                f"tls_bugs_{bug_to_name}.png",
+                DefaultValues.PNG_TLS_PRODUCTS_BY_BUGS,
+            )
 
     def load_tls_scan_results(
         self,
@@ -249,27 +297,51 @@ class TlsParser:
 
         unique_attacks = self.count_unique_entities(all_results, ent_type="attacks")
         unique_bugs = self.count_unique_entities(all_results, ent_type="bugs")
-        unique_vulnerabilities = self.count_unique_entities(all_results, ent_type="vulnerabilities")
+        unique_vulnerabilities = self.count_unique_entities(
+            all_results, ent_type="vulnerabilities"
+        )
 
         self.save_plots_per_product(all_results)
         self.save_plots(unique_attacks, "Quantity of unique attacks", "tls_attacks.png")
         self.save_plots(unique_bugs, "Quantity of unique bugs", "tls_bugs.png")
 
-        self.save_results_json(all_results, filename=DefaultTlsParserValues.FULL_RESULTS_JSON)
-        self.save_results_json(unique_attacks, filename=DefaultTlsParserValues.UNIQUE_ATTACKS_JSON)
-        self.save_results_json(unique_bugs, filename=DefaultTlsParserValues.UNIQUE_BUGS_JSON)
-        self.save_results_json(unique_vulnerabilities, filename=DefaultTlsParserValues.UNIQUE_VULNERABILITIES_JSON)
+        self.save_results_json(
+            all_results, filename=DefaultTlsParserValues.FULL_RESULTS_JSON
+        )
+        self.save_results_json(
+            unique_attacks, filename=DefaultTlsParserValues.UNIQUE_ATTACKS_JSON
+        )
+        self.save_results_json(
+            unique_bugs, filename=DefaultTlsParserValues.UNIQUE_BUGS_JSON
+        )
+        self.save_results_json(
+            unique_vulnerabilities,
+            filename=DefaultTlsParserValues.UNIQUE_VULNERABILITIES_JSON,
+        )
 
-        self.save_results_csv(all_results, filename=DefaultTlsParserValues.FULL_RESULTS_CSV)
-        self.save_unique_results_csv(unique_attacks, filename=DefaultTlsParserValues.UNIQUE_ATTACKS_CSV)
-        self.save_unique_results_csv(unique_bugs, filename=DefaultTlsParserValues.UNIQUE_BUGS_CSV)
-        self.save_unique_results_csv(unique_vulnerabilities, filename=DefaultTlsParserValues.UNIQUE_VULNERABILITIES_CSV)
+        self.save_results_csv(
+            all_results, filename=DefaultTlsParserValues.FULL_RESULTS_CSV
+        )
+        self.save_unique_results_csv(
+            unique_attacks, filename=DefaultTlsParserValues.UNIQUE_ATTACKS_CSV
+        )
+        self.save_unique_results_csv(
+            unique_bugs, filename=DefaultTlsParserValues.UNIQUE_BUGS_CSV
+        )
+        self.save_unique_results_csv(
+            unique_vulnerabilities,
+            filename=DefaultTlsParserValues.UNIQUE_VULNERABILITIES_CSV,
+        )
 
-        self.save_unique_groupped_results_csv(all_results,
-                                              filename=DefaultTlsParserValues.UNIQUE_GROUPPED_PRODUCTS_RESULTS_CSV)
+        self.save_unique_groupped_results_csv(
+            all_results,
+            filename=DefaultTlsParserValues.UNIQUE_GROUPPED_PRODUCTS_RESULTS_CSV,
+        )
 
     @staticmethod
-    def count_unique_entities(results: dict, ent_type: str, flat_list_flag: bool = True) -> dict:
+    def count_unique_entities(
+        results: dict, ent_type: str, flat_list_flag: bool = True
+    ) -> dict:
         """
         Count unique entities (attacks, bugs, vulnerabilities, etc.)
         :param results: dictionary with results to count in
@@ -330,13 +402,23 @@ class TlsParser:
         full_path = Path(".").joinpath(dest_dir).joinpath(sub_dir)
         full_path.mkdir(parents=True, exist_ok=True)
         full_path = full_path.joinpath(filename)
-        csv_columns = ["ip", "vendor", "product", "port", "attacks", "bugs", "vulnerabilities"]
+        csv_columns = [
+            "ip",
+            "vendor",
+            "product",
+            "port",
+            "attacks",
+            "bugs",
+            "vulnerabilities",
+        ]
 
         with open(full_path, "w") as csv_file:
             writer = DictWriter(csv_file, fieldnames=csv_columns)
             writer.writeheader()
 
-            sorted_by_vendor = sorted(results.items(), key=lambda item: item[1].get("product"))
+            sorted_by_vendor = sorted(
+                results.items(), key=lambda item: item[1].get("product")
+            )
             results = OrderedDict(sorted_by_vendor)
 
             for ip, data in results.items():
@@ -397,7 +479,7 @@ class TlsParser:
         entities_sorted_by_value = dict(
             sorted(counter.items(), key=lambda x: x[1], reverse=True)
         )
-        
+
         groupped_results = {}
         for attack, quantity in entities_sorted_by_value.items():
             products_with_this_attack = [
@@ -406,23 +488,40 @@ class TlsParser:
                     "product": host.get("product"),
                     "ip": host.get("ip"),
                     "port": host.get("port"),
-                } for host in results.values() if attack in host.get("attacks")]
+                }
+                for host in results.values()
+                if attack in host.get("attacks")
+            ]
             groupped_results.update({attack: {}})
-            attack_vendors = list(set([host.get("vendor") for host in products_with_this_attack]))
+            attack_vendors = list(
+                set([host.get("vendor") for host in products_with_this_attack])
+            )
             for vendor in attack_vendors:
                 groupped_results[attack].update({vendor: {}})
-                attack_products = list(set([host.get("product") for host in products_with_this_attack if host.get("vendor") == vendor]))
-                for product in attack_products: 
-                    ips = [host.get("ip") + ":" + host.get("port") for host in products_with_this_attack if host.get("vendor") == vendor and host.get("product") == product]
+                attack_products = list(
+                    set(
+                        [
+                            host.get("product")
+                            for host in products_with_this_attack
+                            if host.get("vendor") == vendor
+                        ]
+                    )
+                )
+                for product in attack_products:
+                    ips = [
+                        host.get("ip") + ":" + host.get("port")
+                        for host in products_with_this_attack
+                        if host.get("vendor") == vendor
+                        and host.get("product") == product
+                    ]
                     quantity = len(ips)
-                    
-                    sorted_ips = {
-                        product: {
-                            "ips": ips, 
-                            "quantity": quantity
-                        }
-                    }
-                    sorted_ips_by_quantity = sorted(sorted_ips.items(), key=lambda item: item[1].get("quantity"), reverse=True)
+
+                    sorted_ips = {product: {"ips": ips, "quantity": quantity}}
+                    sorted_ips_by_quantity = sorted(
+                        sorted_ips.items(),
+                        key=lambda item: item[1].get("quantity"),
+                        reverse=True,
+                    )
                     res_sorted_dict = OrderedDict(sorted_ips_by_quantity)
                     groupped_results[attack][vendor].update(res_sorted_dict)
 
@@ -439,16 +538,18 @@ class TlsParser:
                         "product": "",
                         "versions": None,
                         "ips": [item for sublist in all_ips for item in sublist],
-                        "quantity": sum([info.get("quantity") for info in product.values()])
+                        "quantity": sum(
+                            [info.get("quantity") for info in product.values()]
+                        ),
                     }
                     writer.writerow(vendor_row)
                     for product, info in product.items():
                         row = {
-                            "attack": attack, 
-                            "vendor": vendor, 
-                            "product": product, 
+                            "attack": attack,
+                            "vendor": vendor,
+                            "product": product,
                             "versions": None,
-                            "ips": info.get("ips"), 
+                            "ips": info.get("ips"),
                             "quantity": info.get("quantity"),
                         }
                         writer.writerow(row)

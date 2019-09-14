@@ -74,7 +74,10 @@ class TlsScanner:
         for product in unique_products:
             current_product_quantity = 0
             for ip, host in hosts.items():
-                if host.get("product") == product and current_product_quantity < product_limit:
+                if (
+                    host.get("product") == product
+                    and current_product_quantity < product_limit
+                ):
                     fixed_hosts.update({ip: host})
                     current_product_quantity += 1
         return fixed_hosts
@@ -216,7 +219,7 @@ class TlsScanner:
         port: int or str,
         report_detail: str,
         scan_detail: str,
-        threads: int or str
+        threads: int or str,
     ) -> str or None:
         """
         Call TLS-Scanner module to scan TLS configuration, attacks and bugs
@@ -269,16 +272,22 @@ class TlsScanner:
         :param name_of_file: name of file to check, without extension
         :return: answer to question "Is current host was already scanned?"
         """
-        results_dir = Path(".").joinpath(
-            DefaultValues.RESULTS_DIRECTORY
-        ).joinpath(DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)
+        results_dir = (
+            Path(".")
+            .joinpath(DefaultValues.RESULTS_DIRECTORY)
+            .joinpath(DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)
+        )
         if f"{name_of_file}.txt" not in listdir(results_dir):
             return False
         else:
-            with open(results_dir.joinpath(f"{name_of_file}.txt"), mode="r") as res_file:
+            with open(
+                results_dir.joinpath(f"{name_of_file}.txt"), mode="r"
+            ) as res_file:
                 file_contains = res_file.read()
-                if ("Cannot reach the Server. Is it online?" in file_contains
-                        and "online error caught" not in file_contains):
+                if (
+                    "Cannot reach the Server. Is it online?" in file_contains
+                    and "online error caught" not in file_contains
+                ):
                     print(f"Host {name_of_file} was offline. Try to rescan.")
                     return False
             print(f"Host was already scanned: {name_of_file}")

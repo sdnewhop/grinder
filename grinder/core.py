@@ -987,11 +987,12 @@ class GrinderCore:
         self.__add_product_data_to_database(product_info)
 
         # Shodan queries processor
-        for query_info in product_info.get("shodan_queries"):
+        len_of_shodan_queries = len(product_info.get("shodan_queries"))
+        for query_index, query_info in enumerate(product_info.get("shodan_queries")):
             if not self.__is_query_confidence_valid(query_info.get("query_confidence")):
                 continue
             query = query_info.get("query")
-            cprint(f"Current Shodan query is: {query}", "blue", attrs=["bold"])
+            cprint(f"{query_index} / {len_of_shodan_queries} :: Current Shodan query is: {query}", "blue", attrs=["bold"])
             shodan_raw_results = self.shodan_search(query)
             for current_host in shodan_raw_results:
                 self.__parse_current_host_shodan_results(
@@ -999,11 +1000,12 @@ class GrinderCore:
                 )
 
         # Censys queries processor
-        for query_info in product_info.get("censys_queries"):
+        len_of_censys_queries = len(product_info.get("censys_queries"))
+        for query_index, query_info in enumerate(product_info.get("censys_queries")):
             if not self.__is_query_confidence_valid(query_info.get("query_confidence")):
                 continue
             query = query_info.get("query")
-            cprint(f"Current Censys query is: {query}", "blue", attrs=["bold"])
+            cprint(f"{query_index} / {len_of_censys_queries} :: Current Censys query is: {query}", "blue", attrs=["bold"])
             censys_raw_results = self.censys_search(query)
             for current_host in censys_raw_results:
                 self.__parse_current_host_censys_results(
@@ -1430,7 +1432,9 @@ class GrinderCore:
         if not_incremental is False:
             self.__increment_prev_scan_results()
 
-        for product_info in self.queries_file:
+        len_of_products = len(self.queries_file)
+        for product_index, product_info in enumerate(self.queries_file):
+            cprint(f"{product_index} / {len_of_products} :: Current product: {product_info.get('product')}", "blue", attrs=["bold"])
             self.__process_current_product_queries(product_info)
 
         # Force create combined results container

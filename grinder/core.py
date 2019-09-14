@@ -440,7 +440,7 @@ class GrinderCore:
         :param results: results to save
         :param name: name of file
         :param dest_dir: directory to save
-        :param hosts_result: results with all hosts
+        :param hosts_results: results with all hosts
         :return: None
         """
         cprint(f"Save Vulners reports for {name}...", "blue", attrs=["bold"])

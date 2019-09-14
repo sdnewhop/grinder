@@ -9,6 +9,11 @@ map/static/data
 database.db
 .idea/
 
+# Tests files
+tests/test_data/test_database
+tests/test_results
+tests/run.sh
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

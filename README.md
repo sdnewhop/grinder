@@ -9,6 +9,7 @@
 1. [Current Features](#current-features)
 1. [Setup and Configure Environment](#setup-and-configure-environment)
 1. [Build in Docker](#build-in-docker)
+1. [Tests](#tests)
 1. [Usage](#usage)
 1. [Examples](#examples)
 1. [Add Your Own Queries](#add-your-own-queries)
@@ -124,6 +125,19 @@ To build the basic lightweight Grinder framework version (without TLS-Attacker a
 ```bash
 docker run -it --rm --volume $(pwd)/results:/code/results --volume $(pwd)/map:/code/map grinder-framework -h
 ```
+
+## Tests
+To run basic tests for some modules, you need to change directory to `tests/`:
+```
+cd tests/
+```
+And run basic tests with the next command - please, pay attention that you need to provide API keys for some modules (like Shodan, Censys) because tests are implemented to check all real functional features of this search engines in Grinder modules and wrappers:
+```
+pytest --shodan_key SHODAN_API_KEY --censys_id CENSYS_ID_KEY --censys_secret CENSYS_SECRET_KEY
+```
+Note: tests are still WIP, so please, feel free to create issues If you encounter any problems with it. Currently tests provided for some basic modules and features (Censys, Shodan, Filemanager, Database).
+
+
 ## Usage
 ### Help on Command Line Arguments
 ```bash

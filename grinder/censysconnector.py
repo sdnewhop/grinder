@@ -19,16 +19,26 @@ from grinder.errors import (
 
 
 class CensysConnector:
+    """
+    This class is used to retrieve information from Censys Search Engine.
+    """
     @exception_handler(expected_exception=CensysConnectorInitError)
     def __init__(
         self,
-        api_id=DefaultValues.CENSYS_API_ID,
-        api_secret=DefaultValues.CENSYS_API_SECRET,
+        api_id: str = DefaultValues.CENSYS_API_ID,
+        api_secret: str = DefaultValues.CENSYS_API_SECRET,
     ):
+        """
+        Initialize Censys Search Engine API
+        :param api_id: Censys ID key
+        :param api_secret: Censys SECRET key
+        """
         try:
             self.api = CensysIPv4(api_id=api_id, api_secret=api_secret)
-        except CensysUnauthorizedException as api_error:
-            print(f"Censys API error: {api_error}")
+        except CensysUnauthorizedException as invalid_api_err:
+            print(f"Censys invalid API keys error: {invalid_api_err}")
+        except CensysException as api_err:
+            print(f"Censys API error: {api_err}")
         self.results: list = []
         self.censys_results_count: int = 0
         self.search_fields = [
@@ -50,8 +60,16 @@ class CensysConnector:
 
     @exception_handler(expected_exception=CensysConnectorSearchError)
     def search(
-        self, query: str, max_records=DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
+        self,
+        query: str,
+        max_records: int = DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
     ) -> None:
+        """
+        This function is used to search hosts in Censys with initialized API
+        :param query: query that you want to use for you search
+        :param max_records: quantity of hosts that you want to get with query
+        :return: None
+        """
         try:
             self.results = list(
                 self.api.search(
@@ -82,10 +100,20 @@ class CensysConnector:
         self.censys_results_count = len(self.results)
 
     def get_raw_results(self) -> list:
+        """
+        Return raw data from Censys directly
+        :return: list with results
+        """
         return self.results
 
     @exception_handler(expected_exception=CensysConnectorGetResultsError)
     def get_results(self) -> list:
+        """
+        Return parsed results - all results
+        will be processed in the style of
+        Shodan hosts and keys
+        :return: list of parsed and formatted hosts
+        """
         formated_result: list = []
         for result in self.results:
             formated_result.append(
@@ -99,4 +127,8 @@ class CensysConnector:
         return formated_result
 
     def get_results_count(self) -> int:
+        """
+        Return quantity of Censys hosts
+        :return: quantity of hosts
+        """
         return self.censys_results_count

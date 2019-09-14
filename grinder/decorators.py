@@ -7,6 +7,19 @@ from time import time, strftime, gmtime
 
 
 def exception_handler(expected_exception):
+    """
+    Custom exception handler that wraps almost
+    all functions in Grinder. This wrapper
+    catches all kind of unexpected exceptions,
+    provide an exception for keyboard stopping in any
+    function (especially in case of multiprocessing/
+    multithreading locking), and also provides
+    "clean" exit with terminal input returning (again,
+    in a case when you try to stop Grinder in a dirty
+    way when he is in multiprocessing case)
+    :param expected_exception: exception that will be processed here
+    :return: wrapped function
+    """
     def real_decorator(function):
         def func_wrapper(*args, **kwargs):
             try:
@@ -26,6 +39,12 @@ def exception_handler(expected_exception):
 
 
 def timer(function):
+    """
+    Timer that used to count runtime
+    of different functions. Simple.
+    :param function: wrapping function
+    :return: wrapped function
+    """
     @wraps(function)
     def wrapper(*args, **kwargs):
         start = time()

@@ -2,7 +2,7 @@
 
 from csv import DictWriter, QUOTE_ALL
 from csv import writer as csv_writer
-from json import loads, dumps
+from json import load, dump
 from pathlib import Path
 
 from grinder.decorators import exception_handler
@@ -17,7 +17,7 @@ class GrinderFileManager:
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def get_queries(self, queries_file=DefaultValues.QUERIES_FILE) -> list:
         with open(Path(".").joinpath(queries_file), mode="r") as queries_file:
-            return loads(queries_file.read())
+            return load(queries_file)
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def load_data_from_file(
@@ -27,10 +27,18 @@ class GrinderFileManager:
         load_json_dir=DefaultValues.JSON_RESULTS_DIRECTORY,
     ) -> list:
         with open(Path(".").joinpath(load_dir).joinpath(load_json_dir).joinpath(load_file), mode="r") as saved_results:
-            return loads(saved_results.read())
+            return load(saved_results)
 
     @staticmethod
     def csv_dict_fix(results_to_write: dict, field_name: str) -> list:
+        """
+        Converts dict
+        from: {"one": 1, "two": 2}
+        to: [{"test": "one", "count": 1}, {"test": "two", "count": 2}]
+        :param results_to_write:
+        :param field_name:
+        :return:
+        """
         dict_to_list_dictpairs: list = []
         for item in results_to_write.items():
             dict_to_list_dictpairs.append(
@@ -52,7 +60,7 @@ class GrinderFileManager:
         path_to_json_file.mkdir(parents=True, exist_ok=True)
         path_to_json_file = path_to_json_file.joinpath(json_file)
         with open(path_to_json_file, mode="w") as result_json_file:
-            result_json_file.write(dumps(results_to_write, indent=4))
+            dump(results_to_write, result_json_file, indent=4)
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def write_results_csv(
@@ -72,7 +80,6 @@ class GrinderFileManager:
                 results_to_write = GrinderFileManager.csv_dict_fix(
                     results_to_write, csv_file
                 )
-
             maximum_fields = max(results_to_write, key=len)
             writer = DictWriter(result_csv_file, fieldnames=maximum_fields.keys())
             writer.writeheader()
@@ -112,8 +119,8 @@ class GrinderFileManager:
             _writer = csv_writer(result_csv_file, delimiter=',',
                                  quotechar='"', quoting=QUOTE_ALL)
             _writer.writerow(["CVE with exploit", "Affected Products", "Exploit title", "Bulletin family", 
-            				  "Exploit description", "id", "Exploit HREF", "type", "CVSS Score", 
-            				  "CVSS Vector", "Vulners HREF"])
+                              "Exploit description", "id", "Exploit HREF", "type", "CVSS Score",
+                              "CVSS Vector", "Vulners HREF"])
             for cve, exploits in results_to_write.items():
                 for exploit in exploits:
                     _writer.writerow([cve,
@@ -128,26 +135,6 @@ class GrinderFileManager:
                                       exploit.get("cvss", {}).get("vector"),
                                       exploit.get("vhref"),
                                       ])
-
-    @exception_handler(expected_exception=GrinderFileManagerOpenError)
-    def write_results_txt(
-        self,
-        results_to_write: list or dict,
-        dest_dir: str,
-        txt_file: str,
-        txt_dir=DefaultValues.TXT_RESULTS_DIRECTORY,
-    ) -> None:
-        if not results_to_write:
-            return
-        path_to_txt_file = Path(".").joinpath(dest_dir).joinpath(txt_dir)
-        path_to_txt_file.mkdir(parents=True, exist_ok=True)
-        path_to_txt_file = path_to_txt_file.joinpath(txt_file)
-        with open(path_to_txt_file, mode="w") as result_txt_file:
-            if isinstance(results_to_write, list):
-                for item in results_to_write:
-                    result_txt_file.write(f"{item}\n")
-            if isinstance(results_to_write, dict):
-                result_txt_file.write(dumps(results_to_write))
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)
     def write_results_png(

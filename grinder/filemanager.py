@@ -2,7 +2,7 @@
 
 from csv import DictWriter, QUOTE_ALL
 from csv import writer as csv_writer
-from json import loads, dumps, load, dump
+from json import load, dump
 from pathlib import Path
 
 from grinder.decorators import exception_handler
@@ -27,7 +27,7 @@ class GrinderFileManager:
         load_json_dir=DefaultValues.JSON_RESULTS_DIRECTORY,
     ) -> list:
         with open(Path(".").joinpath(load_dir).joinpath(load_json_dir).joinpath(load_file), mode="r") as saved_results:
-            return loads(saved_results.read())
+            return load(saved_results)
 
     @staticmethod
     def csv_dict_fix(results_to_write: dict, field_name: str) -> list:

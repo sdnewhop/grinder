@@ -3,6 +3,7 @@ from pytest import fixture, raises
 from sqlite3 import connect
 from sqlite3 import Connection as Connection_instance
 from pathlib import Path
+from json import loads
 
 from grinder.dbhandling import GrinderDatabase
 from grinder.errors import (
@@ -23,7 +24,8 @@ class TestDatabaseValues:
     Default database values for tests
     """
 
-    TEST_DB_NAME = str(Path(".").joinpath("test_data").joinpath("test_database").joinpath("test_database.db"))
+    TEST_DB_PATH = Path(".").joinpath("test_data").joinpath("test_database")
+    TEST_DB_NAME = str(TEST_DB_PATH.joinpath("test_database.db"))
 
 
 def setup_module() -> None:
@@ -32,7 +34,7 @@ def setup_module() -> None:
     :return: None
     """
     global db
-    Path(".").joinpath("test_data").joinpath("test_database").mkdir(parents=True, exist_ok=True)
+    TestDatabaseValues.TEST_DB_PATH.mkdir(parents=True, exist_ok=True)
     db = GrinderDatabase(db_name=TestDatabaseValues.TEST_DB_NAME)
     db.create_db()
 
@@ -406,9 +408,9 @@ def test_add_shodan_scan_data_error(connection: Connection_instance) -> None:
 
     def add_scan_data():
         db.add_shodan_scan_data(
-            query={"query": "pyquery", "query_confidence": "pyconfidence"},
-            results_count=1234,
-            results=[{"pykey": "pyvalue"}],
+            query={},
+            results_count=0,
+            results=[],
         )
 
     with raises(GrinderDatabaseAddScanDataError):
@@ -425,11 +427,27 @@ def test_add_shodan_scan_data_success(connection: Connection_instance) -> None:
     :param connection: sqlite3.Connection object
     :return: None
     """
-    db.add_shodan_scan_data(
-        query={"query": "pyquery", "query_confidence": "pyconfidence"},
-        results_count=1234,
-        results=[{"ip": "pyvalue"}],
-    )
+    scan_data_values = [
+        {
+            "query": {"query": "one", "query_confidence": "one"},
+            "results_count": 1,
+            "results": [{"ip": "11.11.11.11"}]
+        },
+        {
+            "query": {"query": "two", "query_confidence": "two"},
+            "results_count": 2,
+            "results": [{"ip": "22.22.22.22"}]
+        },
+        {
+            "query": {"query": "three", "query_confidence": "three"},
+            "results_count": 3,
+            "results": [{"ip": "33.33.33.33"}]
+        }
+    ]
+    for scan_data_value in scan_data_values:
+        db.add_shodan_scan_data(
+            **scan_data_value
+        )
     shodan_data_results = connection.execute(
         """
         SELECT * FROM shodan_results 
@@ -442,10 +460,10 @@ def test_add_shodan_scan_data_success(connection: Connection_instance) -> None:
     assert isinstance(shodan_data_results[0], int)
     assert isinstance(shodan_data_results[1], int)
     assert isinstance(shodan_data_results[2], int)
-    assert shodan_data_results[3] == "pyquery"
-    assert shodan_data_results[4] == "pyconfidence"
-    assert shodan_data_results[5] == 1234
-    assert shodan_data_results[6] == '[{"ip":"pyvalue"}]'
+    assert shodan_data_results[3] == "three"
+    assert shodan_data_results[4] == "three"
+    assert shodan_data_results[5] == 3
+    assert loads(shodan_data_results[6]) == [{"ip": "33.33.33.33"}]
 
 
 def test_add_censys_scan_data_error(connection: Connection_instance) -> None:
@@ -460,9 +478,9 @@ def test_add_censys_scan_data_error(connection: Connection_instance) -> None:
 
     def add_scan_data():
         db.add_censys_scan_data(
-            query={"query": "pyquery", "query_confidence": "pyconfidence"},
-            results_count=1234,
-            results=[{"pykey": "pyvalue"}],
+            query={},
+            results_count=0,
+            results=[],
         )
 
     with raises(GrinderDatabaseAddScanDataError):
@@ -479,12 +497,28 @@ def test_add_censys_scan_data_success(connection: Connection_instance) -> None:
     :param connection: sqlite3.Connection object
     :return: None
     """
-    db.add_censys_scan_data(
-        query={"query": "pyquery", "query_confidence": "pyconfidence"},
-        results_count=1234,
-        results=[{"ip": "pyvalue"}],
-    )
-    shodan_data_results = connection.execute(
+    scan_data_values = [
+        {
+            "query": {"query": "one", "query_confidence": "one"},
+            "results_count": 4,
+            "results": [{"ip": "44.44.44.44"}]
+        },
+        {
+            "query": {"query": "two", "query_confidence": "two"},
+            "results_count": 5,
+            "results": [{"ip": "55.55.55.55"}]
+        },
+        {
+            "query": {"query": "three", "query_confidence": "three"},
+            "results_count": 6,
+            "results": [{"ip": "66.66.66.66"}]
+        }
+    ]
+    for scan_data_value in scan_data_values:
+        db.add_censys_scan_data(
+            **scan_data_value
+        )
+    censys_data_results = connection.execute(
         """
         SELECT * FROM censys_results 
         WHERE id = (
@@ -493,13 +527,13 @@ def test_add_censys_scan_data_success(connection: Connection_instance) -> None:
         )
         """
     ).fetchall()[0]
-    assert isinstance(shodan_data_results[0], int)
-    assert isinstance(shodan_data_results[1], int)
-    assert isinstance(shodan_data_results[2], int)
-    assert shodan_data_results[3] == "pyquery"
-    assert shodan_data_results[4] == "pyconfidence"
-    assert shodan_data_results[5] == 1234
-    assert shodan_data_results[6] == '[{"ip":"pyvalue"}]'
+    assert isinstance(censys_data_results[0], int)
+    assert isinstance(censys_data_results[1], int)
+    assert isinstance(censys_data_results[2], int)
+    assert censys_data_results[3] == "three"
+    assert censys_data_results[4] == "three"
+    assert censys_data_results[5] == 6
+    assert loads(censys_data_results[6]) == [{"ip": "66.66.66.66"}]
 
 
 def test_load_last_results_error() -> None:
@@ -525,7 +559,14 @@ def test_load_last_results_success() -> None:
     is correct and can be successfully loaded
     :return: None
     """
-    assert db.load_last_results() == {"pyvalue": {"ip": "pyvalue"}}
+    assert db.load_last_results() == {
+        "11.11.11.11": {"ip": "11.11.11.11"},
+        "22.22.22.22": {"ip": "22.22.22.22"},
+        "33.33.33.33": {"ip": "33.33.33.33"},
+        "44.44.44.44": {"ip": "44.44.44.44"},
+        "55.55.55.55": {"ip": "55.55.55.55"},
+        "66.66.66.66": {"ip": "66.66.66.66"}
+    }
 
 
 def test_load_last_results_by_name_error() -> None:
@@ -553,10 +594,18 @@ def test_load_last_results_by_name_success() -> None:
     """
     assert db.load_last_results_by_name(
         scan_name="pytest", engine_table="shodan_results"
-    ) == {"pyvalue": {"ip": "pyvalue"}}
+    ) == {
+        "11.11.11.11": {"ip": "11.11.11.11"},
+        "22.22.22.22": {"ip": "22.22.22.22"},
+        "33.33.33.33": {"ip": "33.33.33.33"}
+    }
     assert db.load_last_results_by_name(
         scan_name="pytest", engine_table="censys_results"
-    ) == {"pyvalue": {"ip": "pyvalue"}}
+    ) == {
+        "44.44.44.44": {"ip": "44.44.44.44"},
+        "55.55.55.55": {"ip": "55.55.55.55"},
+        "66.66.66.66": {"ip": "66.66.66.66"}
+    }
     assert (
         db.load_last_results_by_name(
             scan_name="not_exists", engine_table="censys_results"
@@ -594,7 +643,11 @@ def test_load_all_results_by_name_shodan_success() -> None:
     """
     assert db.load_all_results_by_name(
         scan_name="pytest", engine_table="shodan_results"
-    ) == {"pyvalue": {"ip": "pyvalue"}}
+    ) == {
+        "11.11.11.11": {"ip": "11.11.11.11"},
+        "22.22.22.22": {"ip": "22.22.22.22"},
+        "33.33.33.33": {"ip": "33.33.33.33"}
+    }
 
 
 def test_load_all_results_by_name_censys_success() -> None:
@@ -605,7 +658,11 @@ def test_load_all_results_by_name_censys_success() -> None:
     """
     assert db.load_all_results_by_name(
         scan_name="pytest", engine_table="censys_results"
-    ) == {"pyvalue": {"ip": "pyvalue"}}
+    ) == {
+        "44.44.44.44": {"ip": "44.44.44.44"},
+        "55.55.55.55": {"ip": "55.55.55.55"},
+        "66.66.66.66": {"ip": "66.66.66.66"}
+    }
 
 
 def test_load_multiple_last_results_by_name_error() -> None:
@@ -631,7 +688,14 @@ def test_load_multiple_last_resuls_by_name_success() -> None:
     that connected with last scan.
     :return: None
     """
-    assert db.load_multiple_last_results_by_name() == {"pyvalue": {"ip": "pyvalue"}}
+    assert db.load_multiple_last_results_by_name() == {
+        "11.11.11.11": {"ip": "11.11.11.11"},
+        "22.22.22.22": {"ip": "22.22.22.22"},
+        "33.33.33.33": {"ip": "33.33.33.33"},
+        "44.44.44.44": {"ip": "44.44.44.44"},
+        "55.55.55.55": {"ip": "55.55.55.55"},
+        "66.66.66.66": {"ip": "66.66.66.66"}
+    }
 
 
 def test_custom_database_getters_handlers_error() -> None:
@@ -670,10 +734,89 @@ def test_custom_database_getters_handlers_success() -> None:
     that all of that wrappers return expected results.
     :return: None
     """
-    expected_dict = {"pyvalue": {"ip": "pyvalue"}}
-    assert db.load_last_shodan_results() == expected_dict
-    assert db.load_last_censys_results() == expected_dict
-    assert db.load_last_shodan_results_by_scan_name() == expected_dict
-    assert db.load_last_censys_results_by_scan_name() == expected_dict
-    assert db.load_all_shodan_results_by_scan_name() == expected_dict
-    assert db.load_all_censys_results_by_scan_name() == expected_dict
+    assert db.load_last_shodan_results() == {
+        "11.11.11.11": {"ip": "11.11.11.11"},
+        "22.22.22.22": {"ip": "22.22.22.22"},
+        "33.33.33.33": {"ip": "33.33.33.33"}
+    }
+    assert db.load_last_censys_results() == {
+        "44.44.44.44": {"ip": "44.44.44.44"},
+        "55.55.55.55": {"ip": "55.55.55.55"},
+        "66.66.66.66": {"ip": "66.66.66.66"}
+    }
+
+
+def test_initiate_one_more_scan_results() -> None:
+    """
+    Test situations when we got collection of scans
+    in database and we want to check how we can handle
+    results getting of them
+    :return: None
+    """
+    db.initiate_scan(queries_filename="another_test")
+    another_results = {
+        "query": {"query": "seven", "query_confidence": "seven"},
+        "results_count": 7,
+        "results": [{"ip": "77.77.77.77"}]
+    }
+    db.add_basic_scan_data(
+        vendor="pytest_vendor",
+        product="pytest_product",
+        script="pytest_script",
+        vendor_confidence="pytest_confidence",
+    )
+    db.add_shodan_scan_data(**another_results)
+    db.add_censys_scan_data(**another_results)
+    db.update_results_count(total_products=42, total_results=1337)
+    db.update_end_time()
+    assert db.load_last_shodan_results_by_scan_name() == {
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+    assert db.load_last_censys_results_by_scan_name() == {
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+    assert db.load_all_shodan_results_by_scan_name() == {
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+    assert db.load_all_censys_results_by_scan_name() == {
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+    assert db.load_all_results_by_name(engine_table="censys_results") == {
+        "44.44.44.44": {"ip": "44.44.44.44"},
+        "55.55.55.55": {"ip": "55.55.55.55"},
+        "66.66.66.66": {"ip": "66.66.66.66"},
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+    assert db.load_all_results_by_name(engine_table="shodan_results") == {
+        "11.11.11.11": {"ip": "11.11.11.11"},
+        "22.22.22.22": {"ip": "22.22.22.22"},
+        "33.33.33.33": {"ip": "33.33.33.33"},
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+
+
+def test_change_scan_name_results() -> None:
+    """
+    Almost the same as the previous case
+    but now we want to check what will happened
+    if we will change names of scan in database
+    handlers, basically we want to take results
+    from different scans
+    :return:
+    """
+    assert db.load_all_results_by_name(engine_table="censys_results", scan_name="another_test") == {
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+    assert db.load_all_results_by_name(engine_table="shodan_results", scan_name="another_test") == {
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+    assert db.load_all_results_by_name(engine_table="censys_results", scan_name="pytest") == {
+        "44.44.44.44": {"ip": "44.44.44.44"},
+        "55.55.55.55": {"ip": "55.55.55.55"},
+        "66.66.66.66": {"ip": "66.66.66.66"}
+    }
+    assert db.load_all_results_by_name(engine_table="shodan_results", scan_name="pytest") == {
+        "11.11.11.11": {"ip": "11.11.11.11"},
+        "22.22.22.22": {"ip": "22.22.22.22"},
+        "33.33.33.33": {"ip": "33.33.33.33"}
+    }

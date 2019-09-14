@@ -73,6 +73,31 @@ def test_filemanager_get_queries_success() -> None:
                 "vendor_confidence",
             ]
         )
+        assert (
+            isinstance(query_obj.get("vendor"), str) and query_obj.get("vendor") != ""
+        )
+        assert (
+            isinstance(query_obj.get("product"), str) and query_obj.get("product") != ""
+        )
+        assert (
+            isinstance(query_obj.get("shodan_queries"), list)
+            and query_obj.get("shodan_queries") != []
+        )
+        for query in query_obj.get("shodan_queries"):
+            assert sorted(query.keys()) == sorted(["query", "query_confidence"])
+        assert (
+            isinstance(query_obj.get("censys_queries"), list)
+            and query_obj.get("censys_queries") != []
+        )
+        for query in query_obj.get("censys_queries"):
+            assert sorted(query.keys()) == sorted(["query", "query_confidence"])
+        assert sorted(query_obj.get("scripts").keys()) == sorted(
+            ["py_script", "nse_script"]
+        )
+        assert (
+            isinstance(query_obj.get("vendor_confidence"), str)
+            and query_obj.get("vendor_confidence") != ""
+        )
 
 
 def test_filemanager_get_queries_error() -> None:
@@ -112,6 +137,31 @@ def test_load_data_from_file_success() -> None:
                 "vendor_confidence",
             ]
         )
+        assert (
+            isinstance(query_obj.get("vendor"), str) and query_obj.get("vendor") != ""
+        )
+        assert (
+            isinstance(query_obj.get("product"), str) and query_obj.get("product") != ""
+        )
+        assert (
+            isinstance(query_obj.get("shodan_queries"), list)
+            and query_obj.get("shodan_queries") != []
+        )
+        for query in query_obj.get("shodan_queries"):
+            assert sorted(query.keys()) == sorted(["query", "query_confidence"])
+        assert (
+            isinstance(query_obj.get("censys_queries"), list)
+            and query_obj.get("censys_queries") != []
+        )
+        for query in query_obj.get("censys_queries"):
+            assert sorted(query.keys()) == sorted(["query", "query_confidence"])
+        assert sorted(query_obj.get("scripts").keys()) == sorted(
+            ["py_script", "nse_script"]
+        )
+        assert (
+            isinstance(query_obj.get("vendor_confidence"), str)
+            and query_obj.get("vendor_confidence") != ""
+        )
 
 
 def test_load_data_from_file_error() -> None:
@@ -141,11 +191,15 @@ def test_write_results_json() -> None:
         json_dir=str(Path("filemanager").joinpath("json")),
         json_file=TestDefaultFilemanagerValues.TEST_RESULTS_JSON_FILE,
     )
-    path_to_file = (
-        Path(".").joinpath("test_results").joinpath("filemanager").joinpath("json")
+    assert TestDefaultFilemanagerValues.TEST_RESULTS_JSON_FILE in listdir(
+        TestDefaultFilemanagerValues.TEST_RESULTS_PATH_JSON
     )
-    assert "results.json" in listdir(path_to_file)
-    with open(path_to_file.joinpath("results.json")) as result_file:
+    with open(
+        TestDefaultFilemanagerValues.TEST_RESULTS_PATH_JSON.joinpath(
+            TestDefaultFilemanagerValues.TEST_RESULTS_JSON_FILE
+        ),
+        mode="r",
+    ) as result_file:
         assert load(result_file) == get_results
 
 
@@ -163,11 +217,15 @@ def test_write_results_csv() -> None:
         csv_dir=str(Path("filemanager").joinpath("csv")),
         csv_file=TestDefaultFilemanagerValues.TEST_RESULTS_CSV_FILE,
     )
-    path_to_file = (
-        Path(".").joinpath("test_results").joinpath("filemanager").joinpath("csv")
+    assert TestDefaultFilemanagerValues.TEST_RESULTS_CSV_FILE in listdir(
+        TestDefaultFilemanagerValues.TEST_RESULTS_PATH_CSV
     )
-    assert "results.csv" in listdir(path_to_file)
-    with open(path_to_file.joinpath("results.csv"), mode="r") as result_file:
+    with open(
+        TestDefaultFilemanagerValues.TEST_RESULTS_PATH_CSV.joinpath(
+            TestDefaultFilemanagerValues.TEST_RESULTS_CSV_FILE
+        ),
+        mode="r",
+    ) as result_file:
         file_contains = result_file.read().split("\n")
         assert (
             file_contains[0]
@@ -215,7 +273,24 @@ def test_csv_dict_to_fix() -> None:
     ]
 
 
-def test_write_results_csv_exploits_to_cve() -> None:
+def test_write_results_csv_exploits_to_cve_error() -> None:
+    """
+    Test how we can handle errors when operating
+    with exploits and CVEs in file cases
+    :return: None
+    """
+    filemanager = GrinderFileManager()
+    with raises(GrinderFileManagerOpenError):
+        filemanager.write_results_csv_exploits_to_cve(
+            hosts_results={"test": "test"},
+            results_to_write=["test", "test"],
+            dest_dir=str(TestDefaultFilemanagerValues.TEST_RESULTS_PATH),
+            csv_dir=str(Path("filemanager").joinpath("csv")),
+            csv_file="malformed_exploits.csv"
+        )
+
+
+def test_write_results_csv_exploits_to_cve_success() -> None:
     """
     Test how we can save exploits info to csv
     :return: None

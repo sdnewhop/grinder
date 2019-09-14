@@ -1,0 +1,43 @@
+[
+    {
+        "vendor":"American Megatrends",
+        "product":"Baseboard Management Controller",
+        "shodan_queries":[
+            {
+                "query":"\"Content-Length: 1820\" lighttpd port:443",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"\"Content-Length: 1901\" lighttpd port:443",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"ssl:\"quantatw.com\" lighttpd",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"ssl.cert.issuer.CN:\"Quanta\" port:\"443\" all:\"lighttpd\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"3.14.17-ami",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+            {
+                "query":"443.https.get.title:\"Megarac SP\" AND 443.https.get.headers.server:\"lighttpd\"",
+                "query_confidence":"certain"
+            },
+            {
+                "query":"(((\"<title>Megarac SP</title>\") AND protocols: \"443/https\") AND protocols: \"623/ipmi\") AND 443.https.get.headers.server:\"lighttpd\"",
+                "query_confidence":"certain"
+            }
+        ],
+        "scripts":{
+            "py_script":"",
+            "nse_script":""
+        },
+        "vendor_confidence":"certain"
+    }
+]

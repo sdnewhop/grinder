@@ -2,32 +2,55 @@
 
 from csv import DictWriter, QUOTE_ALL
 from csv import writer as csv_writer
-from json import load, dump
+from json import load, dump, JSONDecodeError
 from pathlib import Path
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
-from grinder.errors import GrinderFileManagerOpenError
+from grinder.errors import GrinderFileManagerOpenError, GrinderFileManagerJsonDecoderError
 
 
 class GrinderFileManager:
     def __init__(self):
         pass
 
-    @exception_handler(expected_exception=GrinderFileManagerOpenError)
-    def get_queries(self, queries_file=DefaultValues.QUERIES_FILE) -> list:
-        with open(Path(".").joinpath(queries_file), mode="r") as queries_file:
-            return load(queries_file)
+    @staticmethod
+    def get_queries(queries_file=DefaultValues.QUERIES_FILE) -> list:
+        """
+        This function loads file with queries that were defined by the user.
+        :param queries_file: filename of file with queries to load
+        :return: list with queries from json file
+        """
+        try:
+            with open(Path(".").joinpath(queries_file), mode="r") as queries_file:
+                return load(queries_file)
+        except JSONDecodeError as unparse_json:
+            raise GrinderFileManagerJsonDecoderError(unparse_json) from unparse_json
+        except Exception as unexp_error:
+            raise GrinderFileManagerOpenError(unexp_error) from unexp_error
 
-    @exception_handler(expected_exception=GrinderFileManagerOpenError)
+    @staticmethod
     def load_data_from_file(
-        self,
         load_dir=DefaultValues.RESULTS_DIRECTORY,
         load_file=DefaultValues.JSON_RESULTS_FILE,
         load_json_dir=DefaultValues.JSON_RESULTS_DIRECTORY,
     ) -> list:
-        with open(Path(".").joinpath(load_dir).joinpath(load_json_dir).joinpath(load_file), mode="r") as saved_results:
-            return load(saved_results)
+        """
+        Load data from some particular file in filesystem
+        :param load_dir: base directory
+        :param load_file: subdirectory
+        :param load_json_dir: file to load
+        :return: list with results (expected)
+        """
+        try:
+            with open(
+                    Path(".").joinpath(load_dir).joinpath(load_json_dir).joinpath(load_file), mode="r"
+            ) as saved_results:
+                return load(saved_results)
+        except JSONDecodeError as unparse_json:
+            raise GrinderFileManagerJsonDecoderError(unparse_json) from unparse_json
+        except Exception as unexp_error:
+            raise GrinderFileManagerOpenError(unexp_error) from unexp_error
 
     @staticmethod
     def csv_dict_fix(results_to_write: dict, field_name: str) -> list:

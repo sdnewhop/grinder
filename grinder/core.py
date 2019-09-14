@@ -38,6 +38,7 @@ from grinder.errors import (
     GrinderCoreUpdateEndTimeDatabaseError,
     GrinderCoreUpdateResultsCountDatabaseError,
     GrinderFileManagerOpenError,
+    GrinderFileManagerJsonDecoderError,
     GrinderCoreLoadResultsFromDbError,
     GrinderDatabaseLoadResultsError,
     GrinderCoreLoadResultsError,
@@ -378,7 +379,11 @@ class GrinderCore:
             return self.combined_results
         except GrinderFileManagerOpenError:
             print(
-                "Json file with results not found. Try to load results from database."
+                "JSON file with results not found. Try to load results from database."
+            )
+        except GrinderFileManagerJsonDecoderError:
+            print(
+                "JSON file with results corrupted. Try to load results from database."
             )
 
     @exception_handler(expected_exception=GrinderCoreForceUpdateCombinedResults)
@@ -1403,10 +1408,17 @@ class GrinderCore:
             self.queries_file = self.filemanager.get_queries(
                 queries_file=queries_filename
             )
-        except GrinderFileManagerOpenError:
+        except GrinderFileManagerJsonDecoderError as json_err:
+            print(
+                "Oops! Looks like you got error in your JSON file syntax. Please, check it out and run Grinder again."
+            )
+            print(f"Error message: {json_err.error_args}")
+            return self.combined_results
+        except GrinderFileManagerOpenError as open_err:
             print(
                 "Oops! File with queries was not found. Create it or set name properly."
             )
+            print(f"Error message: {open_err.error_args}")
             return self.combined_results
 
         self.__filter_queries_by_vendor_confidence()

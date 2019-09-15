@@ -68,9 +68,15 @@ class GrinderPlots:
         values = [value for value in results.values()]
         keys = [key for key in results.keys()]
         percents = []
+
+        total = sum(values)
+        if total == 0:
+            return
         for value in values:
-            total = sum(values)
-            percent = (value / total) * 100
+            try:
+                percent = (value / total) * 100
+            except ZeroDivisionError:
+                return
             percents.append(f"{percent:1.1f}% ({value:d})")
 
         plot.figure()

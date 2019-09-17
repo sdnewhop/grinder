@@ -18,7 +18,13 @@ class NmapConnector:
         self.nm = PortScanner()
         self.results: dict = {}
 
-    def check_ip_v6(self, host: str):
+    @staticmethod
+    def check_ip_v6(host: str):
+        """
+        Check if presented IP address is IPv6 (not IPv4 as expected)
+        :param host: IP address of some host
+        :return: bool answer to question "Is host address are IPv6?"
+        """
         if "IPv6Address" in str(type(ip_address(host))):
             return True
 
@@ -26,6 +32,18 @@ class NmapConnector:
     def scan(
         self, host: str, arguments: str = "", ports: str = "", sudo: bool = False
     ) -> None:
+        """
+        The most basic Nmap caller. This is the "lowest" function in terms
+        of Grinder Framework, all calls here are going to python-nmap
+        library. In this function we just puts right arguments, parameters
+        and other things to call Nmap.
+        :param host: ip of the host to scan
+        :param arguments: arguments for Nmap
+        :param ports: ports to scan with Nmap
+        :param sudo: is sudo required to Nmap scan?
+        :return: None
+        """
+
         # Add special Nmap key to scan ipv6 hosts
         if self.check_ip_v6(host):
             arguments += " -6"
@@ -45,7 +63,7 @@ class NmapConnector:
         elif arguments:
             self.nm.scan(hosts=host, arguments=arguments, sudo=sudo)
 
-        # If arguments are not setted too, make
+        # If arguments are not set too, make
         # simple scan
         else:
             self.nm.scan(hosts=host, sudo=sudo)
@@ -53,8 +71,16 @@ class NmapConnector:
 
     @exception_handler(expected_exception=NmapConnectorGetResultsError)
     def get_results(self) -> dict:
+        """
+        Return Nmap scan results
+        :return: dictionary with results {host: info}
+        """
         return self.results
 
     @exception_handler(expected_exception=NmapConnectorGetResultsCountError)
     def get_results_count(self) -> int:
+        """
+        Return quantity of results
+        :return: quantity of results
+        """
         return len(self.results)

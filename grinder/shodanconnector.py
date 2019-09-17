@@ -17,15 +17,21 @@ class ShodanConnector:
         self.real_results_count: int = 0
 
     def _remove_unused_fields_in_vulns(
-        self,
-        max_references: int = DefaultValues.SHODAN_MAX_VULNERABILITIES_REFERENCES
+        self, max_references: int = DefaultValues.SHODAN_MAX_VULNERABILITIES_REFERENCES
     ) -> None:
+        """
+        Remove fields that not useful from vulnerabilities.
+        :param max_references: decrease quantity of reference to this number
+        :return: None
+        """
         for host in self.results:
             if not host.get("vulns"):
                 continue
             for cve, cve_information in host.get("vulns", {}).items():
                 if cve_information.get("references"):
-                    cve_information["references"] = cve_information["references"][:max_references]
+                    cve_information["references"] = cve_information["references"][
+                        :max_references
+                    ]
                 if "verified" in cve_information.keys():
                     cve_information.pop("verified")
 
@@ -33,6 +39,12 @@ class ShodanConnector:
     def search(
         self, query: str, max_records=DefaultValues.SHODAN_DEFAULT_RESULTS_QUANTITY
     ) -> None:
+        """
+        Search for defined query in Shodan database
+        :param query: query to search for
+        :param max_records: quantity of max records to search
+        :return: None
+        """
         try:
             self.results = list(self.api.search_cursor(query))[:max_records]
             self._remove_unused_fields_in_vulns()
@@ -42,15 +54,33 @@ class ShodanConnector:
         self.real_results_count = len(list(self.results))
 
     def get_results(self) -> list:
+        """
+        Return Shodan results
+        :return: list of results
+        """
         return self.results
 
     def get_shodan_count(self) -> int:
+        """
+        Return quantity of results from Shodan database
+        :return: quantity of results
+        """
         return self.shodan_results_count
 
     def get_real_count(self) -> int:
+        """
+        Return real quantity of results that
+        was successfully gained from Shodan
+        :return: quantity of real results that we get
+        """
         return self.real_results_count
 
     def get_vulnerabilities(self) -> dict:
+        """
+        Return dictionary with vulnerabilities,
+        {host: vulnerabilities}
+        :return: dictionary with vulnerabilities
+        """
         return {
             host["ip_str"]: host["vulns"] for host in self.results if host.get("vulns")
         }

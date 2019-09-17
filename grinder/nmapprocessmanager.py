@@ -14,10 +14,24 @@ from grinder.defaultvalues import DefaultProcessManagerValues
 
 
 class NmapProcessingResults:
+    """
+    This is results collector to gain
+    results directly from a process
+    """
+
     RESULTS = Manager().dict({})
 
 
 class NmapProcessing(Process):
+    """
+    Create custom Nmap process. The reason to create
+    custom Nmap process is that we need a mechanism
+    to organize queue or process pool to work with
+    it more flexible and accurate than with standard
+    methods like Pool, etc. Also, custom process provides
+    for us a more flexible way of queue organizing.
+    """
+
     def __init__(self, queue: JoinableQueue, arguments: str, ports: str, sudo: bool):
         Process.__init__(self)
         self.queue = queue
@@ -26,7 +40,11 @@ class NmapProcessing(Process):
         self.sudo = sudo
 
     @exception_handler(expected_exception=NmapProcessingRunError)
-    def run(self):
+    def run(self) -> None:
+        """
+        Run Nmap process
+        :return: None
+        """
         while True:
             index, hosts_quantity, host = self.queue.get()
             host_ip = host.get("ip")
@@ -51,13 +69,19 @@ class NmapProcessing(Process):
             results = nm.get_results()
             if not results.get(host_ip):
                 self.queue.task_done()
-                return {}
+                return
             if results.get(host_ip).values():
                 NmapProcessingResults.RESULTS.update({host_ip: results.get(host_ip)})
             self.queue.task_done()
 
 
 class NmapProcessingManager:
+    """
+    Custom Nmap scanner processes manager.
+    Here we organize a custom queue with a
+    defined quantity of workers and start it on hosts.
+    """
+
     def __init__(
         self,
         hosts: list,
@@ -73,7 +97,11 @@ class NmapProcessingManager:
         self.sudo = sudo
 
     @exception_handler(expected_exception=NmapProcessingManagerOrganizeProcessesError)
-    def organize_processes(self):
+    def organize_processes(self) -> None:
+        """
+        Create process queue
+        :return: None
+        """
         queue = JoinableQueue()
         for _ in range(self.workers):
             process = NmapProcessing(queue, self.arguments, self.ports, self.sudo)
@@ -84,16 +112,35 @@ class NmapProcessingManager:
             queue.put((index, hosts_quantity, host))
         queue.join()
 
-    def start(self):
+    def start(self) -> None:
+        """
+        Start multiple workers scanning
+        :return: None
+        """
         self.organize_processes()
 
     @staticmethod
     def get_results() -> dict:
+        """
+        Return dictionary with Nmap results
+        :return: Nmap results
+        """
         return NmapProcessingResults.RESULTS
 
     @staticmethod
     def get_results_count() -> int:
+        """
+        Return quantity of Nmap results
+        :return: quantity of results
+        """
         return len(NmapProcessingResults.RESULTS)
 
     def __del__(self):
+        """
+        Fix in a case when we have finished scanning,
+        but some processes are still not. In this case,
+        we can lose control over the terminal or console,
+        so "stty sane" command will return it to us.
+        :return: None
+        """
         system("stty sane")

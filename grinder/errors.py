@@ -6,109 +6,157 @@ import os
 class ShodanConnectorException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Shodan Connector module: {self.error_args}"
+        return f"Error occured in Shodan Connector module: {self._error_args}"
 
 
 class CensysConnectorException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Censys Connector module: {self.error_args}"
+        return f"Error occured in Censys Connector module: {self._error_args}"
 
 
 class NmapConnectorException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Nmap Connector module: {self.error_args}"
+        return f"Error occured in Nmap Connector module: {self._error_args}"
 
 
 class VulnersConnectorException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Vulners Connector module: {self.error_args}"
+        return f"Error occured in Vulners Connector module: {self._error_args}"
 
 
 class NmapProcessingManagerException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Nmap Processing Manager module: {self.error_args}"
+        return f"Error occured in Nmap Processing Manager module: {self._error_args}"
 
 
 class GrinderFileManagerException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Grinder Filemanager module: {self.error_args}"
+        return f"Error occured in Grinder Filemanager module: {self._error_args}"
 
 
 class GrinderCoreException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Grinder Core module: {self.error_args}"
+        return f"Error occured in Grinder Core module: {self._error_args}"
 
 
 class GrinderInterfaceException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Grinder Interface module: {self.error_args}"
+        return f"Error occured in Grinder Interface module: {self._error_args}"
 
 
 class GrinderContinentsException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Grinder Continents module: {self.error_args}"
+        return f"Error occured in Grinder Continents module: {self._error_args}"
 
 
 class GrinderPlotsException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Grinder Plots module: {self.error_args}"
+        return f"Error occured in Grinder Plots module: {self._error_args}"
 
 
 class GrinderDatabaseException(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Grinder Database module: {self.error_args}"
+        return f"Error occured in Grinder Database module: {self._error_args}"
 
 
 class GrinderScriptExecutor(Exception):
     def __init__(self, error_args: Exception):
         super().__init__(self)
-        self.error_args = error_args
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
 
     def __str__(self):
-        return f"Error occured in Grinder Script Executor module: {self.error_args}"
+        return f"Error occured in Grinder Script Executor module: {self._error_args}"
 
 
 class GrinderScriptExecutorRunScriptError(GrinderScriptExecutor):
@@ -232,6 +280,11 @@ class GrinderCoreVulnersScanError(NmapProcessingManagerException):
 
 
 class GrinderFileManagerOpenError(GrinderFileManagerException):
+    def __init__(self, error_args: Exception):
+        super().__init__(error_args)
+
+
+class GrinderFileManagerJsonDecoderError(GrinderFileManagerException):
     def __init__(self, error_args: Exception):
         super().__init__(error_args)
 

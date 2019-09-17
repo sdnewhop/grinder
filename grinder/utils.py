@@ -9,6 +9,13 @@ class GrinderUtils:
         self.dict_with_limited_max_results: dict = {}
 
     def count_entities(self, results: list, max_entities: int) -> None:
+        """
+        This function helps to count different entities,
+        like {"entity": quantity (int) + "other": rest of the results quantity (int)}
+        :param results: results to count
+        :param max_entities: maximum quantity of entities in output
+        :return: None
+        """
         number_of_entities: dict = Counter(results)
         entities_sorted_by_value = dict(
             sorted(number_of_entities.items(), key=lambda x: x[1], reverse=True)
@@ -38,7 +45,15 @@ class GrinderUtils:
         self.dict_with_limited_max_results.update({"other": rest_of_results_quantity})
 
     def get_all_count_results(self) -> dict:
+        """
+        Return counter results (all)
+        :return: dictionary with counters
+        """
         return self.dict_with_all_results
 
     def get_limited_max_count_results(self) -> dict:
+        """
+        Return counter results (limited)
+        :return: dictionary with limited counter results
+        """
         return self.dict_with_limited_max_results

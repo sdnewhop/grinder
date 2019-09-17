@@ -5,7 +5,7 @@ from os import listdir
 from json import load
 
 from grinder.filemanager import GrinderFileManager
-from grinder.errors import GrinderFileManagerOpenError
+from grinder.errors import GrinderFileManagerOpenError, GrinderFileManagerJsonDecoderError
 
 
 class TestDefaultFilemanagerValues:
@@ -24,6 +24,7 @@ class TestDefaultFilemanagerValues:
     TEST_RESULTS_PATH_CSV = TEST_RESULTS_FILEMANAGER_PATH.joinpath("csv")
 
     TEST_QUERIES_FILE = "queries.json"
+    TEST_MALFORMED_FILE = "malformed_queries.json"
     TEST_RESULTS_JSON_FILE = "results.json"
     TEST_RESULTS_CSV_FILE = "results.csv"
     TEST_EXPLOITS_JSON_FILE = "exploits.json"
@@ -111,6 +112,24 @@ def test_filemanager_get_queries_error() -> None:
         filemanager.get_queries(queries_file="not_exists.json")
 
 
+def test_filemanager_get_malformed_queries() -> None:
+    """
+    Check case when input json is exists, but
+    file itself is malformed or contains
+    some unparseable constructions
+    :return: None
+    """
+    filemanager = GrinderFileManager()
+    with raises(GrinderFileManagerJsonDecoderError):
+        filemanager.get_queries(
+            queries_file=str(
+                TestDefaultFilemanagerValues.TEST_DATA_QUERIES_PATH.joinpath(
+                    TestDefaultFilemanagerValues.TEST_MALFORMED_FILE
+                )
+            )
+        )
+
+
 def test_load_data_from_file_success() -> None:
     """
     Originally this function is used to load results
@@ -175,6 +194,22 @@ def test_load_data_from_file_error() -> None:
         filemanager.load_data_from_file(
             load_dir="totally", load_json_dir="wrong", load_file="path.json"
         )
+
+
+def test_load_data_from_malformed_file_error() -> None:
+    """
+    Check case when JSON is malformed but needed
+    to be loaded
+    :return: None
+    """
+    filemanager = GrinderFileManager()
+    with raises(GrinderFileManagerJsonDecoderError):
+        filemanager.load_data_from_file(
+            load_dir=str(TestDefaultFilemanagerValues.TEST_DATA_PATH),
+            load_json_dir="test_queries",
+            load_file=TestDefaultFilemanagerValues.TEST_MALFORMED_FILE,
+        )
+
 
 
 def test_write_results_json() -> None:

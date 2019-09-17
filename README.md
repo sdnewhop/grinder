@@ -1,4 +1,9 @@
 # Grinder Framework
+[![Required OS](https://img.shields.io/badge/OS-Linux%20based-blue)](https://en.wikipedia.org/wiki/Linux)
+[![Python3 Version](https://img.shields.io/badge/python-3.6-blue)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-GPL--2.0-blue)](/LICENSE)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/psf/black)
+
 :mag_right: Internet-connected Devices Census Python Framework 
 ![Grinder Screenshot](/docs/screenshot.png?raw=true "Grinder Help")
 ## Contents

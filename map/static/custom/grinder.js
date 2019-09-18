@@ -56,6 +56,7 @@ fetch(`${window.location.origin}/api/viewall`)
                     shodan: `https://www.shodan.io/host/${markers[i].ip}`,
                     censys: `https://censys.io/ipv4/${markers[i].ip}`,
                     zoomeye: `https://www.zoomeye.org/searchResult?q=${markers[i].ip}`,
+                    virustotal: `https://www.virustotal.com/gui/ip-address/${markers[i].ip}/details`,
                     googlemaps: `https://www.google.com/maps/search/?api=1&query=${markers[i].lat},${markers[i].lng}`,
                     iplookup: `https://extreme-ip-lookup.com/${markers[i].ip}`,
                 },

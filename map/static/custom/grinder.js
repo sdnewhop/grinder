@@ -28,14 +28,14 @@ var source = document.getElementById('grinder-popup').innerHTML;
 var template = Handlebars.compile(source);
 var markerClusters = L.markerClusterGroup();
 
-fetch(window.location.origin + '/api/viewall')
+fetch(`${window.location.origin}/api/viewall`)
     .then(function(response) {
         return response.json();
     })
     .then(function(markers) {
         for (var i = 0; i < markers.length; ++i) {
             let proto = (markers[i].port === 443 ||
-                markers[i].port === 8443) ? 'https://' : 'http://';
+                markers[i].port === 8443) ? 'https' : 'http';
             let context = {
                 index: i.toString(),
                 basic: {
@@ -49,15 +49,15 @@ fetch(window.location.origin + '/api/viewall')
                     longitude: Math.round(markers[i].lng * 1000) / 1000,
                 },
                 api: {
-                    raw: 'api/viewraw/' + i.toString(),
+                    raw: `api/viewraw/${i.toString()}`,
                 },
                 additionalContent: {
-                    host: proto + markers[i].ip + ':' + markers[i].port,
-                    shodan: 'https://www.shodan.io/host/' + markers[i].ip,
-                    censys: 'https://censys.io/ipv4/' + markers[i].ip,
-                    zoomeye: 'https://www.zoomeye.org/searchResult?q=' + markers[i].ip,
-                    googlemaps: 'https://www.google.com/maps/search/?api=1&query=' + markers[i].lat + ',' + markers[i].lng,
-                    iplookup: 'https://extreme-ip-lookup.com/' + markers[i].ip,
+                    host: `${proto}://${markers[i].ip}:${markers[i].port}`,
+                    shodan: `https://www.shodan.io/host/${markers[i].ip}`,
+                    censys: `https://censys.io/ipv4/${markers[i].ip}`,
+                    zoomeye: `https://www.zoomeye.org/searchResult?q=${markers[i].ip}`,
+                    googlemaps: `https://www.google.com/maps/search/?api=1&query=${markers[i].lat},${markers[i].lng}`,
+                    iplookup: `https://extreme-ip-lookup.com/${markers[i].ip}`,
                 },
             }
 

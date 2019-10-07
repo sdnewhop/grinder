@@ -4,7 +4,6 @@ import sys
 
 from grinder.asciiart import AsciiOpener
 from grinder.core import GrinderCore
-from grinder.errors import GrinderCoreBatchSearchError, GrinderCoreLoadResultsError
 from grinder.interface import GrinderInterface
 
 if __name__ == "__main__":

@@ -1,0 +1,113 @@
+[
+    {
+        "vendor": "Vendor with certain confidence",
+        "product": "Some product from vendor with certain confidence",
+        "shodan_queries": [
+            {
+                "query": "Query with certain confidence",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "Query with firm confidence",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "Query with tentative confidence",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "Query with certain confidence",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "Query with firm confidence",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "Query with tentative confidence",
+                "query_confidence": "tentative"
+            }
+        ],
+        "scripts": {
+            "py_script": "test.py",
+            "nse_script": "test.nse"
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Vendor with firm confidence",
+        "product": "Some product from vendor with firm confidence",
+        "shodan_queries": [
+            {
+                "query": "Query with certain confidence",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "Query with firm confidence",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "Query with tentative confidence",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "Query with certain confidence",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "Query with firm confidence",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "Query with tentative confidence",
+                "query_confidence": "tentative"
+            }
+        ],
+        "scripts": {
+            "py_script": "test.py",
+            "nse_script": "test.nse"
+        },
+        "vendor_confidence": "firm"
+    },
+        {
+        "vendor": "Vendor with tentative confidence",
+        "product": "Some product from vendor with tentative confidence",
+        "shodan_queries": [
+            {
+                "query": "Query with certain confidence",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "Query with firm confidence",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "Query with tentative confidence",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "Query with certain confidence",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "Query with firm confidence",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "Query with tentative confidence",
+                "query_confidence": "tentative"
+            }
+        ],
+        "scripts": {
+            "py_script": "test.py",
+            "nse_script": "test.nse"
+        },
+        "vendor_confidence": "tentative"
+    }
+]

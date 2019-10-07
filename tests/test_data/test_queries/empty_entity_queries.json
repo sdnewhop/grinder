@@ -1,0 +1,26 @@
+[
+    {
+        "vendor": "Apache Software Foundation",
+        "product": "Apache HTTP Server",
+        "shodan_queries": [
+            {
+                "query": "Apache",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "Apache",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "test.py",
+            "nse_script": "test.nse"
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+
+    }
+]

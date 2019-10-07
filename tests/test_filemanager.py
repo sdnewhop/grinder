@@ -211,7 +211,6 @@ def test_load_data_from_malformed_file_error() -> None:
         )
 
 
-
 def test_write_results_json() -> None:
     """
     Test if we can successfully save our

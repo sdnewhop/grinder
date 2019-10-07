@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pytest import raises
 from time import sleep
+from re import search
 
 from grinder.decorators import exception_handler, timer
 
@@ -41,7 +42,6 @@ def test_timer_handler(capsys) -> None:
     def my_long_time_function(time: float):
         sleep(time)
 
-    my_long_time_function(0.1)
-    assert "Done in 0.1s (00:00:00)\n" == capsys.readouterr().out
-    my_long_time_function(1.0)
-    assert "Done in 1.0s (00:00:01)\n" == capsys.readouterr().out
+    for test_value in [0.1, 1.0, 1.1]:
+        my_long_time_function(test_value)
+        assert search(r"Done in \d+.\d+s \(\d{2}:\d{2}:\d{2}\)\n", str(capsys.readouterr().out)) is not None

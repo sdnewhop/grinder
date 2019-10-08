@@ -21,3 +21,11 @@ def pytest_generate_tests(metafunc):
     option_value = metafunc.config.option.vulners_key
     if "vulners_key" in metafunc.fixturenames and option_value is not None:
         metafunc.parametrize("vulners_key", [option_value])
+
+
+options = None
+
+
+def pytest_configure(config):
+    global options
+    options = config.option

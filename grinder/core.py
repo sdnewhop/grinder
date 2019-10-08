@@ -925,9 +925,9 @@ class GrinderCore:
         """
         cprint("Save all results to database...", "blue", attrs=["bold"])
         for product_info in self.queries_file:
-            for query in product_info.get("shodan_queries"):
+            for query in product_info.get("shodan_queries", []) or []:
                 self.__shodan_save_to_database(query)
-            for query in product_info.get("censys_queries"):
+            for query in product_info.get("censys_queries", []) or []:
                 self.__censys_save_to_database(query)
 
         self.__update_end_time_database()
@@ -950,6 +950,12 @@ class GrinderCore:
         # If current query confidence is not valid by definition
         if not self.query_confidence.lower() in ["firm", "certain", "tentative"]:
             print("Confidence level for current query is not valid")
+            return False
+        if not query_confidence:
+            print("Query confidence level of current product is not valid: empty field")
+            return False
+        if not isinstance(query_confidence, str):
+            print("Query confidence level of current product is not valid: wrong type")
             return False
 
         """
@@ -987,12 +993,16 @@ class GrinderCore:
         self.__add_product_data_to_database(product_info)
 
         # Shodan queries processor
-        len_of_shodan_queries = len(product_info.get("shodan_queries"))
-        for query_index, query_info in enumerate(product_info.get("shodan_queries")):
-            if not self.__is_query_confidence_valid(query_info.get("query_confidence")):
+        len_of_shodan_queries = len(product_info.get("shodan_queries") or [])
+        for query_index, query_info in enumerate(product_info.get("shodan_queries") or []):
+            if not self.__is_query_confidence_valid(query_info.get("query_confidence", "") or ""):
                 continue
             query = query_info.get("query")
-            cprint(f"{query_index} / {len_of_shodan_queries} :: Current Shodan query is: {query}", "blue", attrs=["bold"])
+            cprint(f"{query_index} / {len_of_shodan_queries} :: "
+                   f"Current Shodan query is: {query or 'Empty query field'}", "blue", attrs=["bold"])
+            if not query:
+                print("Query field is empty, skip this search")
+                continue
             shodan_raw_results = self.shodan_search(query)
             for current_host in shodan_raw_results:
                 self.__parse_current_host_shodan_results(
@@ -1000,12 +1010,16 @@ class GrinderCore:
                 )
 
         # Censys queries processor
-        len_of_censys_queries = len(product_info.get("censys_queries"))
-        for query_index, query_info in enumerate(product_info.get("censys_queries")):
-            if not self.__is_query_confidence_valid(query_info.get("query_confidence")):
+        len_of_censys_queries = len(product_info.get("censys_queries") or [])
+        for query_index, query_info in enumerate(product_info.get("censys_queries") or []):
+            if not self.__is_query_confidence_valid(query_info.get("query_confidence", "") or ""):
                 continue
             query = query_info.get("query")
-            cprint(f"{query_index} / {len_of_censys_queries} :: Current Censys query is: {query}", "blue", attrs=["bold"])
+            cprint(f"{query_index} / {len_of_censys_queries} :: "
+                   f"Current Censys query is: {query or 'Empty query field'}", "blue", attrs=["bold"])
+            if not query:
+                print("Query field is empty, skip this search")
+                continue
             censys_raw_results = self.censys_search(query)
             for current_host in censys_raw_results:
                 self.__parse_current_host_censys_results(
@@ -1239,8 +1253,13 @@ class GrinderCore:
         """
         if not self.vendor_confidence:
             return
+        if not isinstance(self.vendor_confidence, str):
+            print("Confidence level for vendors is not valid: wrong type of confidence level")
+            self.queries_file = []
+            return
         if not self.vendor_confidence.lower() in ["firm", "certain", "tentative"]:
             print("Confidence level for vendors is not valid")
+            self.queries_file = []
             return
         """
         Lower confidence must include higher confidence:
@@ -1259,7 +1278,7 @@ class GrinderCore:
 
         self.queries_file = list(
             filter(
-                lambda product: product.get("vendor_confidence").lower()
+                lambda product: str(product.get("vendor_confidence", "")).lower()
                 in required_confidences,
                 self.queries_file,
             )
@@ -1279,7 +1298,7 @@ class GrinderCore:
         if not self.vendors:
             return
         vendors_from_queries = list(
-            map(lambda product: product.get("vendor"), self.queries_file)
+            map(lambda product: product.get("vendor", ""), self.queries_file)
         )
 
         # Search vendors from CLI in list of all existed products

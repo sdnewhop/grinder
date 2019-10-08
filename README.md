@@ -271,9 +271,6 @@ Format of file with queries:
             "nse_script": "NAME OF NSE SCRIPT FROM /custom_scripts/nse_scripts"
         },
         "vendor_confidence": "VENDOR CONFIDENCE LEVEL {tentative|firm|certain}"
-    },
-    {
-    
     }
 ]
 ```

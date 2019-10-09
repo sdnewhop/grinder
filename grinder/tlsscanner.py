@@ -27,6 +27,7 @@ class TlsScanner:
         self.all_ports: dict = {}
         self.alive_hosts_with_ports: dict = {}
         self.n: int = n
+        self._prepare_results_directory()
 
     @staticmethod
     def _grouper(n: int, iterable: Iterable, padding=None) -> Iterator:
@@ -293,6 +294,19 @@ class TlsScanner:
             print(f"Host was already scanned: {name_of_file}")
             return True
 
+    @staticmethod
+    def _prepare_results_directory() -> None:
+        """
+        Prepare directory for results
+        :return: None
+        """
+        prepare_results_dir = (
+            Path(".")
+            .joinpath(DefaultValues.RESULTS_DIRECTORY)
+            .joinpath(DefaultTlsScannerValues.TLS_SCANNER_RESULTS_DIR)
+        )
+        prepare_results_dir.mkdir(parents=True, exist_ok=True)
+
     @timer
     def start_tls_scan(
         self,
@@ -364,8 +378,6 @@ class TlsScanner:
         :param result: result to save in file
         :return: None
         """
-        path_to_txt_file = Path(".").joinpath(dest_dir).joinpath(sub_dir)
-        path_to_txt_file.mkdir(parents=True, exist_ok=True)
-        path_to_txt_file = path_to_txt_file.joinpath(f"{filename}.txt")
+        path_to_txt_file = Path(".").joinpath(dest_dir).joinpath(sub_dir).joinpath(f"{filename}.txt")
         with open(path_to_txt_file, mode="w") as result_file:
             result_file.write(result)

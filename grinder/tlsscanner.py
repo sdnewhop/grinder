@@ -27,6 +27,7 @@ class TlsScanner:
         self.all_ports: dict = {}
         self.alive_hosts_with_ports: dict = {}
         self.n: int = n
+        self._prepare_results_directory()
 
     @staticmethod
     def _grouper(n: int, iterable: Iterable, padding=None) -> Iterator:
@@ -322,7 +323,6 @@ class TlsScanner:
         :param threads: quantity of threads, 4/4 by default
         :return: None
         """
-        self._prepare_results_directory()
         alive_hosts_quantity = len(self.alive_hosts_with_ports.items())
         for index, host_port in enumerate(self.alive_hosts_with_ports.items()):
             host, port = host_port

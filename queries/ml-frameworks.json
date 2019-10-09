@@ -1,19 +1,87 @@
 [
     {
+        "vendor": "American Megatrends",
+        "product": "NVIDIA DGX-1 Baseboard Management Controller",
+        "shodan_queries": [
+            {
+                "query": "\"Content-Length: 1820\" lighttpd port:443",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "American Megatrends",
+        "product": "QCT Baseboard Management Controller",
+        "shodan_queries": [
+            {
+                "query": "\"Content-Length: 1901\" lighttpd port:443",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl:\"quantatw.com\" lighttpd",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl.cert.issuer.CN:\"Quanta\" port:\"443\" all:\"lighttpd\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "American Megatrends",
+        "product": "Megarac SP",
+        "shodan_queries": [
+            {
+                "query": "\"3.14.17-ami\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "443.https.get.title:\"Megarac SP\" AND 443.https.get.headers.server:\"lighttpd\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "(((\"<title>Megarac SP</title>\") AND protocols: \"443/https\") AND protocols: \"623/ipmi\") AND 443.https.get.headers.server:\"lighttpd\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
         "vendor": "Google Brain",
         "product": "TensorFlow",
         "shodan_queries": [
             {
                 "query": "tensorflow \"Server: TornadoServer\"",
                 "query_confidence": "certain"
-            },
-            {
-                "query": "tensorflow",
-                "query_confidence": "firm"
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "8888.http.get.headers.server: TornadoServer OR 80.http.get.headers.server: TornadoServer OR 443.http.get.headers.server: TornadoServer OR 8080.http.get.headers.server: TornadoServer",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -39,7 +107,18 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"2016 The TensorFlow Authors\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"2017 The TensorFlow Authors\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "80.http.get.title: \"TensorBoard\"",
+                "query_confidence": "firm"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -73,7 +152,14 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "80.http.get.body: \"Caffe flavor:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "80.http.get.body: \"Caffe version:\"",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -103,7 +189,14 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "80.http.get.title: \"DIGITS\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "80.http.get.body_sha256: 86967845b3c54aee52a94f2193eec3a0faaf98ed97a183b0910c063a599736ec",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -141,7 +234,18 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"tfjs@1.0.0\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"tf.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"tfjs-vis.umd.min.js\"",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -167,7 +271,14 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"brain.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"js/brain.js\"",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -193,7 +304,14 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"predict.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"script src=\"predict.js\"\"",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -223,7 +341,14 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"ml5.min.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"ml5.js\"",
+                "query_confidence": "firm"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -249,7 +374,10 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"keras-js\"",
+                "query_confidence": "tentative"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -267,7 +395,10 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"figue.js\"",
+                "query_confidence": "firm"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -285,7 +416,10 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"Natural.js\"",
+                "query_confidence": "tentative"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -329,7 +463,10 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"script src=\"ml.js\"\"",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -347,7 +484,10 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"Clusterfck.js\"",
+                "query_confidence": "firm"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -365,7 +505,10 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"neuro.js\"",
+                "query_confidence": "firm"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -383,7 +526,14 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"deeplearn.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "443.https.get.body: \"deeplearn.js\"",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -413,7 +563,22 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"lib/convnetjs\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"lib/convnet.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"lib/convnet_main.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "80.http.get.body: \"convnet.js\"",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -431,7 +596,14 @@
             }
         ],
         "censys_queries": [
-
+            {
+                "query": "\"synaptic.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "443.https.get.body: \"synaptic.js\" OR 80.http.get.body: \"synaptic.js\"",
+                "query_confidence": "firm"
+            }
         ],
         "scripts": {
             "py_script": "",
@@ -449,7 +621,486 @@
             }
         ],
         "censys_queries": [
+            {
+                "query": "apache AND (443.https.get.body: \"mxnet\" OR 80.http.get.body: \"mxnet\")",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Elasticsearch",
+        "product": "Elasticsearch",
+        "shodan_queries": [
+            {
+                "query": "all:\"ml-logs\" product:elastic port:9200 all:\"Elastic Indices:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"datasets\" product:elastic port:9200 all:\"Elastic Indices:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"dataset\" product:elastic port:9200 all:\"Elastic Indices:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"algomodel\" product:elastic port:9200 all:\"Elastic Indices:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"models\" product:elastic port:9200 all:\"Elastic Indices:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"predictions\" product:elastic port:9200 all:\"Elastic Indices:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "(\"ml-logs\" OR \"datasets\" OR \"dataset\" OR \"algomodel\" OR \"models\" OR \"predictions\" OR \"tensorflow\" OR \"tensor\") \"Elastic Indices:\" product:elastic port:9200",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
 
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "MongoDB",
+        "product": "MongoDB",
+        "shodan_queries": [
+            {
+                "query": "all:\"ml\" product:MongoDB port:27017 -authentication",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"dataset\" product:MongoDB port:27017 -authentication",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"datasets\" product:MongoDB port:27017 -authentication",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"models\" product:MongoDB port:27017 -authentication",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "(\"ml\" OR \"dataset\" OR \"datasets\" OR \"ml-logs\" OR \"algomodel\" OR \"models\" OR \"predictions\" OR \"prediction\" OR \"tensorflow\" OR \"tensor\") \"MongoDB Server Information\" product:MongoDB port:27017 -authentication",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Docker",
+        "product": "Docker",
+        "shodan_queries": [
+            {
+                "query": "all:\"ml\" \"Docker Containers:\" port:2375",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "(\"dataset\" OR \"datasets\" OR \"ml-logs\" OR \"algomodel\" OR \"models\" OR \"predictions\" OR \"prediction\" OR \"ml\" OR \"tensorflow\" OR \"tensor\") \"Docker Containers:\" port:2375",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "ResponsiveVoice",
+        "product": "ResponsiveVoice.JS",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"responsivevoice.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"responsivevoice.min.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"responsivevoice.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"responsivevoice.min.js\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Inference Solutions",
+        "product": "Inference Studio",
+        "shodan_queries": [
+            {
+                "query": "\"Inference Studio\"",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "tentative"
+    },
+    {
+        "vendor": "Speech.js",
+        "product": "Speech.js",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"Speech.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"Speech.min.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"Speech.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"Speech.min.js\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "dictate.js",
+        "product": "dictate.js",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"dictate.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"dictate.js\"",
+                "query_cofidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "p5.speech.js",
+        "product": "p5.speech.js",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"p5.speech.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"p5.speech.js\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "artyom.js",
+        "product": "artyom.js",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"artyom.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"artyom.min.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"artyom.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"artyom.min.js\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "SpeechKITT",
+        "product": "SpeechKITT",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"speechkitt.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"speechkitt.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"speechkitt.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"speechkitt.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "annyang",
+        "product": "annyang",
+        "shodan_queries": [
+            {
+                "query": "\"annyang.min.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"annyang.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "http.html:\"annyang.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"annyang.min.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"annyang.min.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"annyang.js\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "OpenCV",
+        "product": "OpenCV.js",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"opencv.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"opencv.min.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"opencv.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"opencv.min.js\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Clmtrackr",
+        "product": "Clmtrackr",
+        "shodan_queries": [
+            {
+                "query": "\"clmtrackr.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"clmtrackr.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"clmtrackr.min.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"clmtrackr.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"clmtrackr.min.js\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "JQuery",
+        "product": "JQuery Facedetection",
+        "shodan_queries": [
+            {
+                "query": "\"jquery.facedetection.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"jquery.facedetection.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"jquery.facedetection.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:”\"jquery.facedetection.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"jquery.facedetection.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"jquery.facedetection.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "FaceDetector.js",
+        "product": "FaceDetector.js",
+        "shodan_queries": [
+            {
+                "query": "\"FaceDetector.js\"",
+                "query_confidence": "tentative"
+            },
+            {
+                "query": "http.html:\"FaceDetector.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"FaceDetector.min.js\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"FaceDetector.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"FaceDetector.min.js\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Face-api.js",
+        "product": "Face-api.js",
+        "shodan_queries": [
+            {
+                "query": "\"face-api.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"face-api.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"face-api.min.js\"",
+                "query_confidnce": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"face-api.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"face-api.min.js\"",
+                "query_confidence": "certain"
+            }
         ],
         "scripts": {
             "py_script": "",

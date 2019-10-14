@@ -10,12 +10,12 @@ from grinder.errors import GrinderScriptExecutorRunScriptError
 class PyScriptExecutor:
     @staticmethod
     @exception_handler(expected_exception=GrinderScriptExecutorRunScriptError)
-    def run_script(host_info, py_script):
+    def run_script(host_info: dict, py_script: str):
         """
         Import additional script and run it
 
-        :param host_info (dict): information about host
-        :param py_script (str): python script filename
+        :param host_info: information about host
+        :param py_script: python script filename
         :return: data from additional script
         """
         if isinstance(py_script, str) and py_script.endswith(".py"):
@@ -25,8 +25,5 @@ class PyScriptExecutor:
                 .joinpath(DefaultValues.PY_SCRIPTS_DIRECTORY)
                 .joinpath(py_script)
             )
-            try:
-                module = SourceFileLoader("main", str(full_path)).load_module()
-                return module.main(host_info)
-            except:
-                return
+            module = SourceFileLoader("main", str(full_path)).load_module()
+            return module.main(host_info)

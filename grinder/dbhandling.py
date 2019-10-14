@@ -152,8 +152,14 @@ class GrinderDatabase:
         of scanning time, and scan duration.
         :return: None
         """
-        self.scan_end_time = datetime.now()
-        self.scan_duration = self.scan_end_time - self.scan_start_time
+        try:
+            self.scan_end_time = datetime.now()
+            self.scan_duration = self.scan_end_time - self.scan_start_time
+        # Case when we try to update end time without start time is possible:
+        # for example, we still can call save to database handler
+        # if some error happened
+        except TypeError as scan_wasnt_initialized:
+            return
         with self.connection as db_connection:
             db_connection.execute(
                 """

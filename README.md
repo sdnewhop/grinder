@@ -126,7 +126,7 @@ flask routes
 ```
 
 ## Build in Docker
-To build the basic lightweight Grinder framework version (without TLS-Attacker and TLS-Scanner) as a docker image you can use the script `docker-build.sh`, and to run this image you can use the script `docker-run.sh`:
+To build the basic lightweight Grinder framework version (without TLS-Attacker and TLS-Scanner) as a docker image you can use the script `docker_build.sh`, and to run this image you can use the script `docker_run.sh`:
 ```bash
 docker run -it --rm --volume $(pwd)/results:/code/results --volume $(pwd)/map:/code/map grinder-framework -h
 ```

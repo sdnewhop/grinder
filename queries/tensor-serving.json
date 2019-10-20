@@ -1,0 +1,18 @@
+[
+  {
+      "vendor": "Google, TensorFlow",
+      "product": "TensorFlow Serving Model Server",
+      "shodan_queries": [
+          {
+              "query": "http.html:\" <HTML><HEAD> <TITLE>404 Not Found</TITLE> </HEAD><BODY> <H1>Not Found</H1> </BODY></HTML>\" \"connection: close\" \"Content-Type: text/html\" -\"charset\" -\"server\" -\"content-length\" -\"cookie\" -\"frame\" -\"expires\" \"HTTP/1.1\" \"404\" \"Date:\"",
+              "query_confidence": "certain"
+          }
+      ],
+      "censys_queries": [],
+      "scripts": {
+          "py_script": "tensor_serving_checker.py",
+          "nse_script": ""
+      },
+      "vendor_confidence": "certain"
+  }
+]

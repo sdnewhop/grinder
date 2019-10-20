@@ -1346,7 +1346,8 @@ class GrinderCore:
                 return
 
         # Search for compatible script
-        for ip, host_info in self.combined_results.items():
+        results_len = len(self.combined_results.keys())
+        for index, (ip, host_info) in enumerate(self.combined_results.items()):
             scripts = None
             for product in self.queries_file:
                 if (product.get("vendor"), product.get("product")) == (
@@ -1358,13 +1359,14 @@ class GrinderCore:
             if not scripts:
                 continue
 
+            cur_position = f"{index}/{results_len}"
             py_script = scripts.get("py_script")
             if py_script:
                 py_script_res = PyScriptExecutor.run_script(host_info, py_script)
                 if not py_script_res:
-                    print(f"[PyExecutor: Empty]\tScript {py_script} done for {ip}")
+                    print(f"[{cur_position}] [PyExecutor: Empty output] Script {py_script} done for {ip}")
                 else:
-                    print(f"[PyExecutor: Successful]\tScript {py_script} done for {ip}")
+                    print(f"[{cur_position}] [PyExecutor: Successful] Script {py_script} done for {ip}")
                     if py_script_res:
                         self.combined_results[ip]["scripts"][
                             "py_script"
@@ -1374,10 +1376,10 @@ class GrinderCore:
             if nse_script:
                 nse_script_res = NmapScriptExecutor.run_script(host_info, nse_script)
                 if not nse_script_res:
-                    print(f"[NseExecutor: Empty]\tScript {nse_script} done for {ip}")
+                    print(f"[{cur_position}] [NseExecutor: Empty output] Script {nse_script} done for {ip}")
                 else:
                     print(
-                        f"[NseExecutor: Successful]\tScript {nse_script} done for {ip}"
+                        f"[{cur_position}] [NseExecutor: Successful] Script {nse_script} done for {ip}"
                     )
                     if nse_script_res:
                         self.combined_results[ip]["scripts"][

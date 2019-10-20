@@ -3,6 +3,7 @@
 [![Python3 Version](https://img.shields.io/badge/python-3.6%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-GPL--2.0-blue)](/LICENSE)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/psf/black)
+[![Last Commit](https://img.shields.io/github/last-commit/sdnewhop/grinder)](https://github.com/sdnewhop/grinder)
 
 :mag_right: Internet-connected Devices Census Python Framework 
 ![Grinder Screenshot](/docs/screenshot.png?raw=true "Grinder Help")
@@ -16,6 +17,7 @@
 1. [Build in Docker](#build-in-docker)
 1. [Tests](#tests)
 1. [Usage](#usage)
+1. [Wiki](#wiki)
 1. [Examples](#examples)
 1. [Add Your Own Queries](#add-your-own-queries)
 ## Description
@@ -159,6 +161,13 @@ Note: tests are still WIP, so please, feel free to create issues If you encounte
 ## Usage
 ### Help on Command Line Arguments
 ```bash
+  .,-:::::/ :::::::..   ::::::.    :::.:::::::-.  .,:::::: :::::::..
+,;;-'````'  ;;;;``;;;;  ;;;`;;;;,  `;;; ;;,   `';,;;;;'''' ;;;;``;;;;
+[[[   [[[[[[/[[[,/[[['  [[[  [[[[[. '[[ `[[     [[ [[cccc   [[[,/[[['
+"$$c.    "$$ $$$$$$c    $$$  $$$ "Y$c$$  $$,    $$ $$""""   $$$$$$c
+ `Y8bo,,,o88o888b "88bo,888  888    Y88  888_,o8P' 888oo,__ 888b "88bo,
+   `'YMUP"YMMMMMM   "W" MMM  MMM     YM  MMMMP"`   """"YUMMMMMMM   "W"
+
 usage: grinder.py [-h] [-r] [-u] [-q QUERIES_FILE] [-sk SHODAN_KEY]
                   [-vk VULNERS_KEY] [-cu] [-cp] [-ci CENSYS_ID]
                   [-cs CENSYS_SECRET] [-cm CENSYS_MAX] [-sm SHODAN_MAX] [-nm]
@@ -166,7 +175,7 @@ usage: grinder.py [-h] [-r] [-u] [-q QUERIES_FILE] [-sk SHODAN_KEY]
                   [-ht HOST_TIMEOUT] [-tp TOP_PORTS] [-sc]
                   [-vc VENDOR_CONFIDENCE] [-qc QUERY_CONFIDENCE]
                   [-v [VENDORS [VENDORS ...]]] [-ml MAX_LIMIT] [-d] [-ts]
-                  [-tsp TLS_SCAN_PATH] [-vr]
+                  [-tsp TLS_SCAN_PATH] [-vr] [-ni]
 
 The Grinder framework was created to automatically enumerate and fingerprint
 different hosts on the Internet using different back-end systems
@@ -220,7 +229,13 @@ optional arguments:
                         in Grinder root, else not required)
   -vr, --vulners-report
                         Make additional vulners reports
+  -ni, --not-incremental
+                        Turn off incrememental scan - make clean scan (without
+                        previous results)
 ```
+## Wiki
+Additional extended documentation for the framework is available on the [repository wiki](https://github.com/sdnewhop/grinder/wiki), including additional information about flags, the internal structure of the framework, queries, and more.
+
 ## Examples
 Run the most basic enumeration with Shodan and Censys engines without map markers and plots (results will be saved in database and output JSON):
 ```bash

@@ -1,6 +1,6 @@
 # Grinder Framework
 [![Required OS](https://img.shields.io/badge/OS-Linux%20based-blue)](https://en.wikipedia.org/wiki/Linux)
-[![Python3 Version](https://img.shields.io/badge/python-3.6%2B-blue)](https://www.python.org/downloads/)
+[![Python3 Version](https://img.shields.io/badge/python-3.6%20%7C%203.7-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-GPL--2.0-blue)](/LICENSE)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/psf/black)
 [![Last Commit](https://img.shields.io/github/last-commit/sdnewhop/grinder)](https://github.com/sdnewhop/grinder)

@@ -1,6 +1,6 @@
 # Grinder Framework
 [![Required OS](https://img.shields.io/badge/OS-Linux%20based-blue)](https://en.wikipedia.org/wiki/Linux)
-[![Python3 Version](https://img.shields.io/badge/python-3.6-blue)](https://www.python.org/downloads/)
+[![Python3 Version](https://img.shields.io/badge/python-3.6%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-GPL--2.0-blue)](/LICENSE)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/psf/black)
 
@@ -33,6 +33,7 @@ Also, Grinder can show you some basic information:
 
 ## Requirements
 - [Python 3.6+](https://www.python.org/downloads/)
+- [python3-tk](https://docs.python.org/3/library/tkinter.html)
 - [Shodan](https://account.shodan.io/register) and [Censys](https://censys.io/register) accounts  
 Required to collect hosts, both free and full accounts are suitable. Also, it's possible to use only one account (Censys or Shodan, Shodan is preferable).
 - [Vulners](https://vulners.com/) account  
@@ -64,33 +65,45 @@ Required only for TLS scanning.
 The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
 ## Setup and Configure Environment
 ### Grinder Installing
-1. Install [Nmap Security Scanner](https://nmap.org/download.html), if not installed.
-2. Clone the repository
+1. Install [Nmap Security Scanner](https://nmap.org/download.html) if not installed.
+2. Install [python3-tk](https://docs.python.org/3/library/tkinter.html) package if not installed (Linux only)
+```
+sudo apt-get install python3-tk
+```
+3. Install virtualenv if not installed
+```
+sudo pip3 install virtualenv 
+```
+or
+```
+pip3 install --upgrade virtualenv
+```
+4. Clone the repository
 ```
 git clone https://github.com/sdnewhop/grinder
 ```
-3. Clone and install [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker) (if you want to use TLS scanning features with Grinder).
-4. Clone [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner) in directory with Grinder and install it (if you want to use TLS scanning features with Grinder.
-5. Create virtual environment
+5. Clone and install [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker) (if you want to use TLS scanning features with Grinder).
+6. Clone [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner) in directory with Grinder and install it (if you want to use TLS scanning features with Grinder.
+7. Create virtual environment
 ```
 cd grinder
 python3 -m venv grindervenv
 source grindervenv/bin/activate
 ```
-6. Check if virtual environment successfully loaded
+8. Check if virtual environment successfully loaded
 ```
 which python
 which pip
 ```
-7. Install project requirements in virtual environment
+9. Install project requirements in virtual environment
 ```
 pip3 install -r requirements.txt
 ```
-8. Run the script
+10. Run the script
 ```
 ./grinder.py -h
 ```
-9. Set your Shodan, Censys and Vulners keys via a command line arguments on every run
+11. Set your Shodan, Censys and Vulners keys via a command line arguments on every run
 ```
 ./grinder.py -sk YOUR_SHODAN_KEY -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -vk YOUR_VULNERS_KEY
 ```
@@ -101,7 +114,7 @@ export CENSYS_API_ID=YOUR_CENSYS_API_ID_HERE
 export CENSYS_API_SECRET=YOUR_CENSYS_API_SECRET_HERE
 export VULNERS_API_KEY=YOUR_VULNERS_API_KEY_HERE
 ```
-10. Deactivate virtual environment after use and restore default python interpreter
+12. Deactivate virtual environment after use and restore default python interpreter
 ```
 deactivate
 ```

@@ -63,6 +63,11 @@ class NmapConnector:
         elif arguments:
             self.nm.scan(hosts=host, arguments=arguments, sudo=sudo)
 
+        # Else if arguments are not defined, let's
+        # scan with default arguments
+        elif ports:
+            self.nm.scan(hosts=host, ports=ports, sudo=sudo)
+
         # If arguments are not set too, make
         # simple scan
         else:

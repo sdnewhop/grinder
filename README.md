@@ -67,6 +67,7 @@ Required only for TLS scanning.
 The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
 ## Setup and Configure Environment
 ### Grinder Installing
+_Note: If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced by `pipenv sync` command._
 1. Install [Nmap Security Scanner](https://nmap.org/download.html) if not installed.
 2. Install [python3-tk](https://docs.python.org/3/library/tkinter.html) package if not installed (Linux only)
 ```

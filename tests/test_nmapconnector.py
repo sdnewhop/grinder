@@ -1,19 +1,32 @@
 #!/usr/bin/env python3
 
-import threading
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-from unittest.mock import patch
+from threading import Thread
 
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+from socket import AF_INET6
+
+from unittest.mock import patch
 from pytest import raises
 
 from grinder.defaultvalues import DefaultNmapScanValues
+from grinder.nmapconnector import NmapConnector
 from grinder.errors import (
     NmapConnectorInitError,
     NmapConnectorScanError,
     NmapConnectorGetResultsError,
     NmapConnectorGetResultsCountError,
 )
-from grinder.nmapconnector import NmapConnector
+
+
+class NmapTestDefaultValues:
+    HOST4 = "127.0.0.1"
+    HOST6 = "::1"
+    PORT4 = 8080
+    PORT6 = 8090
+
+
+class HTTPServer6(HTTPServer):
+    address_family = AF_INET6
 
 
 def setup_module() -> None:
@@ -22,11 +35,21 @@ def setup_module() -> None:
     and NmapConnector for various tests
     :return:
     """
-    global server
-    server = HTTPServer(("localhost", 8080), SimpleHTTPRequestHandler)
-    thread = threading.Thread(target=server.serve_forever)
-    thread.daemon = True
-    thread.start()
+    global server_v4
+    server_v4 = HTTPServer(
+        (NmapTestDefaultValues.HOST4, NmapTestDefaultValues.PORT4),
+        SimpleHTTPRequestHandler,
+    )
+    s_v4 = Thread(target=server_v4.serve_forever, daemon=True)
+    s_v4.start()
+
+    global server_v6
+    server_v6 = HTTPServer6(
+        (NmapTestDefaultValues.HOST6, NmapTestDefaultValues.PORT6),
+        SimpleHTTPRequestHandler,
+    )
+    s_v6 = Thread(target=server_v6.serve_forever, daemon=True)
+    s_v6.start()
 
     global nm
     nm = NmapConnector()
@@ -37,7 +60,8 @@ def teardown_module() -> None:
     Stop HTTPServer
     :return:
     """
-    server.shutdown()
+    server_v4.shutdown()
+    server_v6.shutdown()
 
 
 def test_nmapconnector_init() -> None:
@@ -45,7 +69,7 @@ def test_nmapconnector_init() -> None:
     Check if we can successfully create new NmapConnector instance
     :return:
     """
-    nmapconnector = NmapConnector()
+    NmapConnector()
 
 
 def test_nmapconnector_init_error() -> None:
@@ -59,7 +83,45 @@ def test_nmapconnector_init_error() -> None:
     ):
         with raises(NmapConnectorInitError) as init_error:
             NmapConnector()
-        assert "Error occured in Nmap Connector module" in str(init_error.value)
+        assert "Error occured in Nmap Connector module: test" == str(init_error.value)
+
+
+def test_nmapconnector_scan_ipv4() -> None:
+    """
+    Check if we can successfully scan 127.0.0.1 host
+    :return:
+    """
+    nm.scan(
+        host=NmapTestDefaultValues.HOST4,
+        arguments=DefaultNmapScanValues.ARGUMENTS,
+        ports=str(NmapTestDefaultValues.PORT4),
+    )
+
+    assert (
+        nm.get_results()
+        .get(NmapTestDefaultValues.HOST4)
+        .get("tcp")
+        .get(NmapTestDefaultValues.PORT4, False)
+    )
+
+
+def test_nmapconnector_scan_ipv6() -> None:
+    """
+    Check if we can successfully scan ::1 host
+    :return:
+    """
+    nm.scan(
+        host=NmapTestDefaultValues.HOST6,
+        arguments=DefaultNmapScanValues.ARGUMENTS,
+        ports=str(NmapTestDefaultValues.PORT6),
+    )
+
+    assert (
+        nm.get_results()
+        .get(NmapTestDefaultValues.HOST6)
+        .get("tcp")
+        .get(NmapTestDefaultValues.PORT6, False)
+    )
 
 
 def test_nmapconnector_scan_error() -> None:
@@ -72,13 +134,8 @@ def test_nmapconnector_scan_error() -> None:
         side_effect=NmapConnectorScanError("test"),
     ):
         with raises(NmapConnectorScanError) as scan_error:
-            nm.scan(
-                host="127.0.0.1",
-                arguments=DefaultNmapScanValues.ARGUMENTS,
-                ports=DefaultNmapScanValues.PORTS,
-                sudo=DefaultNmapScanValues.SUDO,
-            )
-        assert "Error occured in Nmap Connector module" in str(scan_error.value)
+            nm.scan(host=NmapTestDefaultValues.HOST4)
+        assert "Error occured in Nmap Connector module: test" == str(scan_error.value)
 
 
 def test_nmpaconnector_scan_without_any_args() -> None:
@@ -97,13 +154,8 @@ def test_nmpaconnector_scan_bad_argument() -> None:
     :return:
     """
     with raises(NmapConnectorScanError) as scan_error:
-        nm.scan(
-            host="127.0.0.1",
-            arguments="--bad-argument",
-            ports=DefaultNmapScanValues.PORTS,
-            sudo=DefaultNmapScanValues.SUDO,
-        )
-    assert "Error occured in Nmap Connector module" in str(scan_error.value)
+        nm.scan(host=NmapTestDefaultValues.HOST4, arguments="--bad-argument")
+    assert "nmap: unrecognized option '--bad-argument'" in str(scan_error.value)
 
 
 def test_nmapconnector_get_results() -> None:
@@ -111,7 +163,7 @@ def test_nmapconnector_get_results() -> None:
     Check if we can successfully get NmapConnector scan results
     :return:
     """
-    get_resuts = nm.get_results()
+    nm.get_results()
 
 
 def test_nmapconnector_get_results_error() -> None:
@@ -125,7 +177,9 @@ def test_nmapconnector_get_results_error() -> None:
     ):
         with raises(NmapConnectorGetResultsError) as get_results_error:
             nm.get_results()
-        assert "Error occured in Nmap Connector module" in str(get_results_error.value)
+        assert "Error occured in Nmap Connector module: test" == str(
+            get_results_error.value
+        )
 
 
 def test_nmapconnector_get_results_count() -> None:
@@ -133,7 +187,7 @@ def test_nmapconnector_get_results_count() -> None:
     Check if we can successfully get NmapConnector scan results
     :return:
     """
-    get_resuts_count = nm.get_results_count()
+    nm.get_results_count()
 
 
 def test_nmapconnector_get_results_count_error() -> None:
@@ -147,6 +201,6 @@ def test_nmapconnector_get_results_count_error() -> None:
     ):
         with raises(NmapConnectorGetResultsCountError) as get_results_count_error:
             nm.get_results_count()
-        assert "Error occured in Nmap Connector module" in str(
+        assert "Error occured in Nmap Connector module: test" == str(
             get_results_count_error.value
         )

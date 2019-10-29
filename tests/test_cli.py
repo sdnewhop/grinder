@@ -2,6 +2,21 @@
 
 from pytest import fixture
 from subprocess import Popen, PIPE
+from os import getcwd, X_OK, access
+from pathlib import Path
+
+
+class CLITestDefaultValues:
+    GRINDER_RUN_COMMAND = "./grinder.py"
+    CLI_QUERY_PATH = "tests/test_data/test_queries/cli_arguments_test.json"
+    if Path(getcwd()).stem == "tests":
+        GRINDER_RUN_COMMAND = f".{GRINDER_RUN_COMMAND}"
+        CLI_QUERY_PATH = CLI_QUERY_PATH[len(Path(getcwd()).stem) + 1 :]
+    if not access("grinder.py", X_OK) and not access("../grinder.py", X_OK):
+        if Path(getcwd()).stem == "tests":
+            GRINDER_RUN_COMMAND = f"python3 {GRINDER_RUN_COMMAND}"
+        else:
+            GRINDER_RUN_COMMAND = f"python3 {GRINDER_RUN_COMMAND[2:]}"
 
 
 @fixture
@@ -17,7 +32,7 @@ def cli_args(shodan_key: str, censys_id: str, censys_secret: str) -> list:
     ci = censys_id
     cs = censys_secret
     base_args = [
-        "./grinder.py",
+        CLITestDefaultValues.GRINDER_RUN_COMMAND,
         "-r",
         "-u",
         "-cu",
@@ -40,10 +55,10 @@ def test_cli_base_args(cli_args: list) -> None:
     :param cli_args: needed arguments for execution and testing
     :return: None
     """
-    p = Popen(["./grinder.py"], stdout=PIPE, stderr=PIPE)
+    p = Popen([CLITestDefaultValues.GRINDER_RUN_COMMAND], stdout=PIPE, stderr=PIPE)
     output, error = p.communicate()
     assert p.returncode == 1
-    assert "Usage: ./grinder.py -h for help" in str(output)
+    assert "grinder.py -h for help" in str(output)
 
     p = Popen(cli_args, stdout=PIPE, stderr=PIPE)
     output, error = p.communicate()
@@ -60,7 +75,7 @@ def test_cli_invalid_base_args() -> None:
     Check behavior in case of invalid value following flag that doesn't require value
     :return: None
     """
-    base_one = ["./grinder.py", "-r"]
+    base_one = [CLITestDefaultValues.GRINDER_RUN_COMMAND, "-r"]
     flags = ["-r", "-u", "-cu", "-cp", "-ni", "-d", "-nm", "-vs", "-sc", "-vs", "-ts"]
     invalid_value = "wrong_one"
     for f in flags:
@@ -98,16 +113,14 @@ def test_cli_invalid_args_after_flags(cli_args: list) -> None:
         "Oops! File with queries was not found. Create it or set name properly."
         in str(output)
     )
-    invalid_args[
-        len(invalid_args) - 1
-    ] = "tests/test_data/test_queries/cli_arguments_test.json"
+    invalid_args[-1] = CLITestDefaultValues.CLI_QUERY_PATH
 
     invalid_args.extend(["-v", invalid_value])
     p = Popen(invalid_args, stdout=PIPE, stderr=PIPE)
     output, error = p.communicate()
     assert p.returncode == 1
     assert "Vendors not found in queries file" in str(output)
-    invalid_args = invalid_args[: len(invalid_args) - 2]
+    invalid_args = invalid_args[:-2]
 
     flags_extension = ["-nm", "-vs", "-sc", "-vs", "-ts"]
     invalid_args.extend(flags_extension)
@@ -122,7 +135,7 @@ def test_cli_invalid_args_after_flags(cli_args: list) -> None:
         "argument -tp/--top-ports: invalid int value",
         "argument -ml/--max-limit: invalid int value",
     ]
-    for (flag_arg, flag_output) in zip(flags, expected_invalid_errors):
+    for flag_arg, flag_output in zip(flags, expected_invalid_errors):
         invalid_args.extend([flag_arg, invalid_value])
         p = Popen(invalid_args, stdout=PIPE, stderr=PIPE)
         output, error = p.communicate()
@@ -144,9 +157,7 @@ def test_cli_vendor_confidence(cli_args: list) -> None:
     :return: None
     """
     base_args = cli_args
-    base_args.extend(
-        ["-q", "tests/test_data/test_queries/cli_arguments_test.json", "-vc"]
-    )
+    base_args.extend(["-q", CLITestDefaultValues.CLI_QUERY_PATH, "-vc"])
     vendor_confidence = ["certain", "firm", "tentative"]
     output_part = "Results are empty"
 
@@ -166,9 +177,7 @@ def test_cli_vendor_confidence_with_invalid_arg(cli_args: list) -> None:
     :return: None
     """
     base_args = cli_args
-    base_args.extend(
-        ["-q", "tests/test_data/test_queries/cli_arguments_test.json", "-vc"]
-    )
+    base_args.extend(["-q", CLITestDefaultValues.CLI_QUERY_PATH, "-vc"])
     base_args.append("wrong_one")
     p = Popen(base_args, stdout=PIPE, stderr=PIPE)
     output, error = p.communicate()
@@ -178,14 +187,12 @@ def test_cli_vendor_confidence_with_invalid_arg(cli_args: list) -> None:
 
 def test_cli_query_confidence(cli_args: list) -> None:
     """
-     Check behavior in case of right query confidence
+    Check behavior in case of right query confidence
     :param cli_args: base arguments
     :return: None
     """
     base_args = cli_args
-    base_args.extend(
-        ["-q", "tests/test_data/test_queries/cli_arguments_test.json", "-qc"]
-    )
+    base_args.extend(["-q", CLITestDefaultValues.CLI_QUERY_PATH, "-qc"])
     query_confidence = ["certain", "firm", "tentative"]
     output_part = "Results are empty"
 
@@ -200,14 +207,12 @@ def test_cli_query_confidence(cli_args: list) -> None:
 
 def test_cli_query_confidence_with_invalid_arg(cli_args: list) -> None:
     """
-     Check behavior in case of invalid query confidence
+    Check behavior in case of invalid query confidence
     :param cli_args: base arguments
     :return: None
     """
     base_args = cli_args
-    base_args.extend(
-        ["-q", "tests/test_data/test_queries/cli_arguments_test.json", "-qc"]
-    )
+    base_args.extend(["-q", CLITestDefaultValues.CLI_QUERY_PATH, "-qc"])
     base_args.append("wrong_one")
     p = Popen(base_args, stdout=PIPE, stderr=PIPE)
     output, error = p.communicate()

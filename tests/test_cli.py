@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-from pytest import fixture, raises
-import subprocess
-from os import listdir
-import random
+from pytest import fixture
+from subprocess import Popen, PIPE
 
 
 @fixture
@@ -31,80 +29,90 @@ def cli_args(shodan_key: str, censys_id: str, censys_secret: str) -> list:
         "-cs",
         cs,
         "-ni",
+        "-d",
     ]
     return base_args
 
 
-@fixture
-def query_random() -> str:
-    """
-    Takes random query file from directory
-    :return: query file
-    """
-    queries = ["queries/" + query for query in listdir("queries")]
-    queries.remove("queries/test.json")
-    return random.choice(queries)
-
-
-def test_cli_base_args(cli_args: list, capfd) -> None:
+def test_cli_base_args(cli_args: list) -> None:
     """
     Execute base arguments and check results
     :param cli_args: needed arguments for execution and testing
     :return: None
     """
-    subprocess.run(["./grinder.py"])
-    assert "Usage: ./grinder.py -h for help" in str(capfd.readouterr().out)
-    subprocess.run(cli_args)
-    out, err = capfd.readouterr()
+    p = Popen(["./grinder.py"], stdout=PIPE, stderr=PIPE)
+    output, error = p.communicate()
+    assert p.returncode == 1
+    assert "Usage: ./grinder.py -h for help" in str(output)
+
+    p = Popen(cli_args, stdout=PIPE, stderr=PIPE)
+    output, error = p.communicate()
+    assert p.returncode == 1
     assert (
         "Oops! File with queries was not found. Create it or set name properly."
-        in str(out)
+        in str(output)
     )
-    assert "No such file or directory: 'queries.json'" in str(out)
+    assert "No such file or directory:" in str(output)
 
 
-def test_cli_invalid_base_args(capfd) -> None:
+def test_cli_invalid_base_args() -> None:
     """
     Check behavior in case of invalid value following flag that doesn't require value
     :return: None
     """
     base_one = ["./grinder.py", "-r"]
-    flags = ["-r", "-u", "-cu", "-cp", "-ni"]
+    flags = ["-r", "-u", "-cu", "-cp", "-ni", "-d", "-nm", "-vs", "-sc", "-vs", "-ts"]
     invalid_value = "wrong_one"
     for f in flags:
         base_one.extend([f, invalid_value])
-        subprocess.run(base_one)
-        out, err = capfd.readouterr()
-        assert "unrecognized arguments:" in str(err)
+        p = Popen(base_one, stdout=PIPE, stderr=PIPE)
+        output, error = p.communicate()
+        assert p.returncode == 1
+        assert "unrecognized arguments:" in str(error)
+
         base_one.pop()
-        subprocess.run(base_one)
-        out, err = capfd.readouterr()
+        p = Popen(base_one, stdout=PIPE, stderr=PIPE)
+        output, error = p.communicate()
+        assert p.returncode == 1
         assert (
             "Oops! File with queries was not found. Create it or set name properly."
-            in str(out)
+            in str(output)
         )
         base_one.pop()
 
 
-def test_cli_invalid_args(cli_args: list, capfd) -> None:
+def test_cli_invalid_args_after_flags(cli_args: list) -> None:
     """
-    Check behavior in case of invalid args with different flags
+    Check behavior in case of invalid arguments after different flags
     :param cli_args: base arguments
     :return: None
     """
-    base_args = cli_args
+    invalid_args = cli_args
     invalid_value = "wrong_one"
-    invalid_args = base_args
 
-    invalid_args.append(invalid_value)
-    subprocess.run(invalid_args)
-    out, err = capfd.readouterr()
-    assert "unrecognized arguments:" in str(err)
+    invalid_args.extend(["-q", invalid_value])
+    p = Popen(invalid_args, stdout=PIPE, stderr=PIPE)
+    output, error = p.communicate()
+    assert p.returncode == 1
+    assert (
+        "Oops! File with queries was not found. Create it or set name properly."
+        in str(output)
+    )
+    invalid_args[
+        len(invalid_args) - 1
+    ] = "tests/test_data/test_queries/cli_arguments_test.json"
 
-    invalid_args = base_args
-    invalid_args.extend(["-nm", "-vs", "-sc", "-vs", "-ts"])
-    flags = ["-cm", "-sm", "-nw", "-vw", "-ht", "-tp", "-ml", "-q", "-v", "-tsp", "-vk"]
+    invalid_args.extend(["-v", invalid_value])
+    p = Popen(invalid_args, stdout=PIPE, stderr=PIPE)
+    output, error = p.communicate()
+    assert p.returncode == 1
+    assert "Vendors not found in queries file" in str(output)
+    invalid_args = invalid_args[: len(invalid_args) - 2]
 
+    flags_extension = ["-nm", "-vs", "-sc", "-vs", "-ts"]
+    invalid_args.extend(flags_extension)
+
+    flags = ["-cm", "-sm", "-nw", "-vw", "-ht", "-tp", "-ml", "-tls"]
     expected_invalid_errors = [
         "argument -cm/--censys-max: invalid int value",
         "argument -sm/--shodan-max: invalid int value",
@@ -113,62 +121,95 @@ def test_cli_invalid_args(cli_args: list, capfd) -> None:
         "argument -ht/--host-timeout: invalid int value",
         "argument -tp/--top-ports: invalid int value",
         "argument -ml/--max-limit: invalid int value",
-        "unrecognized arguments:",
-        "unrecognized arguments:",
-        "unrecognized arguments:",
-        "unrecognized arguments:",
     ]
-
-    for i in range(len(flags)):
-        invalid_args.extend([flags[i], invalid_value])
-        subprocess.run(invalid_args)
-        err1 = capfd.readouterr().err
-        assert expected_invalid_errors[i] in str(err1)
+    for (flag_arg, flag_output) in zip(flags, expected_invalid_errors):
+        invalid_args.extend([flag_arg, invalid_value])
+        p = Popen(invalid_args, stdout=PIPE, stderr=PIPE)
+        output, error = p.communicate()
+        assert p.returncode == 1
+        assert flag_output in str(error)
 
         invalid_args.pop()
-        subprocess.run(invalid_args)
-        out, err = capfd.readouterr()
-        if str(err) != str(err1):
-            assert "expected one argument" in str(err)
+        p = Popen(invalid_args, stdout=PIPE, stderr=PIPE)
+        output, error_without_arg = p.communicate()
+        assert p.returncode == 1
+        assert "expected one argument" in str(error_without_arg)
         invalid_args.pop()
 
 
-def test_cli_vendor_confidence(cli_args: list, query_random: str, capfd) -> None:
+def test_cli_vendor_confidence(cli_args: list) -> None:
     """
-    Check behavior in case of different vendor confidence
+    Check behavior in case of right vendor confidence
     :param cli_args: base arguments
     :return: None
     """
     base_args = cli_args
-    query = query_random
-    base_args.extend(["-q", query, "-vc"])
-    vendor_confidence = ["firm", "tentative", "wrong_one"]
-    error = "Confidence level for vendors is not valid"
+    base_args.extend(
+        ["-q", "tests/test_data/test_queries/cli_arguments_test.json", "-vc"]
+    )
+    vendor_confidence = ["certain", "firm", "tentative"]
+    output_part = "Results are empty"
 
     for vendor in vendor_confidence:
         base_args.append(vendor)
-        subprocess.run(base_args)
-        out, err = capfd.readouterr()
-        if error in str(out):
-            assert error in str(out)
+        p = Popen(base_args, stdout=PIPE, stderr=PIPE)
+        output, error = p.communicate()
+        assert p.returncode == 1
+        assert output_part in str(output)
         base_args.pop()
 
 
-def test_cli_query_confidence(cli_args: list, query_random: str, capfd) -> None:
+def test_cli_vendor_confidence_with_invalid_arg(cli_args: list) -> None:
     """
-     Check behavior in case of different query confidence
+    Check behavior in case of invalid vendor confidence
     :param cli_args: base arguments
     :return: None
     """
     base_args = cli_args
-    query = query_random
-    base_args.extend(["-q", query, "-qc"])
-    query_confidence = ["firm", "tentative", "wrong_one"]
-    error = "Confidence level for current query is not valid"
+    base_args.extend(
+        ["-q", "tests/test_data/test_queries/cli_arguments_test.json", "-vc"]
+    )
+    base_args.append("wrong_one")
+    p = Popen(base_args, stdout=PIPE, stderr=PIPE)
+    output, error = p.communicate()
+    assert p.returncode == 1
+    assert "Confidence level for vendors is not valid" in str(output)
+
+
+def test_cli_query_confidence(cli_args: list) -> None:
+    """
+     Check behavior in case of right query confidence
+    :param cli_args: base arguments
+    :return: None
+    """
+    base_args = cli_args
+    base_args.extend(
+        ["-q", "tests/test_data/test_queries/cli_arguments_test.json", "-qc"]
+    )
+    query_confidence = ["certain", "firm", "tentative"]
+    output_part = "Results are empty"
+
     for query in query_confidence:
         base_args.append(query)
-        subprocess.run(base_args)
-        out, err = capfd.readouterr()
-        if error in str(out):
-            assert error in str(out)
+        p = Popen(base_args, stdout=PIPE, stderr=PIPE)
+        output, error = p.communicate()
+        assert p.returncode == 1
+        assert output_part in str(output)
         base_args.pop()
+
+
+def test_cli_query_confidence_with_invalid_arg(cli_args: list) -> None:
+    """
+     Check behavior in case of invalid query confidence
+    :param cli_args: base arguments
+    :return: None
+    """
+    base_args = cli_args
+    base_args.extend(
+        ["-q", "tests/test_data/test_queries/cli_arguments_test.json", "-qc"]
+    )
+    base_args.append("wrong_one")
+    p = Popen(base_args, stdout=PIPE, stderr=PIPE)
+    output, error = p.communicate()
+    assert p.returncode == 1
+    assert "Confidence level for current query is not valid" in str(output)

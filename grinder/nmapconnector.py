@@ -66,12 +66,12 @@ class NmapConnector:
         # Else if arguments are not defined, let's
         # scan with default arguments
         elif ports:
-            self.nm.scan(hosts=host, ports=ports, sudo=sudo)
+            self.nm.scan(hosts=host, arguments="", ports=ports, sudo=sudo)
 
         # If arguments are not set too, make
         # simple scan
         else:
-            self.nm.scan(hosts=host, sudo=sudo)
+            self.nm.scan(hosts=host, arguments="", sudo=sudo)
         self.results = {host: self.nm[host] for host in self.nm.all_hosts()}
 
     @exception_handler(expected_exception=NmapConnectorGetResultsError)

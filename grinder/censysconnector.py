@@ -48,6 +48,7 @@ class CensysConnector:
             "location.longitude",
             "ports",
             "protocols",
+            "autonomous_system.name",
         ]
         self.convert_dict = {
             "ip": "ip",
@@ -56,6 +57,7 @@ class CensysConnector:
             "location.longitude": "lng",
             "ports": "port",
             "protocols": "proto",
+            "autonomous_system.name": "org",
         }
 
     @exception_handler(expected_exception=CensysConnectorSearchError)

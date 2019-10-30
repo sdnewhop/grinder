@@ -86,6 +86,7 @@ class HostInfo(NamedTuple):
     lat: str
     lng: str
     country: str
+    organization: str
     vulnerabilities: dict
     nmap_scan: dict
     scripts: dict
@@ -755,15 +756,16 @@ class GrinderCore:
         ):
             return
         host_info = HostInfo(
-            product=product_info["product"],
-            vendor=product_info["vendor"],
+            product=product_info.get("product", "Unknown product"),
+            vendor=product_info.get("vendor", "Unknown vendor"),
             query=query,
             port=current_host.get("port"),
-            proto=current_host.get("_shodan").get("module"),
+            proto=current_host.get("_shodan", {}).get("module"),
             ip=current_host.get("ip_str"),
-            lat=current_host.get("location").get("latitude"),
-            lng=current_host.get("location").get("longitude"),
-            country=current_host.get("location").get("country_name"),
+            lat=current_host.get("location", {}).get("latitude"),
+            lng=current_host.get("location", {}).get("longitude"),
+            country=current_host.get("location", {}).get("country_name"),
+            organization=current_host.get("org"),
             vulnerabilities=dict(
                 shodan_vulnerabilities=current_host.get("vulns") or {},
                 vulners_vulnerabilities={},
@@ -793,8 +795,8 @@ class GrinderCore:
         if not (current_host.get("lat") and current_host.get("lng")):
             return
         host_info = HostInfo(
-            product=product_info["product"],
-            vendor=product_info["vendor"],
+            product=product_info.get("product", "Unknown product"),
+            vendor=product_info.get("vendor", "Unknown vendor"),
             query=query,
             port=current_host.get("port"),
             proto=current_host.get("proto"),
@@ -802,6 +804,7 @@ class GrinderCore:
             lat=current_host.get("lat"),
             lng=current_host.get("lng"),
             country=current_host.get("country"),
+            organization=current_host.get("org"),
             vulnerabilities=dict(shodan_vulnerabilities={}, vulners_vulnerabilities={}),
             nmap_scan={},
             scripts=dict(py_script=None, nse_script=None),

@@ -1,0 +1,236 @@
+[
+    {
+        "vendor": "Open Neural Network Exchange",
+        "product": "Open Neural Network Exchange",
+        "shodan_queries": [
+            {
+                "query": "all:\"ONNX\" \"Server: Werkzeug\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "http.html:\"onnx.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"onnx.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"myOnnxSession\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"onnx.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"myOnnxSession\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Oracle",
+        "product": "GraphPipe",
+        "shodan_queries": [
+            {
+                "query": "all:\"GraphPipe\"",
+                "query_confidence": "tentative"
+            },
+            {
+                "query": "http.html:\"graphpipe-tf\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "http.html:\"graphpipe-batcher\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "firm"
+    },
+    {
+        "vendor": "Amazon",
+        "product": "Greengrass",
+        "shodan_queries": [
+            {
+                "query": "all:\"greengrass\" org:\"Amazon.com\"",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "tentative"
+    },
+    {
+        "vendor": "Apache",
+        "product": "Spark",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"/static/spark-logo-77x50px\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:856048515",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.title:\"PySpark\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"pyspark-shell\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"spark jobs\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"spark master at\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Apache",
+        "product": "Flink",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"Apache Flink\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:180732787",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "443.https.get.title: \"Apache Flink\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"ng-app=\"flinkApp\"\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Apache",
+        "product": "Airflow",
+        "shodan_queries": [
+            {
+                "query": "all:\"airflow\" \"Server: gunicorn\" http.title:\"DAGs\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.title:\"Airflow - DAGs\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "80.http.get.title: \"Airflow - DAGs\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "MLFlow",
+        "product": "MLFlow",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"MLflow\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-1507094812",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "80.http.get.title: \"MLflow\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Google",
+        "product": "Kubeflow",
+        "shodan_queries": [
+            {
+                "query": "all:\"Kubeflow\" -\"404\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.title:\"Kubeflow Central Dashboard\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.title:\"Kubeflow UI\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-1203021870",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "80.http.get.title: \"Kubeflow Central Dashboard\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "80.http.get.title: \"Kubeflow UI\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
+]

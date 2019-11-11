@@ -1,0 +1,35 @@
+[
+    {
+        "vendor": "Google",
+        "product": "Kubeflow",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"Kubeflow Central Dashboard\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.title:\"Kubeflow UI\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-1203021870",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "80.http.get.title: \"Kubeflow Central Dashboard\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "80.http.get.title: \"Kubeflow UI\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
+]

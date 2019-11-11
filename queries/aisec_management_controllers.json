@@ -1,0 +1,78 @@
+[
+    {
+        "vendor": "NVIDIA",
+        "product": "DGX-1 Baseboard Management Controller",
+        "shodan_queries": [
+            {
+                "query": "\"Content-Length: 1820\" lighttpd port:443",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "NVIDIA",
+        "product": "NVIDIA DGX-2 Baseboard Management Controller",
+        "shodan_queries": [
+            {
+                "query": "ssl:\"American Megatrends Inc\" http.html:\"index.html\" \"Server: lighttpd\" port:\"443\" \"200 OK\" \"unsafe-inline\" \"Content-Length: 1249\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl:\"American Megatrends Inc\" \"Content-Length: 1249\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "443.https.get.title: \"NVIDIA DGX-2\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"DGX-2\" AND \"COPYRIGHT American Megatrends Inc. 2016-2017\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Quanta Cloud Technology",
+        "product": "QCT Baseboard Management Controller",
+        "shodan_queries": [
+            {
+                "query": "\"Content-Length: 1901\" lighttpd port:443",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl:\"quantatw.com\" lighttpd",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl.cert.issuer.CN:\"Quanta\" port:\"443\" all:\"lighttpd\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "443.https.get.body_sha256: fd2d03b750513363f8761dfafcbf9a0a20811204cb965a3373c5c1ca13457988",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
+]

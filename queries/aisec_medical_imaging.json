@@ -1,0 +1,24 @@
+[
+    {
+        "vendor": "NVIDIA",
+        "product": "NVIDIA AI Annotation Assistance server",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"NVIDIA AIAA Server documentation\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:816615992 http.component:\"google font api\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
+]

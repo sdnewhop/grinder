@@ -1,0 +1,28 @@
+[
+    {
+        "vendor": "XMRPool",
+        "product": "XMRPool",
+        "shodan_queries": [
+            {
+                "query": "all:\"hashes_total\" port:5555",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"hashes_total\" \"application/json\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "nvidia all:\"hashes_total\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
+]

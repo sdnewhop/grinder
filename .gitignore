@@ -8,6 +8,7 @@ results/
 map/static/data
 database.db
 .idea/
+old_databases/
 
 # Tests files
 tests/test_data/test_database

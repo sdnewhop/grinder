@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+from matplotlib import use as mpl_use
+from sys import platform
+from os import environ
+
+# Fix possible problems with Mac OS X venv backend
+if platform == "darwin":
+    mpl_use("TkAgg")
+    environ.update({"TK_SILENCE_DEPRECATION": "1"})
+
 from matplotlib import pyplot as plot
 
 from grinder.decorators import exception_handler

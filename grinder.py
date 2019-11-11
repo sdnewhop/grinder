@@ -70,6 +70,7 @@ if __name__ == "__main__":
         core.count_unique_entities("country")
         core.count_unique_entities("vulnerability")
         core.count_unique_entities("continent")
+        core.count_unique_entities("organization")
     if args.vulners_report:
         core.vulners_report()
     if args.update_markers:

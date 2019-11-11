@@ -1,0 +1,23 @@
+[
+    {
+        "vendor": "Test Vendor",
+        "product": "Test Product",
+        "shodan_queries": [
+            {
+                "query_confidence": "certain"
+            }
+
+        ],
+        "censys_queries": [
+            {
+                "query_confidence": "certain"
+            }
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
+]

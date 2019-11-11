@@ -54,6 +54,15 @@ def setup_module() -> None:
     global nm
     nm = NmapConnector()
 
+    global empty_nm
+    empty_nm = NmapConnector()
+
+    global nm_v4
+    nm_v4 = NmapConnector()
+
+    global nm_v6
+    nm_v6 = NmapConnector()
+
 
 def teardown_module() -> None:
     """
@@ -91,14 +100,14 @@ def test_nmapconnector_scan_ipv4() -> None:
     Check if we can successfully scan 127.0.0.1 host
     :return:
     """
-    nm.scan(
+    nm_v4.scan(
         host=NmapTestDefaultValues.HOST4,
         arguments=DefaultNmapScanValues.ARGUMENTS,
         ports=str(NmapTestDefaultValues.PORT4),
     )
 
     assert (
-        nm.get_results()
+        nm_v4.get_results()
         .get(NmapTestDefaultValues.HOST4)
         .get("tcp")
         .get(NmapTestDefaultValues.PORT4, False)
@@ -110,14 +119,14 @@ def test_nmapconnector_scan_ipv6() -> None:
     Check if we can successfully scan ::1 host
     :return:
     """
-    nm.scan(
+    nm_v6.scan(
         host=NmapTestDefaultValues.HOST6,
         arguments=DefaultNmapScanValues.ARGUMENTS,
         ports=str(NmapTestDefaultValues.PORT6),
     )
 
     assert (
-        nm.get_results()
+        nm_v6.get_results()
         .get(NmapTestDefaultValues.HOST6)
         .get("tcp")
         .get(NmapTestDefaultValues.PORT6, False)
@@ -155,15 +164,35 @@ def test_nmpaconnector_scan_bad_argument() -> None:
     """
     with raises(NmapConnectorScanError) as scan_error:
         nm.scan(host=NmapTestDefaultValues.HOST4, arguments="--bad-argument")
-    assert "nmap: unrecognized option '--bad-argument'" in str(scan_error.value)
+    assert "nmap: unrecognized option" in str(scan_error.value) \
+           and "--bad-argument" in str(scan_error.value)
 
 
-def test_nmapconnector_get_results() -> None:
+def test_nmapconnector_get_results_ipv4() -> None:
     """
-    Check if we can successfully get NmapConnector scan results
+    Check if we can successfully get NmapConnector
+    scan results for IPv4
     :return:
     """
-    nm.get_results()
+    assert nm_v4.get_results()
+
+
+def test_nmapconnector_get_results_ipv6() -> None:
+    """
+    Check if we can successfully get NmapConnector
+    scan results for IPv6
+    :return:
+    """
+    assert nm_v6.get_results()
+
+
+def test_nmapconnector_get_results_with_default_values() -> None:
+    """
+    Check if we can successfully get scan results
+    from NmapConnector with default values
+    :return:
+    """
+    assert empty_nm.get_results() == {}
 
 
 def test_nmapconnector_get_results_error() -> None:
@@ -182,12 +211,31 @@ def test_nmapconnector_get_results_error() -> None:
         )
 
 
-def test_nmapconnector_get_results_count() -> None:
+def test_nmapconnector_get_results_count_ipv4() -> None:
     """
-    Check if we can successfully get NmapConnector scan results
+    Check if we can successfully get the count of
+    NmapConnector scan results for IPv4
     :return:
     """
-    nm.get_results_count()
+    nm_v4.get_results_count()
+
+
+def test_nmapconnector_get_results_count_ipv6() -> None:
+    """
+    Check if we can successfully get the count of
+    NmapConnector scan results for IPv6
+    :return:
+    """
+    nm_v6.get_results_count()
+
+
+def test_nmapconnector_get_results_count_with_default_values() -> None:
+    """
+    Check if we can successfully get scan results
+    from NmapConnector with default values
+    :return:
+    """
+    assert empty_nm.get_results_count() == 0
 
 
 def test_nmapconnector_get_results_count_error() -> None:

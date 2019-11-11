@@ -243,7 +243,7 @@ class GrinderCore:
         :param entity_name: name of entity
         :return: modified entity name
         """
-        if entity_name.lower() in ["continent", "port", "product", "vendor"]:
+        if entity_name.lower() in ["continent", "port", "product", "vendor", "organization"]:
             return entity_name + "s"
         elif entity_name.lower() in ["country", "vulnerability"]:
             return entity_name[:-1] + "ies"

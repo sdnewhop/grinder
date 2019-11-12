@@ -217,7 +217,7 @@ def test_nmapconnector_get_results_count_ipv4() -> None:
     NmapConnector scan results for IPv4
     :return:
     """
-    nm_v4.get_results_count()
+    assert nm_v4.get_results_count()
 
 
 def test_nmapconnector_get_results_count_ipv6() -> None:
@@ -226,7 +226,7 @@ def test_nmapconnector_get_results_count_ipv6() -> None:
     NmapConnector scan results for IPv6
     :return:
     """
-    nm_v6.get_results_count()
+    assert nm_v6.get_results_count()
 
 
 def test_nmapconnector_get_results_count_with_default_values() -> None:

@@ -1,25 +1,31 @@
+FROM maven:3.6.1-jdk-8 AS tls-scanner-build
+
+RUN git clone --depth=1 https://github.com/RUB-NDS/TLS-Attacker.git && \
+	git clone --depth=1 --recurse-submodules https://github.com/RUB-NDS/TLS-Scanner.git && \
+	(cd /TLS-Attacker/ && mvn clean install -DskipTests=true) && \
+	(cd /TLS-Scanner/ && mvn clean install -DskipTests=true)
+
+
 FROM python:3.6-alpine
 
-RUN apk update && apk upgrade
-RUN apk add --no-cache nmap nmap-scripts
-RUN apk add --no-cache libpng freetype libstdc++ pkgconfig
-RUN apk add --no-cache --virtual .build-deps gcc build-base python-dev libpng-dev musl-dev freetype-dev
-RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
+COPY . /app/
+COPY --from=tls-scanner-build /TLS-Scanner/apps /app/TLS-Scanner/apps
 
-COPY requirements.txt /code/requirements.txt
-RUN pip install -r /code/requirements.txt
+WORKDIR /app
 
-RUN apk del .build-deps
+RUN apk update && apk upgrade && \
+	apk add --no-cache nmap nmap-scripts && \
+	apk add --no-cache libpng freetype libstdc++ pkgconfig openjdk8 && \
+	apk add --no-cache --virtual .build-deps gcc build-base python-dev libpng-dev musl-dev freetype-dev && \
+	ln -s /usr/include/locale.h /usr/include/xlocale.h && \
+	pip install --no-cache-dir -r /app/requirements.txt && \
+	apk del .build-deps && \
+	ln -s /app/grinder.py /usr/local/bin/grinder && \
+	mkdir -p /app/results/ && \
+	mkdir -p /app/map/static/data/
 
-ENV PYTHONPATH="/code"
-COPY custom_scripts/ /code/custom_scripts/
-COPY grinder/ /code/grinder/
-COPY map/ /code/map/
-COPY plugins/ /code/plugins/
-COPY queries/ /code/queries/
-COPY tests/ /code/tests/
-COPY grinder.py /code/grinder.py
-RUN mkdir /code/results/
+ENV PYTHONPATH="/app"
 
-WORKDIR /code
-ENTRYPOINT ["python3", "/code/grinder.py"]
+EXPOSE 5000
+
+ENTRYPOINT ["/bin/sh", "/app/docker-grinder-wrapper.sh"]

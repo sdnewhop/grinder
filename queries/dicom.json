@@ -89,7 +89,7 @@
             },
             {
                 "query": "port:4242",
-                "query_confidence": "certain"
+                "query_confidence": "tentative"
             }
         ],
         "censys_queries": [],

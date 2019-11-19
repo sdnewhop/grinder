@@ -5,6 +5,7 @@ from pathlib import Path
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
 from grinder.errors import GrinderScriptExecutorRunScriptError
+from grinder import example
 
 
 class PyScriptExecutor:

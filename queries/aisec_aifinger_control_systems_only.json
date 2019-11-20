@@ -1,0 +1,467 @@
+[
+    {
+        "vendor": "Deeplearning4j",
+        "product": "Deeplearning4j",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"DL4J Training UI\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-165549574",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "FedAI",
+        "product": "FATE",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"FATE Board\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"FATE\" \"Content-Length: 2831\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "8080.http.get.title: \"FATE Board\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"FATE\" AND 8080.http.get.headers.content_length: 2831",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "NVIDIA",
+        "product": "NVIDIA AI Annotation Assistance server",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"NVIDIA AIAA Server documentation\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:816615992 http.component:\"google font api\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "NVIDIA",
+        "product": "NVIDIA DGX-1 Baseboard Management Controller",
+        "shodan_queries": [
+            {
+                "query": "\"Content-Length: 1820\" lighttpd port:443",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "NVIDIA",
+        "product": "NVIDIA DGX-2 Baseboard Management Controller",
+        "shodan_queries": [
+            {
+                "query": "ssl:\"American Megatrends Inc\" http.html:\"index.html\" \"Server: lighttpd\" port:\"443\" \"200 OK\" \"unsafe-inline\" \"Content-Length: 1249\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl:\"American Megatrends Inc\" \"Content-Length: 1249\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "443.https.get.title: \"NVIDIA DGX-2\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"DGX-2\" AND \"COPYRIGHT American Megatrends Inc. 2016-2017\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Quanta Cloud Technology",
+        "product": "QCT Baseboard Management Controller",
+        "shodan_queries": [
+            {
+                "query": "\"Content-Length: 1901\" lighttpd port:443",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl:\"quantatw.com\" lighttpd",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "ssl.cert.issuer.CN:\"Quanta\" port:\"443\" all:\"lighttpd\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "443.https.get.body_sha256: fd2d03b750513363f8761dfafcbf9a0a20811204cb965a3373c5c1ca13457988",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Open Neural Network Exchange",
+        "product": "Open Neural Network Exchange",
+        "shodan_queries": [
+            {
+                "query": "all:\"ONNX\" \"Server: Werkzeug\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "http.html:\"onnx.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"onnx.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"myOnnxSession\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"onnx.min.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"myOnnxSession\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Oracle",
+        "product": "GraphPipe",
+        "shodan_queries": [
+            {
+                "query": "all:\"GraphPipe\"",
+                "query_confidence": "tentative"
+            },
+            {
+                "query": "http.html:\"graphpipe-tf\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "http.html:\"graphpipe-batcher\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "firm"
+    },
+    {
+        "vendor": "Amazon",
+        "product": "Greengrass",
+        "shodan_queries": [
+            {
+                "query": "all:\"greengrass\" org:\"Amazon.com\"",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "tentative"
+    },
+    {
+        "vendor": "MLFlow",
+        "product": "MLFlow",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"MLflow\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-1507094812",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "80.http.get.title: \"MLflow\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Google",
+        "product": "Kubeflow",
+        "shodan_queries": [
+            {
+                "query": "all:\"Kubeflow\" -\"404\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.title:\"Kubeflow Central Dashboard\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.title:\"Kubeflow UI\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-1203021870",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "80.http.get.title: \"Kubeflow Central Dashboard\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "80.http.get.title: \"Kubeflow UI\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Google Brain",
+        "product": "TensorFlow",
+        "shodan_queries": [
+            {
+                "query": "tensorflow \"Server: TornadoServer\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "8888.http.get.headers.server: TornadoServer OR 80.http.get.headers.server: TornadoServer OR 443.http.get.headers.server: TornadoServer OR 8080.http.get.headers.server: TornadoServer",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Google Brain",
+        "product": "TensorBoard",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"2016 The TensorFlow Authors\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"2017 The TensorFlow Authors\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"TensorFlow Authors\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"tensorboard\" \"Server: Werkzeug\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"tensorflow\" \"Server: Werkzeug\" \"python\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.title:\"TensorBoard\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "all:\"TensorFlow\" port:\"6006\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "\"2016 The TensorFlow Authors\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"2017 The TensorFlow Authors\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "80.http.get.title: \"TensorBoard\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Berkeley Vision and Learning Center",
+        "product": "Caffe",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"Caffe version:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.html:\"Caffe flavor:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"Caffe version:\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"Caffe flavor:\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "Caffe server: python",
+                "query_confidence": "tentative"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "80.http.get.body: \"Caffe flavor:\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "80.http.get.body: \"Caffe version:\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "firm"
+    },
+    {
+        "vendor": "NVIDIA Corporation",
+        "product": "DIGITS",
+        "shodan_queries": [
+            {
+                "query": "http.html:\"/static/js/digits.js\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"/static/js/digits.js\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"https://developer.nvidia.com/digits\"",
+                "query_confidence": "firm"
+            },
+            {
+                "query": "\"DIGITS version: \" nvidia",
+                "query_confidence": "firm"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "80.http.get.title: \"DIGITS\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "80.http.get.body_sha256: 86967845b3c54aee52a94f2193eec3a0faaf98ed97a183b0910c063a599736ec",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Apache",
+        "product": "Apache MXNET",
+        "shodan_queries": [
+            {
+                "query": "apache http.html:\"mxnet\"",
+                "query_confidence": "firm"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "apache AND (443.https.get.body: \"mxnet\" OR 80.http.get.body: \"mxnet\")",
+                "query_confidence": "firm"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    }
+]

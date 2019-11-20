@@ -1,5 +1,56 @@
 [
     {
+        "vendor": "Deeplearning4j",
+        "product": "Deeplearning4j",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"DL4J Training UI\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "http.favicon.hash:-165549574",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "FedAI",
+        "product": "FATE",
+        "shodan_queries": [
+            {
+                "query": "http.title:\"FATE Board\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "all:\"FATE\" \"Content-Length: 2831\"",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "8080.http.get.title: \"FATE Board\"",
+                "query_confidence": "certain"
+            },
+            {
+                "query": "\"FATE\" AND 8080.http.get.headers.content_length: 2831",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "",
+            "nse_script": ""
+        },
+        "vendor_confidence": "certain"
+    },
+    {
         "vendor": "NVIDIA",
         "product": "NVIDIA AI Annotation Assistance server",
         "shodan_queries": [

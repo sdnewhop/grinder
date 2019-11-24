@@ -10,11 +10,6 @@ class HTTPServer6(HTTPServer):
 
 
 def setup_module(host_v4, port_v4, host_v6, port_v6) -> None:
-    """
-    Initialize HTTPServer for test NmapConnector scanning
-    and NmapConnector for various tests
-    :return:
-    """
     global server_v4
     server_v4 = HTTPServer(
         (host_v4, port_v4),

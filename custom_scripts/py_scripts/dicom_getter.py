@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 from pynetdicom import AE, QueryRetrievePresentationContexts
-from pydicom.dataset import Dataset
-from pprint import pprint
 
 
 class DicomGetter:
@@ -34,23 +32,24 @@ class DicomGetter:
         """
         self.ip, self.port = ip, port
 
-    def get_server_properties(self):
+    def get_server_properties(self) -> list or dict:
         """
         Get DICOM server properties
-        :return: None
+        :return: list with properties
         """
         association = self.ae.associate(self.ip, self.port)
         if not association.is_established:
-            return
+            return {
+                "error": "can not get server properties, association is not established"
+            }
+        if not association.accepted_contexts:
+            return {"error": "accepted contexts is empty"}
         for context in association.accepted_contexts:
-            try:
-                transfer_syntaxes = [
-                    syntax.name
-                    for syntax in context.transfer_syntax
-                    if context.transfer_syntax
-                ] or []
-            except:
-                transfer_syntaxes = []
+            transfer_syntaxes = [
+                syntax.name
+                for syntax in context.transfer_syntax
+                if context.transfer_syntax
+            ] or []
             context_data = {
                 "Abstract Syntax": context.abstract_syntax.name,
                 "Transfer Syntax(es)": transfer_syntaxes,
@@ -78,3 +77,15 @@ def main(host_info: dict) -> list or dict:
         return dicom_getter.get_server_properties()
     except Exception as unexp_err:
         return {"error": str(unexp_err)}
+
+
+if __name__ == "__main__":
+    dicom_getter = DicomGetter()
+    dicom_getter.set_host("0.0.0.0", 104)
+    dicom_getter.set_request_context(QueryRetrievePresentationContexts)
+    results = dicom_getter.get_server_properties()
+    if isinstance(results, list):
+        for context in results:
+            print(context.get("String Representation"))
+    else:
+        print(results)

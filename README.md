@@ -42,9 +42,9 @@ Required to collect hosts, both free and full accounts are suitable. Also, it's 
 Required to make additional reports on vulnerabilities and exploits. If this feature is not required for you, you can use Grinder without Vulners account.
 - [Nmap Security Scanner 7.60+](https://nmap.org/download.html)  
 Version 7.60 and newer has been tested with currently used in Grinder scripts (ssl-cert.nse, vulners.nse, etc.).
-- [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker)  
-Required only for TLS scanning. Version 3.0 has been tested.
-- [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner)  
+- [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/tree/3.0)  
+Required only for TLS scanning.
+- [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/tree/2.9)  
 Required only for TLS scanning.
 ## Current Features
 ### Already Implemented

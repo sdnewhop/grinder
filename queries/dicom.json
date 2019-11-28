@@ -1,6 +1,6 @@
 [
     {
-        "vendor": "DICOM",
+        "vendor": "DICOM Server",
         "product": "DICOM Server",
         "shodan_queries": [
             {
@@ -38,7 +38,7 @@
         ],
         "censys_queries": [],
         "scripts": {
-            "py_script": "",
+            "py_script": "dicom_getter.py",
             "nse_script": ""
         },
         "vendor_confidence": "certain"

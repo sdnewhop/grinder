@@ -65,7 +65,7 @@ from grinder.nmapprocessmanager import NmapProcessingManager
 from grinder.plots import GrinderPlots
 from grinder.shodanconnector import ShodanConnector
 from grinder.utils import GrinderUtils
-from grinder.pyscriptexecutor import PyScriptExecutor
+from grinder.pyscriptexecutor import PyProcessingManager
 from grinder.nmapscriptexecutor import NmapScriptExecutor
 from grinder.tlsscanner import TlsScanner
 from grinder.tlsparser import TlsParser
@@ -1327,8 +1327,68 @@ class GrinderCore:
             )
         )
 
+    def _run_nse_scripts(self) -> None:
+        """
+        Run Nmap scripts per host
+
+        :return: None
+        """
+        # Search for compatible script
+        results_len = len(self.combined_results.keys())
+        for index, (ip, host_info) in enumerate(self.combined_results.items()):
+            scripts = None
+            for product in self.queries_file:
+                if (product.get("vendor"), product.get("product")) == (
+                    host_info.get("vendor"),
+                    host_info.get("product"),
+                ):
+                    scripts = product.get("scripts")
+                    break
+            if not scripts:
+                continue
+
+            cur_position = f"{index}/{results_len}"
+            nse_script = scripts.get("nse_script")
+            if nse_script:
+                nse_script_res = NmapScriptExecutor.run_script(host_info, nse_script)
+                if not nse_script_res:
+                    print(f"[{cur_position}] [NseExecutor: Empty output] Script {nse_script} done for {ip}")
+                else:
+                    print(
+                        f"[{cur_position}] [NseExecutor: Successful] Script {nse_script} done for {ip}"
+                    )
+                    if nse_script_res:
+                        self.combined_results[ip]["scripts"][
+                            "nse_script"
+                        ] = nse_script_res
+
+    def _run_py_scripts(self) -> None:
+        """
+        Run python scripts in batch mode
+
+        :return: None
+        """
+        # Reduce original queries to smaller dict with scripts
+        py_scripts_per_product = {f"{product.get('vendor')}:{product.get('product')}":
+                                  product.get('scripts', {}).get('py_script')
+                                  for product in self.queries_file
+                                  if product.get('scripts', {}).get('py_script')}
+        # Compare ips to required scripts
+        py_ip_script_mapping = dict()
+        for ip, host_info in self.combined_results.items():
+            compatible_script = py_scripts_per_product.get(f"{host_info.get('vendor')}:{host_info.get('product')}")
+            if not compatible_script:
+                continue
+            py_ip_script_mapping.update({ip: compatible_script})
+        # Run scripts
+        py_runner = PyProcessingManager(py_ip_script_mapping, self.combined_results)
+        py_runner.start()
+        scripts_results = py_runner.get_results()
+        for ip, result in scripts_results.items():
+            self.combined_results[ip]["scripts"]["py_script"] = result
+
     @exception_handler(expected_exception=GrinderCoreRunScriptsError)
-    def run_scripts(self, queries_filename: str):
+    def run_scripts(self, queries_filename: str) -> None:
         """
         Initiate script execution
 
@@ -1348,46 +1408,8 @@ class GrinderCore:
                 )
                 return
 
-        # Search for compatible script
-        results_len = len(self.combined_results.keys())
-        for index, (ip, host_info) in enumerate(self.combined_results.items()):
-            scripts = None
-            for product in self.queries_file:
-                if (product.get("vendor"), product.get("product")) == (
-                    host_info.get("vendor"),
-                    host_info.get("product"),
-                ):
-                    scripts = product.get("scripts")
-                    break
-            if not scripts:
-                continue
-
-            cur_position = f"{index}/{results_len}"
-            py_script = scripts.get("py_script")
-            if py_script:
-                py_script_res = PyScriptExecutor.run_script(host_info, py_script)
-                if not py_script_res:
-                    print(f"[{cur_position}] [PyExecutor: Empty output] Script {py_script} done for {ip}")
-                else:
-                    print(f"[{cur_position}] [PyExecutor: Successful] Script {py_script} done for {ip}")
-                    if py_script_res:
-                        self.combined_results[ip]["scripts"][
-                            "py_script"
-                        ] = py_script_res
-
-            nse_script = scripts.get("nse_script")
-            if nse_script:
-                nse_script_res = NmapScriptExecutor.run_script(host_info, nse_script)
-                if not nse_script_res:
-                    print(f"[{cur_position}] [NseExecutor: Empty output] Script {nse_script} done for {ip}")
-                else:
-                    print(
-                        f"[{cur_position}] [NseExecutor: Successful] Script {nse_script} done for {ip}"
-                    )
-                    if nse_script_res:
-                        self.combined_results[ip]["scripts"][
-                            "nse_script"
-                        ] = nse_script_res
+        self._run_nse_scripts()
+        self._run_py_scripts()
 
     @staticmethod
     def __separate_filename_wo_extension(original_filepath: str) -> str:

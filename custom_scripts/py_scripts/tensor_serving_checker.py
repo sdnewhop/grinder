@@ -11,10 +11,7 @@ def main(host_info: dict, timeout: int = 3) -> dict:
     :param timeout: host timeout
     :return: dictionary with status and data
     """
-    output = {
-        "html": "",
-        "status": ""
-    }
+    output = {"html": "", "status": ""}
 
     try:
         url = f"http://{host_info.get('ip')}:{host_info.get('port')}/v1/models"
@@ -33,8 +30,5 @@ def main(host_info: dict, timeout: int = 3) -> dict:
 
 
 if __name__ == "__main__":
-    host_info = {
-        "ip": "localhost",
-        "port": 8501
-    }
+    host_info = {"ip": "localhost", "port": 8501}
     print(main(host_info))

@@ -183,6 +183,21 @@ class GrinderInterface:
             help="Initiate custom scripts additional checks",
         )
         parser.add_argument(
+            "-scw",
+            "--script-workers",
+            action="store",
+            type=int,
+            default=10,
+            help="Number of script checking workers"
+        )
+        parser.add_argument(
+            "-scm",
+            "--script-mute",
+            action="store_true",
+            default=False,
+            help="Suppress scripts output (stdout, stderr)"
+        )
+        parser.add_argument(
             "-vc",
             "--vendor-confidence",
             action="store",

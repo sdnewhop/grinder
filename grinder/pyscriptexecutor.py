@@ -4,6 +4,7 @@ from multiprocessing import Process, JoinableQueue, Manager
 from os import system
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
+from contextlib import redirect_stdout, redirect_stderr
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
@@ -22,9 +23,10 @@ class PyProcessing(Process):
     """
     Create custom python script process
     """
-    def __init__(self, queue: JoinableQueue):
+    def __init__(self, queue: JoinableQueue, mute: bool = False):
         Process.__init__(self)
         self.queue = queue
+        self.mute = mute
 
     @staticmethod
     @exception_handler(expected_exception=GrinderScriptExecutorRunScriptError)
@@ -46,6 +48,17 @@ class PyProcessing(Process):
             module = SourceFileLoader("main", str(full_path)).load_module()
             return module.main(host_info)
 
+    def _exec_mute_switcher(self, host_info: dict, py_script: str) -> any:
+        """
+        Check do we need stdout/stderr or not
+
+        :return: result of script execution
+        """
+        if not self.mute:
+            return self._exec_script(host_info, py_script)
+        with redirect_stderr(None), redirect_stdout(None):
+            return self._exec_script(host_info, py_script)
+
     def run(self) -> None:
         """
         Run custom python script
@@ -54,7 +67,12 @@ class PyProcessing(Process):
         """
         while True:
             current_progress, host_info, py_script = self.queue.get()
-            result = self._exec_script(host_info, py_script)
+            try:
+                result = self._exec_mute_switcher(host_info=host_info, py_script=py_script)
+            except GrinderScriptExecutorRunScriptError as unexp_script_error:
+                print(f"Caught error on host {host_info.get('ip')}:{host_info.get('port')}: {str(unexp_script_error)}")
+                self.queue.task_done()
+                continue
             PyProcessingResults.RESULTS.update({host_info.get("ip"): result})
             print(f"Host {current_progress[0]}/{current_progress[1]} ({current_progress[2]}): "
                   f"script \"{py_script}\" done for {host_info.get('ip')}:{host_info.get('port')}")
@@ -62,15 +80,16 @@ class PyProcessing(Process):
 
 
 class PyProcessingManager:
-    def __init__(self, ip_script_mapping: dict, hosts_info: dict, workers: int = 100):
+    def __init__(self, ip_script_mapping: dict, hosts_info: dict, workers: int = 100, mute: bool = False):
         self.ip_script_mapping = ip_script_mapping
         self.hosts_info = hosts_info
         self.workers = workers
+        self.mute = mute
 
     def organize_processes(self) -> None:
         queue = JoinableQueue()
         for _ in range(self.workers):
-            process = PyProcessing(queue)
+            process = PyProcessing(queue, mute=self.mute)
             process.daemon = True
             process.start()
         hosts_length = len(self.hosts_info)

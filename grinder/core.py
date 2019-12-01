@@ -20,6 +20,7 @@ from grinder.defaultvalues import (
     DefaultValues,
     DefaultNmapScanValues,
     DefaultVulnersScanValues,
+    DefaultScriptCheckerValues,
 )
 from grinder.errors import (
     GrinderCoreSearchError,
@@ -1327,10 +1328,12 @@ class GrinderCore:
             )
         )
 
-    def _run_nse_scripts(self) -> None:
+    def __run_nse_scripts(self, workers: int, mute: bool) -> None:
         """
         Run Nmap scripts per host
 
+        :param workers: quantity of processes to scan with (placeholder for now)
+        :param mute: suppress stdout/stderr output or not (placeholder for now)
         :return: None
         """
         # Search for compatible script
@@ -1362,17 +1365,20 @@ class GrinderCore:
                             "nse_script"
                         ] = nse_script_res
 
-    def _run_py_scripts(self) -> None:
+    def __run_py_scripts(self, workers: int, mute: bool) -> None:
         """
         Run python scripts in batch mode
 
+        :param workers: quantity of processes to scan with
+        :param mute: suppress stdout/stderr output or not
         :return: None
         """
         # Reduce original queries to smaller dict with scripts
-        py_scripts_per_product = {f"{product.get('vendor')}:{product.get('product')}":
+        py_scripts_per_product = {f"{product.get('vendor', 'unknown')}:{product.get('product', 'unknown')}":
                                   product.get('scripts', {}).get('py_script')
                                   for product in self.queries_file
                                   if product.get('scripts', {}).get('py_script')}
+
         # Compare ips to required scripts
         py_ip_script_mapping = dict()
         for ip, host_info in self.combined_results.items():
@@ -1380,23 +1386,46 @@ class GrinderCore:
             if not compatible_script:
                 continue
             py_ip_script_mapping.update({ip: compatible_script})
+
         # Run scripts
-        py_runner = PyProcessingManager(py_ip_script_mapping, self.combined_results)
+        py_runner = PyProcessingManager(ip_script_mapping=py_ip_script_mapping,
+                                        hosts_info=self.combined_results,
+                                        workers=workers,
+                                        mute=mute)
         py_runner.start()
         scripts_results = py_runner.get_results()
+
+        # Store retrieved results
         for ip, result in scripts_results.items():
             self.combined_results[ip]["scripts"]["py_script"] = result
 
     @exception_handler(expected_exception=GrinderCoreRunScriptsError)
-    def run_scripts(self, queries_filename: str) -> None:
+    def run_scripts(self,
+                    queries_filename: str,
+                    workers: int = DefaultScriptCheckerValues.WORKERS,
+                    mute: bool = False) -> None:
         """
         Initiate script execution
 
         :param queries_filename: name of json file with input data
             such as queries (shodan_queries, censys_queries, etc.)
+        :param workers: quantity of workers to use with scripts
+        :param mute: suppress stdout/stderr output or not
         :return None
         """
         cprint("Start Custom Scripts scanning", "blue", attrs=["bold"])
+        self.__check_if_queryfile_loaded(queries_filename)
+        self.__run_nse_scripts(workers, mute)
+        self.__run_py_scripts(workers, mute)
+
+    def __check_if_queryfile_loaded(self, queries_filename: str) -> None:
+        """
+        Check if file with queries successfully loaded
+
+        :param queries_filename: name of file with queries to load if
+            current is empty
+        :return: None
+        """
         if not self.queries_file:
             try:
                 self.queries_file = self.filemanager.get_queries(
@@ -1407,9 +1436,6 @@ class GrinderCore:
                     "Oops! File with queries was not found. Create it or set name properly."
                 )
                 return
-
-        self._run_nse_scripts()
-        self._run_py_scripts()
 
     @staticmethod
     def __separate_filename_wo_extension(original_filepath: str) -> str:

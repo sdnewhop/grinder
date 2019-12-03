@@ -3,7 +3,7 @@
 pwd=$(pwd)
 
 if [ ! -e database.db ]; then
-	touch ${pwd}/database.db
+	touch ./database.db
 fi
 
 mkdir -p ./results/

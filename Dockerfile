@@ -1,17 +1,19 @@
-FROM maven:3.6.1-jdk-8 AS tls-scanner-build
+# TLS Scanner build container --------------------------------------------------
 
-RUN git clone --depth=1 https://github.com/RUB-NDS/TLS-Attacker.git && \
-	git clone --depth=1 --recurse-submodules https://github.com/RUB-NDS/TLS-Scanner.git && \
+FROM maven:3-jdk-8 AS tls-scanner-build
+
+RUN git clone --depth=1 --branch '3.1' https://github.com/RUB-NDS/TLS-Attacker.git && \
+	git clone --depth=1 --recurse-submodules --branch '2.9' https://github.com/RUB-NDS/TLS-Scanner.git && \
 	(cd /TLS-Attacker/ && mvn clean install -DskipTests=true) && \
 	(cd /TLS-Scanner/ && mvn clean install -DskipTests=true)
 
 
-FROM python:3.6-alpine
+# Grinder ----------------------------------------------------------------------
+
+FROM python:3.7-alpine
 
 COPY . /app/
 COPY --from=tls-scanner-build /TLS-Scanner/apps /app/TLS-Scanner/apps
-
-WORKDIR /app
 
 RUN apk update && apk upgrade && \
 	apk add --no-cache nmap nmap-scripts && \
@@ -23,6 +25,8 @@ RUN apk update && apk upgrade && \
 	ln -s /app/grinder.py /usr/local/bin/grinder && \
 	mkdir -p /app/results/ && \
 	mkdir -p /app/map/static/data/
+
+WORKDIR /app
 
 ENV PYTHONPATH="/app"
 

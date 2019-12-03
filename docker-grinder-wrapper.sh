@@ -10,6 +10,7 @@ flask run --host=$host --port=$port >& /dev/null &
 flask_pid=$!
 cd ..
 
+echo -e "\e[1mWelcome to\e[0m"
 ./grinder.py -h
 
 sh

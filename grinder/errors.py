@@ -474,11 +474,6 @@ class GrinderPlotsSavePieChartError(GrinderPlotsException):
         super().__init__(error_args)
 
 
-class GrinderPlotsAdjustAutopctError(GrinderPlotsException):
-    def __init__(self, error_args: Exception or str):
-        super().__init__(error_args)
-
-
 class GrinderPlotsCreatePieChartError(GrinderPlotsException):
     def __init__(self, error_args: Exception or str):
         super().__init__(error_args)

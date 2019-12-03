@@ -14,7 +14,6 @@ from matplotlib import pyplot as plot
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultPlotValues, DefaultValues
 from grinder.errors import (
-    GrinderPlotsAdjustAutopctError,
     GrinderPlotsCreatePieChartError,
     GrinderPlotsSavePieChartError,
 )
@@ -47,21 +46,6 @@ class GrinderPlots:
                 sub_dir=relative_path,
             )
             self.plot.close()
-
-    @exception_handler(expected_exception=GrinderPlotsAdjustAutopctError)
-    def __adjust_autopct(self, values: list):
-        """
-        Percents adjuster to show on plot
-        :param values: values to adjust
-        :return: function of adjustment
-        """
-
-        def percent_and_count(pct):
-            total = sum(values)
-            val = int(round(pct * total / 100.0))
-            return f"{pct:1.1f}%\n({val:d})"
-
-        return percent_and_count
 
     @exception_handler(expected_exception=GrinderPlotsCreatePieChartError)
     def create_pie_chart(self, results: dict, suptitle: str) -> None:

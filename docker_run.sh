@@ -4,7 +4,7 @@ usage() {
 	echo "Usage: $(basename $0) [--cpus <quantity-of-cpu>] [-h | --help]"
 }
 
-user_cpu_count=0
+user_cpu_count=1
 cpu_count=0
 pwd=$(pwd)
 
@@ -19,9 +19,10 @@ done
 case "$(uname)" in
 	"Linux") cpu_count=$(grep -c 'processor' /proc/cpuinfo) ;;
 	"Darwin") cpu_count=$(sysctl -n hw.logicalcpu) ;;
+	*) cpu_count=1 ;;
 esac
 
-if [ $user_cpu_count -gt $cpu_count ]; then
+if [ $user_cpu_count -gt $cpu_count || $cpu_count -eq 1 ]; then
 	user_cpu_count=$cpu_count
 fi
 

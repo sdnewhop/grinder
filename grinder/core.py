@@ -419,6 +419,16 @@ class GrinderCore:
         :return: processed search results
         """
         try:
+            self.__increment_prev_scan_results()
+        except GrinderCoreLoadResultsFromDbError:
+            self.combined_results = {}
+            self.shodan_processed_results = {}
+            self.censys_processed_results = {}
+        else:
+            print("Previous scan for this queries list was successfully loaded from database.")
+            return self.combined_results
+
+        try:
             self.combined_results = self.db.load_last_results()
             self.shodan_processed_results = self.db.load_last_shodan_results()
             self.censys_processed_results = self.db.load_last_censys_results()
@@ -435,6 +445,7 @@ class GrinderCore:
         :return: processed search results
         """
         return self.load_results_from_file() or self.load_results_from_db()
+
 
     @exception_handler(expected_exception=GrinderCoreSaveVulnersResultsError)
     def save_vulners_results(self,
@@ -1142,6 +1153,8 @@ class GrinderCore:
             self.shodan_processed_results[host]["nmap_scan"] = nmap_results.get(host)
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["nmap_scan"] = nmap_results.get(host)
+        for host in self.combined_results.keys():
+            self.combined_results[host]["nmap_scan"] = nmap_results.get(host)
 
     @exception_handler(expected_exception=GrinderCoreVulnersScanError)
     def vulners_scan(

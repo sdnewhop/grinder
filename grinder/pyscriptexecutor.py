@@ -84,33 +84,39 @@ class PyProcessing(Process):
 
         :return: None
         """
-        while True:
-            # Poll with POLLING_RATE interval
-            sleep(PyProcessingValues.POLLING_RATE)
-
-            current_progress, host_info, py_script = self.queue.get()
-            log_progress = (
-                f"[{current_progress[0]}/{current_progress[1]}] ({current_progress[2]})"
-            )
-            log_host = f"{host_info.get('ip')}:{host_info.get('port')}"
-
+        while not self.queue.empty():
             try:
-                result = self._exec_script(host_info=host_info, py_script=py_script)
-            except GrinderScriptExecutorRunScriptError as unexp_script_error:
-                print(
-                    f"{log_progress} -> Caught error on host {log_host}: {str(unexp_script_error)}"
+                current_progress, host_info, py_script = self.queue.get()
+                # Poll with POLLING_RATE interval
+                sleep(PyProcessingValues.POLLING_RATE)
+
+                log_progress = (
+                    f"[{current_progress[0]}/{current_progress[1]}] ({current_progress[2]})"
                 )
+                log_host = f"{host_info.get('ip')}:{host_info.get('port')}"
+
+                try:
+                    result = self._exec_script(host_info=host_info, py_script=py_script)
+                except GrinderScriptExecutorRunScriptError as unexp_script_error:
+                    print(
+                        f"{log_progress} -> Caught error on host {log_host}: {str(unexp_script_error)}"
+                    )
+                    self.queue.task_done()
+                    continue
+                try:
+                    PyProcessingResults.RESULTS.update({host_info.get("ip"): result})
+                except (AttributeError, ConnectionRefusedError):
+                    print(
+                        f"{log_progress} -> Caught manager error on host {log_host}: simultaneous shared-dict call"
+                    )
+                    self.queue.task_done()
+                    continue
+            except:
+                print(f'{log_progress} -> script "{py_script}" crash for {log_host}')
                 self.queue.task_done()
-                continue
-            try:
-                PyProcessingResults.RESULTS.update({host_info.get("ip"): result})
-            except (AttributeError, ConnectionRefusedError):
-                print(
-                    f"{log_progress} -> Caught manager error on host {log_host}: simultaneous shared-dict call"
-                )
-
-            print(f'{log_progress} -> script "{py_script}" done for {log_host}')
-            self.queue.task_done()
+            else:
+                print(f'{log_progress} -> script "{py_script}" done for {log_host}')
+                self.queue.task_done()
 
 
 class PyProcessingManager:

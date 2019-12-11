@@ -198,6 +198,7 @@ def test_censysconnector_get_raw_results(
                 "location.longitude",
                 "ports",
                 "protocols",
+                "autonomous_system.name",
             ]
         )
 
@@ -217,7 +218,7 @@ def test_censysconnector_get_results(
     assert len(results) == 10
     for result in results:
         assert sorted(result.keys()) == sorted(
-            ["ip", "country", "lat", "lng", "port", "proto"]
+            ["org", "ip", "country", "lat", "lng", "port", "proto"]
         )
 
 

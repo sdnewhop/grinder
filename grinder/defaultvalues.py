@@ -55,7 +55,7 @@ class DefaultScriptCheckerValues:
     """
     Default values for script scanners
     """
-    WORKERS = 10
+    WORKERS = 50
 
 
 class DefaultTlsParserValues:

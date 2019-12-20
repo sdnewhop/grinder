@@ -38,7 +38,7 @@ if __name__ == "__main__":
             not_incremental=args.not_incremental
         )
         if args.run
-        else core.load_results()
+        else core.load_results(queries_filename=args.queries_file)
     )
 
     if not search_results:

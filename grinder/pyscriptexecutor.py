@@ -10,7 +10,7 @@ from time import sleep
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
-from grinder.errors import GrinderScriptExecutorRunScriptError
+from grinder.errors import GrinderScriptExecutorRunScriptError, PyScriptExecutorOrganizeProcessesError, PyScriptExecutorRunProcessError
 
 
 class PyProcessingValues:
@@ -79,6 +79,7 @@ class PyProcessing(Process):
             with redirect_stderr(None), redirect_stdout(None):
                 return module.main(host_info)
 
+    @exception_handler(expected_exception=PyScriptExecutorRunProcessError)
     def run(self) -> None:
         """
         Run an additional script in a separate isolated process
@@ -154,6 +155,7 @@ class PyProcessingManager:
         self.workers = workers
         self.mute = mute
 
+    @exception_handler(expected_exception=PyScriptExecutorOrganizeProcessesError)
     def organize_processes(self) -> None:
         """
         Organization of a set of processes and dividing the execution queue between them

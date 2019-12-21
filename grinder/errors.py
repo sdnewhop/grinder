@@ -66,6 +66,19 @@ class NmapProcessingManagerException(Exception):
         return f"Error occured in Nmap Processing Manager module: {self._error_args}"
 
 
+class PyScriptExecutoryProcessingManagerException(Exception):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(self)
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
+
+    def __str__(self):
+        return f"Error occured in Python Script Executor Manager module: {self._error_args}"
+
+
 class GrinderFileManagerException(Exception):
     def __init__(self, error_args: Exception or str):
         super().__init__(self)
@@ -155,6 +168,16 @@ class GrinderScriptExecutor(Exception):
 
     def __str__(self):
         return f"Error occured in Grinder Script Executor module: {self._error_args}"
+
+
+class PyScriptExecutorRunProcessError(PyScriptExecutoryProcessingManagerException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
+
+
+class PyScriptExecutorOrganizeProcessesError(PyScriptExecutoryProcessingManagerException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
 
 
 class GrinderScriptExecutorRunScriptError(GrinderScriptExecutor):

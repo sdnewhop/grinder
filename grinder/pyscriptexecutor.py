@@ -10,7 +10,11 @@ from time import sleep
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
-from grinder.errors import GrinderScriptExecutorRunScriptError, PyScriptExecutorOrganizeProcessesError, PyScriptExecutorRunProcessError
+from grinder.errors import (
+    GrinderScriptExecutorRunScriptError,
+    PyScriptExecutorOrganizeProcessesError,
+    PyScriptExecutorRunProcessError,
+)
 
 
 class PyProcessingValues:
@@ -101,9 +105,7 @@ class PyProcessing(Process):
                 # Poll with POLLING_RATE interval
                 sleep(PyProcessingValues.POLLING_RATE)
 
-                log_progress = (
-                    f"[{current_progress[0]}/{current_progress[1]}] ({current_progress[2]})"
-                )
+                log_progress = f"[{current_progress[0]}/{current_progress[1]}] ({current_progress[2]})"
                 log_host = f"{host_info.get('ip')}:{host_info.get('port')}"
 
                 try:

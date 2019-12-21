@@ -18,6 +18,7 @@ class NmapProcessingDefaultManagerValues:
     """
     Define default manager values
     """
+
     POLLING_RATE = 0.5
     EMPTY_QUEUE_POLLING_RATE = 1.0
 
@@ -41,7 +42,14 @@ class NmapProcessing(Process):
     for us a more flexible way of queue organizing.
     """
 
-    def __init__(self, queue: JoinableQueue, arguments: str, ports: str, sudo: bool, hosts_quantity: int):
+    def __init__(
+        self,
+        queue: JoinableQueue,
+        arguments: str,
+        ports: str,
+        sudo: bool,
+        hosts_quantity: int,
+    ):
         Process.__init__(self)
         self.queue = queue
         self.arguments = arguments
@@ -95,7 +103,9 @@ class NmapProcessing(Process):
 
                 results = nm.get_results()
                 if results.get(host_ip).values():
-                    NmapProcessingResults.RESULTS.update({host_ip: results.get(host_ip)})
+                    NmapProcessingResults.RESULTS.update(
+                        {host_ip: results.get(host_ip)}
+                    )
             except:
                 self.queue.task_done()
             else:
@@ -134,7 +144,9 @@ class NmapProcessingManager:
             queue.put((index, host))
         processes = []
         for _ in range(self.workers):
-            process = NmapProcessing(queue, self.arguments, self.ports, self.sudo, len(self.hosts))
+            process = NmapProcessing(
+                queue, self.arguments, self.ports, self.sudo, len(self.hosts)
+            )
             process.daemon = True
             processes.append(process)
         for process in processes:

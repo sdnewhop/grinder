@@ -1156,6 +1156,7 @@ class GrinderCore:
             self.shodan_processed_results[host]["nmap_scan"] = nmap_results.get(host)
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["nmap_scan"] = nmap_results.get(host)
+        # Trigger to update overall results (shodan + censys as combined results)
         for host in self.combined_results.keys():
             self.combined_results[host]["nmap_scan"] = nmap_results.get(host)
 
@@ -1234,6 +1235,12 @@ class GrinderCore:
             )
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["vulnerabilities"].update(
+                {"vulners_vulnerabilities": hosts_vulners.get(host)}
+            )
+        # Trigger to update combined results, for example, when shodan and censys results
+        # are empty
+        for host in self.combined_results.keys():
+            self.combined_results[host]["vulnerabilities"].update(
                 {"vulners_vulnerabilities": hosts_vulners.get(host)}
             )
 

@@ -38,7 +38,7 @@ if __name__ == "__main__":
             not_incremental=args.not_incremental
         )
         if args.run
-        else core.load_results()
+        else core.load_results(queries_filename=args.queries_file)
     )
 
     if not search_results:
@@ -61,7 +61,11 @@ if __name__ == "__main__":
     if args.tls_scan:
         core.tls_scan(args.tls_scan_path)
     if args.script_check:
-        core.run_scripts(queries_filename=args.queries_file)
+        core.run_scripts(
+            queries_filename=args.queries_file,
+            workers=args.script_workers,
+            mute=args.script_mute,
+        )
     if args.count_unique:
         core.count_unique_entities("product")
         core.count_unique_entities("vendor")

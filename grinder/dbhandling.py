@@ -145,6 +145,14 @@ class GrinderDatabase:
                 ),
             )
 
+    def set_scan_name(self, queries_filename: str) -> None:
+        """
+
+        :param queries_filename:
+        :return:
+        """
+        self.scan_name = queries_filename
+
     @exception_handler(expected_exception=GrinderDatabaseUpdateTimeError)
     def update_end_time(self) -> None:
         """

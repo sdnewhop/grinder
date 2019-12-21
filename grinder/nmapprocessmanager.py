@@ -2,6 +2,7 @@
 
 from multiprocessing import Process, JoinableQueue, Manager
 from os import system
+from time import sleep
 from datetime import datetime
 
 from grinder.decorators import exception_handler
@@ -11,6 +12,15 @@ from grinder.errors import (
 )
 from grinder.nmapconnector import NmapConnector
 from grinder.defaultvalues import DefaultProcessManagerValues
+
+
+class NmapProcessingDefaultManagerValues:
+    """
+    Define default manager values
+    """
+
+    POLLING_RATE = 0.5
+    EMPTY_QUEUE_POLLING_RATE = 1.0
 
 
 class NmapProcessingResults:
@@ -32,12 +42,20 @@ class NmapProcessing(Process):
     for us a more flexible way of queue organizing.
     """
 
-    def __init__(self, queue: JoinableQueue, arguments: str, ports: str, sudo: bool):
+    def __init__(
+        self,
+        queue: JoinableQueue,
+        arguments: str,
+        ports: str,
+        sudo: bool,
+        hosts_quantity: int,
+    ):
         Process.__init__(self)
         self.queue = queue
         self.arguments = arguments
         self.ports = ports
         self.sudo = sudo
+        self.quantity = hosts_quantity
 
     @exception_handler(expected_exception=NmapProcessingRunError)
     def run(self) -> None:
@@ -45,34 +63,53 @@ class NmapProcessing(Process):
         Run Nmap process
         :return: None
         """
-        while True:
-            index, hosts_quantity, host = self.queue.get()
-            host_ip = host.get("ip")
-            host_port = str(host.get("port"))
 
-            port_postfix = "Default"
-            if not self.ports and host_port:
-                port_postfix = host_port
-            if self.ports:
-                port_postfix = str(self.ports)
-            current_time = datetime.now().strftime("%H:%M:%S")
-            print(
-                f"⭕ Current scan host ({index}/{hosts_quantity}): {host_ip}:{port_postfix} (started at: {str(current_time)})"
-            )
-            nm = NmapConnector()
-            nm.scan(
-                host=host_ip,
-                arguments=self.arguments,
-                ports=(self.ports or host_port),
-                sudo=self.sudo,
-            )
-            results = nm.get_results()
-            if not results.get(host_ip):
+        # Note: we use 'while True' with queue checker inside to prevent
+        # process dying at the beginning, because we start with empty
+        # queue
+
+        while True:
+            if self.queue.empty():
+                # Wait while queue will get some tasks to do
+                sleep(NmapProcessingDefaultManagerValues.EMPTY_QUEUE_POLLING_RATE)
+                continue
+            try:
+                index, host = self.queue.get()
+                sleep(NmapProcessingDefaultManagerValues.POLLING_RATE)
+
+                host_ip = host.get("ip", "")
+                host_port = host.get("port", "")
+                port_postfix = "Default"
+
+                if not self.ports and host_port:
+                    port_postfix = host_port
+                if self.ports:
+                    port_postfix = self.ports
+
+                print(
+                    f"⭕ "
+                    f"Current scan host ({index}/{self.quantity}): "
+                    f"{host_ip}:{port_postfix} "
+                    f"(started at: {str(datetime.now().strftime('%H:%M:%S'))})"
+                )
+
+                nm = NmapConnector()
+                nm.scan(
+                    host=host_ip,
+                    arguments=self.arguments,
+                    ports=self.ports or str(host_port),
+                    sudo=self.sudo,
+                )
+
+                results = nm.get_results()
+                if results.get(host_ip).values():
+                    NmapProcessingResults.RESULTS.update(
+                        {host_ip: results.get(host_ip)}
+                    )
+            except:
                 self.queue.task_done()
-                return
-            if results.get(host_ip).values():
-                NmapProcessingResults.RESULTS.update({host_ip: results.get(host_ip)})
-            self.queue.task_done()
+            else:
+                self.queue.task_done()
 
 
 class NmapProcessingManager:
@@ -103,13 +140,17 @@ class NmapProcessingManager:
         :return: None
         """
         queue = JoinableQueue()
-        for _ in range(self.workers):
-            process = NmapProcessing(queue, self.arguments, self.ports, self.sudo)
-            process.daemon = True
-            process.start()
-        hosts_quantity = len(self.hosts)
         for index, host in enumerate(self.hosts):
-            queue.put((index, hosts_quantity, host))
+            queue.put((index, host))
+        processes = []
+        for _ in range(self.workers):
+            process = NmapProcessing(
+                queue, self.arguments, self.ports, self.sudo, len(self.hosts)
+            )
+            process.daemon = True
+            processes.append(process)
+        for process in processes:
+            process.start()
         queue.join()
 
     def start(self) -> None:

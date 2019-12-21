@@ -18,7 +18,8 @@ class PyProcessingValues:
     Different values for managers and queues
     """
 
-    POLLING_RATE = 0.2
+    POLLING_RATE = 0.5
+    EMPTY_QUEUE_POLLING_RATE = 1.0
 
 
 class PyProcessingResults:
@@ -84,7 +85,16 @@ class PyProcessing(Process):
 
         :return: None
         """
-        while not self.queue.empty():
+
+        # Note: we use 'while True' with queue checker inside to prevent
+        # process dying at the beginning, because we start with empty
+        # queue
+
+        while True:
+            if self.queue.empty():
+                # Wait while queue will get some tasks to do
+                sleep(PyProcessingValues.EMPTY_QUEUE_POLLING_RATE)
+                continue
             try:
                 current_progress, host_info, py_script = self.queue.get()
                 # Poll with POLLING_RATE interval

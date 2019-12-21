@@ -18,7 +18,8 @@ class NmapProcessingDefaultManagerValues:
     """
     Define default manager values
     """
-    POLLING_RATE = 0.2
+    POLLING_RATE = 0.5
+    EMPTY_QUEUE_POLLING_RATE = 1.0
 
 
 class NmapProcessingResults:
@@ -54,7 +55,16 @@ class NmapProcessing(Process):
         Run Nmap process
         :return: None
         """
-        while not self.queue.empty():
+
+        # Note: we use 'while True' with queue checker inside to prevent
+        # process dying at the beginning, because we start with empty
+        # queue
+
+        while True:
+            if self.queue.empty():
+                # Wait while queue will get some tasks to do
+                sleep(NmapProcessingDefaultManagerValues.EMPTY_QUEUE_POLLING_RATE)
+                continue
             try:
                 index, host = self.queue.get()
                 sleep(NmapProcessingDefaultManagerValues.POLLING_RATE)

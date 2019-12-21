@@ -2,6 +2,7 @@
 from censys.ipv4 import CensysIPv4
 from unittest.mock import patch
 from pytest import raises, fixture
+from collections import Counter
 
 from grinder.censysconnector import CensysConnector
 from grinder.errors import (
@@ -104,7 +105,7 @@ def test_censysconnector_search_api_malformed_request(
     :return: None
     """
     api = CensysConnector(api_id=censys_id_value, api_secret=censys_secret_value)
-    api.search(query=None)
+    api.search(query=None, max_records=10)
     output = capsys.readouterr().out
     for expected_output in ["Censys API core exception", "400 (malformed_request)"]:
         assert expected_output in output
@@ -128,7 +129,7 @@ def test_censysconnector_search_too_much_results_error(
     :return: None
     """
     api = CensysConnector(api_id=censys_id_value, api_secret=censys_secret_value)
-    api.search(query="")
+    api.search(query="", max_records=1100)
     output = capsys.readouterr().out
     assert (
         "Only the first 1,000 search results are available. Retry search with 1,000 results limit."
@@ -151,7 +152,7 @@ def test_censysconnector_search_not_initialized_api(capsys) -> None:
     :return: None
     """
     api = CensysConnector(api_id="not_valid", api_secret="not_valid")
-    api.search(query="")
+    api.search(query="", max_records=10)
     output = capsys.readouterr().out
     for expected_output in ["Censys invalid API keys error", "403 (unathorized)"]:
         assert expected_output in output
@@ -172,7 +173,7 @@ def test_censysconnector_search_error(
         side_effect=CensysConnectorSearchError("test"),
     ):
         with raises(Exception) as init_err:
-            api.search("")
+            api.search("", max_records=10)
         assert "Error occured in Censys Connector module" in str(init_err.value)
 
 
@@ -186,11 +187,11 @@ def test_censysconnector_get_raw_results(
     :return: None
     """
     api = CensysConnector(api_id=censys_id_value, api_secret=censys_secret_value)
-    api.search(query="", max_records=10)
+    api.search(query="nginx", max_records=10)
     results = api.get_raw_results()
     assert len(results) == 10
     for result in results:
-        assert sorted(result.keys()) == sorted(
+        assert Counter(result.keys()) == Counter(
             [
                 "ip",
                 "location.country",
@@ -213,11 +214,11 @@ def test_censysconnector_get_results(
     :return: None
     """
     api = CensysConnector(api_id=censys_id_value, api_secret=censys_secret_value)
-    api.search(query="", max_records=10)
+    api.search(query="nginx", max_records=10)
     results = api.get_results()
     assert len(results) == 10
     for result in results:
-        assert sorted(result.keys()) == sorted(
+        assert Counter(result.keys()) == Counter(
             ["org", "ip", "country", "lat", "lng", "port", "proto"]
         )
 

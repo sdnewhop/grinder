@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from shutil import rmtree
 from pytest import raises
+from hashlib import sha512
 
 from grinder.plots import GrinderPlots
 from grinder.errors import (
@@ -16,24 +18,15 @@ class PlotsTestDefaultValues:
     Needed Paths for test
     """
 
-    PlotsDirectory: Path = (
+    PLOTS_DIRECTORY: Path = (
         Path(".")
         .joinpath(DefaultValues.RESULTS_DIRECTORY)
         .joinpath(DefaultValues.PNG_RESULTS_DIRECTORY)
     )
-    PlotSubDirectory: str = "test_plots"
-    PathToFile: Path = PlotsDirectory.joinpath(PlotSubDirectory)
-    FileName: str = "test_plots.png"
-    PathWithFile: Path = PathToFile.joinpath(FileName)
-
-
-def remove_directory():
-    """
-    Remove a file with all created directories after tests
-    :return: None
-    """
-    PlotsTestDefaultValues.PathWithFile.unlink()
-    PlotsTestDefaultValues.PathToFile.rmdir()
+    PLOTS_SUB_DIRECTORY: str = "test_plots"
+    PATH_TO_FILE: Path = PLOTS_DIRECTORY.joinpath(PLOTS_SUB_DIRECTORY)
+    FILE_NAME: str = "test_plots.png"
+    PATH_WITH_FILE: Path = PATH_TO_FILE.joinpath(FILE_NAME)
 
 
 def test_plots_file_case():
@@ -46,16 +39,20 @@ def test_plots_file_case():
     results = {"test_value": 1, "another_one": 0, "one_more": 3}
     plots.create_pie_chart(results=results, suptitle=f"Test value")
     plots.save_pie_chart(
-        relative_path=PlotsTestDefaultValues.PlotSubDirectory,
-        filename=f"{PlotsTestDefaultValues.FileName}",
+        relative_path=PlotsTestDefaultValues.PLOTS_SUB_DIRECTORY,
+        filename=f"{PlotsTestDefaultValues.FILE_NAME}",
     )
-    assert PlotsTestDefaultValues.PathToFile.is_dir()
-    assert PlotsTestDefaultValues.PathToFile.exists()
-    assert PlotsTestDefaultValues.PathWithFile.exists()
-    assert PlotsTestDefaultValues.PathWithFile.stat().st_size == 72997
+    assert PlotsTestDefaultValues.PATH_TO_FILE.is_dir()
+    assert PlotsTestDefaultValues.PATH_TO_FILE.exists()
+    assert PlotsTestDefaultValues.PATH_WITH_FILE.exists()
+    expected_hash = "6cb9d8d226c9cef60d5b774b1e61ecf1d1a23a3200daed7217b42231550cd992dd0f195a1a055600e1f1827cf80f10416cc556ae206267bf4ac2fbef18732c82"
+    assert (
+        sha512(PlotsTestDefaultValues.PATH_WITH_FILE.read_bytes()).hexdigest()
+        == expected_hash
+    )
     assert plots.results_figure_id == 1
 
-    remove_directory()
+    rmtree(PlotsTestDefaultValues.PATH_TO_FILE)
 
 
 def test_plots_raise_error_in_creating() -> None:
@@ -91,15 +88,15 @@ def test_plots_raise_error_in_saving() -> None:
     with raises(GrinderPlotsSavePieChartError) as create_error:
         plots.create_pie_chart(results=results, suptitle=f"Test value")
         plots.save_pie_chart(
-            relative_path=PlotsTestDefaultValues.PlotSubDirectory, filename=None
+            relative_path=PlotsTestDefaultValues.PLOTS_SUB_DIRECTORY, filename=None
         )
     assert "expected str, bytes or os.PathLike object" in str(create_error.value)
-    PlotsTestDefaultValues.PathToFile.rmdir()
+    PlotsTestDefaultValues.PATH_TO_FILE.rmdir()
 
 
 def test_plots_float_value_case() -> None:
     """
-    Check the behavior of creating the pie chart
+    Check the behaviour of creating the pie chart
     in the case of the value of float type
     :return: None
     """
@@ -115,7 +112,7 @@ def test_plots_float_value_case() -> None:
 
 def test_plots_empty_value_case() -> None:
     """
-    Check the behavior of creating the pie chart
+    Check the behaviour of creating the pie chart
     in the case of an empty dictionary
     :return: None
     """
@@ -123,9 +120,9 @@ def test_plots_empty_value_case() -> None:
     results = {}
     plots.create_pie_chart(results=results, suptitle=f"Test value")
     plots.save_pie_chart(
-        relative_path=PlotsTestDefaultValues.PlotSubDirectory,
-        filename=f"{PlotsTestDefaultValues.FileName}",
+        relative_path=PlotsTestDefaultValues.PLOTS_SUB_DIRECTORY,
+        filename=f"{PlotsTestDefaultValues.FILE_NAME}",
     )
     assert plots.results_figure_id == 0
-    assert not PlotsTestDefaultValues.PathWithFile.exists()
-    assert not PlotsTestDefaultValues.PathToFile.exists()
+    assert not PlotsTestDefaultValues.PATH_WITH_FILE.exists()
+    assert not PlotsTestDefaultValues.PATH_TO_FILE.exists()

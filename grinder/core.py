@@ -1420,7 +1420,12 @@ class GrinderCore:
 
         # Store retrieved results
         for ip, result in scripts_results.items():
-            self.combined_results[ip]["scripts"]["py_script"] = result
+            try:
+                self.combined_results[ip]["scripts"]["py_script"] = result
+            except:
+                # In case if we can't index like that in combined_results
+                # or our in-results are too old and not fully correct
+                continue
 
     @exception_handler(expected_exception=GrinderCoreRunScriptsError)
     def run_scripts(self,

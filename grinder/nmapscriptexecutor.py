@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-from pprint import pprint
+from pathlib import PurePath
 
 from grinder.nmapconnector import NmapConnector
 from grinder.defaultvalues import DefaultValues
@@ -27,7 +27,7 @@ class NmapScriptExecutor:
             and (nse_script.endswith(".nse") or nse_script.endswith(".lua"))
         ):
             return
-        nmap_script_name = nse_script.split(".")[0]
+        nmap_script_name = PurePath(nse_script).stem
         script_path = (
             Path(".")
             .joinpath(DefaultValues.CUSTOM_SCRIPTS_DIRECTORY)

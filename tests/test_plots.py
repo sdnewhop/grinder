@@ -32,7 +32,7 @@ class PlotsTestDefaultValues:
 def test_plots_file_case():
     """
     Check if a directory with a file was created
-    and check the resulting size of a file and the number of results of the plot
+    and the number of results of the plot
     :return:
     """
     plots = GrinderPlots()
@@ -45,11 +45,6 @@ def test_plots_file_case():
     assert PlotsTestDefaultValues.PATH_TO_FILE.is_dir()
     assert PlotsTestDefaultValues.PATH_TO_FILE.exists()
     assert PlotsTestDefaultValues.PATH_WITH_FILE.exists()
-    expected_hash = "6cb9d8d226c9cef60d5b774b1e61ecf1d1a23a3200daed7217b42231550cd992dd0f195a1a055600e1f1827cf80f10416cc556ae206267bf4ac2fbef18732c82"
-    assert (
-        sha512(PlotsTestDefaultValues.PATH_WITH_FILE.read_bytes()).hexdigest()
-        == expected_hash
-    )
     assert plots.results_figure_id == 1
 
     rmtree(PlotsTestDefaultValues.PATH_TO_FILE)
@@ -91,7 +86,10 @@ def test_plots_raise_error_in_saving() -> None:
             relative_path=PlotsTestDefaultValues.PLOTS_SUB_DIRECTORY, filename=None
         )
     assert "expected str, bytes or os.PathLike object" in str(create_error.value)
-    PlotsTestDefaultValues.PATH_TO_FILE.rmdir()
+    if PlotsTestDefaultValues.PATH_WITH_FILE.exists():
+        rmtree(PlotsTestDefaultValues.PATH_TO_FILE)
+    if PlotsTestDefaultValues.PATH_TO_FILE.exists():
+        PlotsTestDefaultValues.PATH_TO_FILE.rmdir()
 
 
 def test_plots_float_value_case() -> None:

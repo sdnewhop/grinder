@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 usage() {
-	echo "Usage: $(basename $0) [--cpus <quantity-of-cpu>] [-h | --help]"
+	printf "Usage: %s [--cpus <quantity-of-cpu>] [-h | --help]" "$(basename "$0")"
 }
 
 user_cpu_count=1
@@ -22,7 +22,7 @@ case "$(uname)" in
 	*) cpu_count=1 ;;
 esac
 
-if [ $user_cpu_count -gt $cpu_count || $cpu_count -eq 1 ]; then
+if [ $user_cpu_count -gt $cpu_count ] || [ $cpu_count -eq 1 ]; then
 	user_cpu_count=$cpu_count
 fi
 
@@ -40,7 +40,7 @@ mkdir -p ./map/static/data/
 docker run -it --rm \
 	-p 5000:5000 \
 	--cpus="$user_cpu_count" \
-	--volume ${pwd}/database.db:/app/database.db \
-	--volume ${pwd}/results:/app/results \
-	--volume ${pwd}/map/static/data:/app/map/static/data \
+	--volume "${pwd}/database.db:/app/database.db" \
+	--volume "${pwd}/results:/app/results" \
+	--volume "${pwd}/map/static/data:/app/map/static/data" \
 	grinder-framework

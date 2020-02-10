@@ -5,14 +5,15 @@ export PS1="(grinder-docker) $PS1"
 host="0.0.0.0"
 port="5000"
 
-cd ./map/
-flask run --host=$host --port=$port >& /dev/null &
-flask_pid=$!
-cd ..
+cd ./map/ && {
+	flask run --host=$host --port=$port > /dev/null 2>&1 &
+	flask_pid=$!
+	cd ..
+}
 
-echo -e "\e[1mWelcome to\e[0m"
+printf "\e[1mWelcome to\e[0m\n"
 ./grinder.py -h
 
 sh
 
-kill $flask_pid
+[ -n "$flask_pid" ] && kill $flask_pid

@@ -2,7 +2,7 @@
 
 *
 .*
-!entrypoint.sh
+!docker/grinder/entrypoint.sh
 !requirements.txt
 !custom_scripts
 !grinder

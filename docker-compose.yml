@@ -3,13 +3,14 @@ version: "3.7"
 services:
   tls-scanner:
     build:
-      context: .
+      context: docker/grinder
       target: tls-scanner-build
     image: grinder/tls-scanner:2.9
   grinder:
     build:
       context: .
       target: grinder-framework-build
+      dockerfile: docker/grinder/Dockerfile
     image: grinder/grinder-framework:1.0
     container_name: grinder_framework
     volumes:
@@ -25,7 +26,7 @@ services:
     build:
       context: .
       target: grinder-map-build
-      dockerfile: Dockerfile-map
+      dockerfile: docker/map/Dockerfile
     image: grinder/grinder-map:1.0
     container_name: grinder_map
     volumes:

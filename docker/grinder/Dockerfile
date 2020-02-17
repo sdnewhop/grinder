@@ -9,7 +9,12 @@ RUN git clone --depth=1 --branch '3.1' https://github.com/RUB-NDS/TLS-Attacker.g
 # Build Grinder Framework
 FROM python:3.7-alpine AS grinder-framework-build
 
+LABEL org.label-schema.name="Grinder Framework" \
+      org.label-schema.description="Python framework to automatically discover and enumerate hosts" \
+      org.label-schema.license="GPL-2.0"
+
 COPY . /app/
+COPY /docker/grinder/entrypoint.sh /app/entrypoint.sh
 COPY --from=tls-scanner-build /TLS-Scanner/apps /app/TLS-Scanner/apps
 
 RUN apk update && \
@@ -23,7 +28,8 @@ RUN apk update && \
 	ln -s /app/grinder.py /usr/local/bin/grinder && \
 	mkdir -p /app/results/ && \
 	mkdir -p /app/map/static/data/ && \
-	rm -rf /etc/apk/cache
+	rm -rf /etc/apk/cache && \
+	chmod +x /app/entrypoint.sh
 
 WORKDIR /app
 ENV PYTHONPATH="/app"

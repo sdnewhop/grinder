@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 usage() {
-	printf "Usage: %s [--cpus <quantity-of-cpu>] [-h | --help]" "$(basename "$0")"
+	printf "Usage: %s [--cpus <quantity-of-cpu>] [-h | --help]\n" "$(basename "$0")"
 }
 
 user_cpu_count=1

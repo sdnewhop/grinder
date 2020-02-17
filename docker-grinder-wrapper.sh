@@ -11,7 +11,6 @@ cd ./map/ && {
 	cd ..
 }
 
-printf "\e[1mWelcome to\e[0m\n"
 ./grinder.py -h
 
 sh

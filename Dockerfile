@@ -1,5 +1,4 @@
-# TLS Scanner build container --------------------------------------------------
-
+# Build TLS-Scanner
 FROM maven:3-jdk-8 AS tls-scanner-build
 
 RUN git clone --depth=1 --branch '3.1' https://github.com/RUB-NDS/TLS-Attacker.git && \
@@ -7,9 +6,7 @@ RUN git clone --depth=1 --branch '3.1' https://github.com/RUB-NDS/TLS-Attacker.g
 	(cd /TLS-Attacker/ && mvn clean install -DskipTests=true) && \
 	(cd /TLS-Scanner/ && mvn clean install -DskipTests=true)
 
-
-# Grinder ----------------------------------------------------------------------
-
+# Build Grinder Framework
 FROM python:3.7-alpine
 
 COPY . /app/

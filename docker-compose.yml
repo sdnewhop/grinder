@@ -16,6 +16,8 @@ services:
     volumes:
       - "./database.db:/app/database.db"
       - "./results:/app/results"
+      - "./queries:/app/queries"
+      - "./custom_scripts:/app/custom_scripts"
       - "./map/static/data:/app/map/static/data"
     dns:
       - 8.8.8.8

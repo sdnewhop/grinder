@@ -1,0 +1,12 @@
+# .dockerignore
+
+*
+.*
+!docker-grinder-wrapper.sh
+!requirements.txt
+!custom_scripts
+!grinder
+!map
+!plugins
+!queries
+!grinder.py

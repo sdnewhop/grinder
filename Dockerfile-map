@@ -1,0 +1,10 @@
+# Build Grinder Map
+FROM python:3.7-alpine AS grinder-map-build
+
+COPY ./map /app/
+RUN pip install --no-cache-dir flask
+
+WORKDIR /app
+ENV PYTHONPATH="/app"
+EXPOSE 5000
+ENTRYPOINT ["python3", "app.py"]

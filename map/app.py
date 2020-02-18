@@ -4,7 +4,6 @@ from sys import exit
 from json import load
 from platform import system
 from subprocess import run, PIPE, TimeoutExpired
-from copy import deepcopy
 
 app = Flask(__name__)
 app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
@@ -24,7 +23,10 @@ def ping(host: str) -> bool:
     """
     param = "-n" if system().lower() == "windows" else "-c"
     command = ["ping", param, "1", host]
-    return run(command, stdout=PIPE, stderr=PIPE, timeout=5).returncode == 0
+    try:
+        return run(command, stdout=PIPE, stderr=PIPE, timeout=5).returncode == 0
+    except:
+        return False
 
 
 @app.before_first_request
@@ -44,7 +46,6 @@ def load_markers(path: str = "data", filename: str = "markers.json") -> None:
         print(
             "File with markers not found. Please, finish some scan and run server again."
         )
-        exit(1)
     print(" * Map markers was successfully loaded")
 
 
@@ -98,8 +99,7 @@ def api_raw_host_ping(host_id: str or int) -> wrappers.Response:
     markers = StorageData.SEARCH_MARKERS or StorageData.MARKERS
     try:
         host_info = markers[int(host_id)]
-        ip = host_info.get("ip")
-        if ping(ip):
+        if ping(host_info.get("ip")):
             return jsonify({"status": "online"})
         return jsonify({"status": "offline"})
     except (TimeoutExpired, TimeoutError):
@@ -150,6 +150,7 @@ def reset_search() -> wrappers.Response:
     StorageData.SEARCH_MARKERS = []
     return root()
 
+
 @app.route("/search", methods=["GET"])
 def search() -> wrappers.Response:
     """
@@ -157,14 +158,7 @@ def search() -> wrappers.Response:
     :return: wrappers.Response object
     """
     query = request.args.get("query", default="", type=str)
-    matched_results = []
-
-    for host in StorageData.MARKERS:
-        if query.lower() not in str(host).lower():
-            continue
-        matched_results.append(host)
-
-    StorageData.SEARCH_MARKERS = matched_results
+    StorageData.SEARCH_MARKERS = [host for host in StorageData.MARKERS if query.lower() in str(host).lower()]
     return root()
 
 

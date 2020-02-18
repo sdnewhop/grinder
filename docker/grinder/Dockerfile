@@ -27,7 +27,6 @@ RUN apk add --no-cache nmap nmap-scripts && \
 	ln -s /app/grinder.py /usr/local/bin/grinder && \
 	mkdir -p /app/results/ && \
 	mkdir -p /app/map/static/data/ && \
-	rm -rf /etc/apk/cache && \
 	chmod +x /app/entrypoint.sh
 
 WORKDIR /app

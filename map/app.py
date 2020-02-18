@@ -1,15 +1,19 @@
-from flask import Flask, send_from_directory, jsonify, json, wrappers
+from flask import Flask, send_from_directory, jsonify, json, wrappers, request, redirect
 from pathlib import Path
 from sys import exit
 from json import load
 from platform import system
 from subprocess import run, PIPE, TimeoutExpired
-
-
-MARKERS: list = []
+from copy import deepcopy
 
 app = Flask(__name__)
-app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
+app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+
+
+class StorageData:
+    MARKERS: list = []
+    SEARCH_MARKERS: list = []
 
 
 def ping(host: str) -> bool:
@@ -20,7 +24,7 @@ def ping(host: str) -> bool:
     """
     param = "-n" if system().lower() == "windows" else "-c"
     command = ["ping", param, "1", host]
-    return run(command, stdout=PIPE, stderr=PIPE, timeout=3).returncode == 0
+    return run(command, stdout=PIPE, stderr=PIPE, timeout=5).returncode == 0
 
 
 @app.before_first_request
@@ -35,15 +39,12 @@ def load_markers(path: str = "data", filename: str = "markers.json") -> None:
         with open(
             Path(".").joinpath("static").joinpath(path).joinpath(filename), mode="r"
         ) as markers_json:
-            markers_list = load(markers_json)
+            StorageData.MARKERS = load(markers_json)
     except FileNotFoundError:
         print(
             "File with markers not found. Please, finish some scan and run server again."
         )
         exit(1)
-
-    global MARKERS
-    MARKERS = markers_list
     print(" * Map markers was successfully loaded")
 
 
@@ -76,8 +77,9 @@ def api_raw_host(host_id: str or int) -> wrappers.Response:
     :param host_id: id of host in list of hosts
     :return: flask response
     """
+    markers = StorageData.SEARCH_MARKERS or StorageData.MARKERS
     try:
-        return jsonify(MARKERS[int(host_id)])
+        return jsonify(markers[int(host_id)])
     except IndexError:
         return jsonify({"error": "request index is out of range"})
     except TypeError:
@@ -93,13 +95,13 @@ def api_raw_host_ping(host_id: str or int) -> wrappers.Response:
     :param host_id: id of host in list of hosts
     :return: flask response
     """
+    markers = StorageData.SEARCH_MARKERS or StorageData.MARKERS
     try:
-        host_info = MARKERS[int(host_id)]
+        host_info = markers[int(host_id)]
         ip = host_info.get("ip")
-        if ping(ip) == True:
+        if ping(ip):
             return jsonify({"status": "online"})
-        else:
-            return jsonify({"status": "offline"})
+        return jsonify({"status": "offline"})
     except (TimeoutExpired, TimeoutError):
         return jsonify({"error": "timeout"})
     except:
@@ -112,8 +114,9 @@ def api_raw_all() -> wrappers.Response:
     Return full list of hosts in JSON
     :return: flask response
     """
+    markers = StorageData.SEARCH_MARKERS or StorageData.MARKERS
     try:
-        return jsonify(MARKERS)
+        return jsonify(markers)
     except:
         return jsonify({"error": "unexpected error was happened"})
 
@@ -125,6 +128,44 @@ def root():
     :return: flask response
     """
     return app.send_static_file("index.html")
+
+
+@app.route("/update", methods=["GET"])
+def api_update_data() -> wrappers.Response:
+    """
+    Update JSON with markers
+    :return: wrappers.Response object
+    """
+    StorageData.SEARCH_MARKERS = []
+    load_markers()
+    return root()
+
+
+@app.route("/reset", methods=["GET"])
+def reset_search() -> wrappers.Response:
+    """
+    Reset search filter
+    :return: wrappers.Response object
+    """
+    StorageData.SEARCH_MARKERS = []
+    return root()
+
+@app.route("/search", methods=["GET"])
+def search() -> wrappers.Response:
+    """
+    Search for some specific keywords in results
+    :return: wrappers.Response object
+    """
+    query = request.args.get("query", default="", type=str)
+    matched_results = []
+
+    for host in StorageData.MARKERS:
+        if query.lower() not in str(host).lower():
+            continue
+        matched_results.append(host)
+
+    StorageData.SEARCH_MARKERS = matched_results
+    return root()
 
 
 if __name__ == "__main__":

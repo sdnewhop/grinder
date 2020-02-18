@@ -2,7 +2,7 @@
 
 # Create markers file if it not exists
 if [ ! -e ./map/static/data/markers.json ]; then
-  echo "{}" > ./map/static/data/markers.json
+  echo "[]" > ./map/static/data/markers.json
 fi
 
 # Create database file if it not exists

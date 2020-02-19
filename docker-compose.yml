@@ -1,0 +1,37 @@
+version: "3.7"
+
+services:
+  tls-scanner:
+    build:
+      context: docker/grinder
+      target: tls-scanner-build
+    image: grinder/tls-scanner:2.9
+  grinder:
+    build:
+      context: .
+      target: grinder-framework-build
+      dockerfile: docker/grinder/Dockerfile
+    image: grinder/grinder-framework:1.0
+    container_name: grinder_framework
+    volumes:
+      - "./database.db:/app/database.db"
+      - "./results:/app/results"
+      - "./queries:/app/queries"
+      - "./custom_scripts:/app/custom_scripts"
+      - "./map/static/data:/app/map/static/data"
+    dns:
+      - 8.8.8.8
+      - 9.9.4.4
+      - 1.1.1.1
+      - 1.0.0.1
+  map:
+    build:
+      context: .
+      target: grinder-map-build
+      dockerfile: docker/map/Dockerfile
+    image: grinder/grinder-map:1.0
+    container_name: grinder_map
+    volumes:
+      - "./map/static/data:/app/static/data"
+    ports:
+      - "5000:5000"

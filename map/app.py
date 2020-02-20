@@ -13,6 +13,14 @@ app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 class StorageData:
     MARKERS: list = []
     SEARCH_MARKERS: list = []
+    MARKERS_DIR: str = "data"
+    MARKERS_FILE: str = "markers.json"
+
+
+class ReloadFiles:
+    MARKERS: str = str(
+        Path(f"./static/{StorageData.MARKERS_DIR}/{StorageData.MARKERS_FILE}")
+    )
 
 
 def ping(host: str) -> bool:
@@ -30,7 +38,9 @@ def ping(host: str) -> bool:
 
 
 @app.before_first_request
-def load_markers(path: str = "data", filename: str = "markers.json") -> None:
+def load_markers(
+    path: str = StorageData.MARKERS_DIR, filename: str = StorageData.MARKERS_FILE
+) -> None:
     """
     Load JSON with markers
     :param path: path to directory with markers
@@ -158,10 +168,12 @@ def search() -> wrappers.Response:
     :return: wrappers.Response object
     """
     query = request.args.get("query", default="", type=str)
-    StorageData.SEARCH_MARKERS = [host for host in StorageData.MARKERS if query.lower() in str(host).lower()]
+    StorageData.SEARCH_MARKERS = [
+        host for host in StorageData.MARKERS if query.lower() in str(host).lower()
+    ]
     return root()
 
 
 if __name__ == "__main__":
     load_markers()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000, extra_files=[ReloadFiles.MARKERS])

@@ -1,6 +1,5 @@
-from flask import Flask, send_from_directory, jsonify, json, wrappers, request, redirect
+from flask import Flask, send_from_directory, jsonify, wrappers, request, redirect, url_for
 from pathlib import Path
-from sys import exit
 from json import load
 from platform import system
 from subprocess import run, PIPE, TimeoutExpired
@@ -132,11 +131,12 @@ def api_raw_all() -> wrappers.Response:
 
 
 @app.route("/", methods=["GET"])
-def root():
+def root() -> wrappers.Response:
     """
     Serve root/index page
     :return: flask response
     """
+    StorageData.SEARCH_MARKERS = []
     return app.send_static_file("index.html")
 
 
@@ -146,9 +146,8 @@ def api_update_data() -> wrappers.Response:
     Update JSON with markers
     :return: wrappers.Response object
     """
-    StorageData.SEARCH_MARKERS = []
     load_markers()
-    return root()
+    return redirect("/")
 
 
 @app.route("/reset", methods=["GET"])
@@ -157,8 +156,7 @@ def reset_search() -> wrappers.Response:
     Reset search filter
     :return: wrappers.Response object
     """
-    StorageData.SEARCH_MARKERS = []
-    return root()
+    return redirect("/")
 
 
 @app.route("/search", methods=["GET"])
@@ -171,7 +169,7 @@ def search() -> wrappers.Response:
     StorageData.SEARCH_MARKERS = [
         host for host in StorageData.MARKERS if query.lower() in str(host).lower()
     ]
-    return root()
+    return app.send_static_file("index.html")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,11 @@
-from flask import Flask, send_from_directory, jsonify, wrappers, request, redirect, url_for
+from flask import (
+    Flask,
+    send_from_directory,
+    jsonify,
+    wrappers,
+    request,
+    redirect,
+)
 from pathlib import Path
 from json import load
 from platform import system

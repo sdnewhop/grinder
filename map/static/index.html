@@ -56,7 +56,7 @@
             <br>
 
             <div class="codebox">
-                <input type="button" class="btn btn-primary btn-sm btn-block" value="Show more" onclick="var spoiler = $(this).parents('.codebox').find('.content').slideToggle(); if ( this.value == 'Hide' ) { this.value = 'Show more'; } else { this.value = 'Hide'; };return false;">
+                <input type="button" class="btn btn-dark btn-sm btn-block" value="Show more" onclick="var spoiler = $(this).parents('.codebox').find('.content').slideToggle(); if ( this.value == 'Hide' ) { this.value = 'Show more'; } else { this.value = 'Hide'; };return false;">
                 <div class="content" style="display: none;">
                     <br>
                     <br><a id="api-raw-data" title="API raw data" href="#" onclick="openInNewTab('{{api.raw}}');return false;"><b>Open raw data</b></a>
@@ -77,6 +77,26 @@
 <!-- Load markers and build map from grinder.js -->
 
 <body>
+    <div class="pos-f-t">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Grinder Map</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link active" href="/">Home <span class="sr-only">(current)</span></a>
+                    <a class="nav-item nav-link" href="/api/viewall">Raw</a>
+                    <a class="nav-item nav-link" href="/update">Update</a>
+                    <a class="nav-item nav-link" href="/reset">Reset</a>
+                </div>
+            </div>
+            <form class="form-inline my-2 my-lg-0" action="/search?" method="GET" name="query">
+                <input class="form-control mr-sm-2" type="search" placeholder="Vendor, Product, CVE ..." aria-label="Search" name="query">
+                <button class="btn btn-dark my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </nav>
+    </div>
     <div class="map" id="map"></div>
     <script type="text/javascript" src="custom/grinder.js"></script>
 </body>

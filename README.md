@@ -1,6 +1,6 @@
 # Grinder Framework
 [![Required OS](https://img.shields.io/badge/OS-Linux%20based-blue)](https://en.wikipedia.org/wiki/Linux)
-[![Python3 Version](https://img.shields.io/badge/python-3.6%20%7C%203.7-blue)](https://www.python.org/downloads/)
+[![Python3 Version](https://img.shields.io/badge/python-3.6%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-GPL--2.0-blue)](/LICENSE)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/psf/black)
 [![Last Commit](https://img.shields.io/github/last-commit/sdnewhop/grinder)](https://github.com/sdnewhop/grinder)
@@ -70,66 +70,66 @@ The Grinder framework is still in progress and got features to improve, so all t
 _Note: If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced by `pipenv sync` command._
 1. Install [Nmap Security Scanner](https://nmap.org/download.html) if not installed.
 2. Install [python3-tk](https://docs.python.org/3/library/tkinter.html) package if not installed (Linux only)
-```
+```bash
 sudo apt-get install python3-tk
 ```
 3. Install virtualenv if not installed
-```
+```bash
 sudo pip3 install virtualenv 
 ```
 or
-```
+```bash
 pip3 install --upgrade virtualenv
 ```
 4. Clone the repository
-```
+```bash
 git clone https://github.com/sdnewhop/grinder
 ```
 5. Clone and install [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker) (if you want to use TLS scanning features with Grinder).
 6. Clone [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner) in directory with Grinder and install it (if you want to use TLS scanning features with Grinder.
 7. Create virtual environment
-```
+```bash
 cd grinder
 python3 -m venv grindervenv
 source grindervenv/bin/activate
 ```
 8. Check if virtual environment successfully loaded
-```
+```bash
 which python
 which pip
 ```
 9. Install project requirements in virtual environment
-```
+```bash
 pip3 install -r requirements.txt
 ```
 10. Run the script
-```
+```bash
 ./grinder.py -h
 ```
 11. Set your Shodan, Censys and Vulners keys via a command line arguments on every run
-```
+```bash
 ./grinder.py -sk YOUR_SHODAN_KEY -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -vk YOUR_VULNERS_KEY
 ```
 or via an environment variable permanently
-```
+```bash
 export SHODAN_API_KEY=YOUR_SHODAN_API_KEY_HERE
 export CENSYS_API_ID=YOUR_CENSYS_API_ID_HERE
 export CENSYS_API_SECRET=YOUR_CENSYS_API_SECRET_HERE
 export VULNERS_API_KEY=YOUR_VULNERS_API_KEY_HERE
 ```
 12. Deactivate virtual environment after use and restore default python interpreter
-```
+```bash
 deactivate
 ```
 
 ### Run Local Grinder Map Server
 1. First, complete all steps from the "Setup and Configure Environment/Grinder Installing" section.
 2. After the scan is completed, go to the "map" folder
-```
+```bash
 cd map/
 ```
 3. Run Flask (use `--help` key for more information)
-```
+```bash
 flask run
 ```
 4. Open in your browser
@@ -142,18 +142,20 @@ flask routes
 ```
 
 ## Build in Docker
-To build the basic lightweight Grinder framework version (without TLS-Attacker and TLS-Scanner) as a docker image you can use the script `docker_build.sh`, and to run this image you can use the script `docker_run.sh`:
+To build the Grinder framework as an Alpine-based docker image you can use the scripts `docker_build.sh` and `docker_run.sh`:
 ```bash
-docker run -it --rm --volume $(pwd)/results:/code/results --volume $(pwd)/map:/code/map grinder-framework -h
+chmod +x docker_*.sh
+./docker_build.sh
+./docker_run.sh
 ```
 
 ## Tests
 To run basic tests for some modules, you need to change directory to `tests/`:
-```
+```bash
 cd tests/
 ```
 And run basic tests with the next command - please, pay attention that you need to provide API keys for some modules (like Shodan, Censys) because tests are implemented to check all real functional features of this search engines in Grinder modules and wrappers:
-```
+```bash
 pytest --shodan_key SHODAN_API_KEY --censys_id CENSYS_ID_KEY --censys_secret CENSYS_SECRET_KEY
 ```
 Note: tests are still WIP, so please, feel free to create issues If you encounter any problems with it. Currently tests provided for some basic modules and features (Censys, Shodan, Filemanager, Database).

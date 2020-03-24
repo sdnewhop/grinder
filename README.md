@@ -404,9 +404,10 @@ Run Grinder with debug information about scanning
 ```
   
 ## Add Your Own Queries
-To add your own vendors and products with queries you can simply create a new .json file in the directory with queries and choose it while running Grinder in the "run" scan mode.
+### Description
+To add your own vendors and products with queries you can simply create a new JSON file in the directory with queries and choose it while running Grinder in the "run" scan mode.
 
-Format of file with queries:
+### Queries template
 ```json
 [
     {
@@ -415,20 +416,67 @@ Format of file with queries:
         "shodan_queries": [
             {
                 "query": "YOUR SHODAN QUERY HERE",
-                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative|firm|certain}"
+                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative | firm | certain}"
             }
         ],
         "censys_queries": [
             {
                 "query": "YOUR CENSYS QUERY HERE",
-                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative|firm|certain}"
+                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative | firm | certain}"
             }
         ],
         "scripts": {
-            "py_script": "NAME OF PYTHON SCRIPT FROM /custom_scripts/py_scripts",
-            "nse_script": "NAME OF NSE SCRIPT FROM /custom_scripts/nse_scripts"
+            "py_script": "NAME OF MODULE AND PYTHON SCRIPT FROM /custom_scripts/py_scripts",
+            "nse_script": "NAME OF MODULE AND NSE SCRIPT FROM /custom_scripts/nse_scripts"
         },
-        "vendor_confidence": "VENDOR CONFIDENCE LEVEL {tentative|firm|certain}"
+        "vendor_confidence": "VENDOR CONFIDENCE LEVEL {tentative | firm | certain}"
+    }
+]
+```
+### Queries example
+```json
+[
+    {
+        "vendor": "Apache Software Foundation",
+        "product": "Apache HTTP Server",
+        "shodan_queries": [
+            {
+                "query": "Apache",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "Apache",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "http_response_grabber/http_response_grabber.py",
+            "nse_script": "test/test.nse"
+        },
+        "vendor_confidence": "certain"
+    },
+    {
+        "vendor": "Nginx",
+        "product": "Nginx",
+        "shodan_queries": [
+            {
+                "query": "Nginx",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [
+            {
+                "query": "Nginx",
+                "query_confidence": "certain"
+            }
+        ],
+        "scripts": {
+            "py_script": "http_response_grabber/http_response_grabber.py",
+            "nse_script": "test/test.nse"
+        },
+        "vendor_confidence": "certain"
     }
 ]
 ```

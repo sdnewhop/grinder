@@ -37,10 +37,11 @@
    - [Building](#building)
    - [Running](#running)
 1. [Tests](#tests)
-1. [Usage](#usage)
+1. [CLI Interface](#cli-interface)
    - [Help on Command Line Arguments](#help-on-command-line-arguments)
 1. [Wiki](#wiki)
-1. [Usage examples](#usage-examples)
+1. [Usage Examples](#usage-examples)
+   - 
 1. [Add Your Own Queries](#add-your-own-queries)
   
 ## Description
@@ -222,7 +223,7 @@ pytest --shodan_key SHODAN_API_KEY --censys_id CENSYS_ID_KEY --censys_secret CEN
 :construction: **Note:** tests are still WIP, so please, feel free to create issues If you encounter any problems with it. Currently tests provided for some basic modules and features (Censys, Shodan, Filemanager, Database).
 
 
-## Usage
+## CLI Interface
 ### Help on Command Line Arguments
 ```bash
   -h, --help            show this help message and exit
@@ -284,8 +285,8 @@ pytest --shodan_key SHODAN_API_KEY --censys_id CENSYS_ID_KEY --censys_secret CEN
 ## Wiki
 Additional extended documentation for the framework is available on the [repository wiki](https://github.com/sdnewhop/grinder/wiki), including additional information about flags, the internal structure of the framework, queries, and more.
 
-## Usage examples
-### Show help
+## Usage Examples
+### Show Help
 #### Description
 Show all available CLI keys for the Grinder Framework
 #### Example
@@ -293,7 +294,7 @@ Show all available CLI keys for the Grinder Framework
 ./grinder.py -h
 ```
   
-### Basic enumeration
+### Basic Enumeration
 #### Description
 Run the most basic enumeration with Shodan and Censys engines without map markers and plots updating (results will be saved in database and output JSON)
   
@@ -307,7 +308,7 @@ Run the most basic enumeration with Shodan and Censys engines without map marker
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -r
 ```
   
-### Enumeration with limited results
+### Enumeration with Limited Results
 #### Description
 Run an enumeration where maximum Censys results is 555 hosts per query and maximum Shodan results is 1337 hosts per query
   
@@ -321,7 +322,7 @@ Run an enumeration where maximum Censys results is 555 hosts per query and maxim
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -cm 555 -sm 1337 -r 
 ```
   
-### Enumeration with Nmap scanning
+### Enumeration with Nmap Scanning
 #### Description
 Run an enumeration with 10 Nmap Network Scanner scanning workers
   
@@ -335,7 +336,7 @@ Run an enumeration with 10 Nmap Network Scanner scanning workers
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -nm -nw 10 -r 
 ```
   
-### Enumeration with additional analytics, map and plots
+### Enumeration with Additional Analytics, Map and Plots
 #### Description
 Run an enumeration, count unique entities, create plots and update Grinder Map markers data
   
@@ -349,7 +350,7 @@ Run an enumeration, count unique entities, create plots and update Grinder Map m
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -cu -cp -u -r 
 ```
   
-### Enumeration with analytics from Vulners
+### Enumeration with Analytics from Vulners
 #### Description
 Run an enumeration with Vulners scanning and Vulners additional reports, quantity of Vulners workers is equal to 10
 
@@ -363,7 +364,7 @@ Run an enumeration with Vulners scanning and Vulners additional reports, quantit
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -vs -vw 10 -vr -vk YOUR_VULNERS_API_KEY_HERE -r
 ```
 
-### Enumeration with TLS configuration and attacks scanning
+### Enumeration with TLS Configuration and Attacks Scanning
 #### Description
 Run an enumeration with TLS scanning features
   
@@ -377,7 +378,7 @@ Run an enumeration with TLS scanning features
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -ts -r 
 ```
 
-### Enumeration with additional filtering
+### Enumeration with Additional Filtering
 #### Description
 Run an enumeration with filtering by vendors (only Nginx and Apache, for example) and confidence levels (only "Certain" level, for example) for queries and vendor
   
@@ -391,7 +392,7 @@ Run an enumeration with filtering by vendors (only Nginx and Apache, for example
 ./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q queries/servers.json -v nginx apache -qc certain -vc certain -r
 ```
 
-### Enumeration with additional custom scripts
+### Enumeration with Additional Custom Scripts
 #### Description
 Run an enumeration with custom scripts which are described in JSON file with queries in 10 workers
   
@@ -405,7 +406,7 @@ Run an enumeration with custom scripts which are described in JSON file with que
 ./grinder.py -sc -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -sc -scw 10 -r
 ```
   
-### Enumeration with additional debug information
+### Enumeration with Additional Debug Information
 #### Description
 Run Grinder with debug information about scanning
   

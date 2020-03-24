@@ -87,7 +87,7 @@ Required only for TLS scanning.
 ### Development and Future Updates
  - [Grinder Development Project](https://github.com/sdnewhop/grinder/projects/2?fullscreen=true)  
  
-:construction: The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
+:construction: **Note:** The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
   
 ## Grinder Installing
 ### Setup and Configure Environment
@@ -192,9 +192,10 @@ To run the Grinder Framework with all included services (Map, Framework and TLS-
 chmod +x docker_run.sh
 ./docker_run.sh
 ```
+After that, you can open map at `http://localhost:5000/`, shell of the Grinder Framework will be automatically open inside the container. All the data will be saved on your hosts directly via Docker volumes.
 
 ## Tests
-To run basic tests for some modules, you need to change directory to `tests/`:
+To run basic tests for different scanning and analytics modules, you need to change directory to `tests/`:
 ```bash
 cd tests/
 ```
@@ -202,32 +203,12 @@ And run basic tests with the next command - please, pay attention that you need 
 ```bash
 pytest --shodan_key SHODAN_API_KEY --censys_id CENSYS_ID_KEY --censys_secret CENSYS_SECRET_KEY
 ```
-Note: tests are still WIP, so please, feel free to create issues If you encounter any problems with it. Currently tests provided for some basic modules and features (Censys, Shodan, Filemanager, Database).
+:construction: **Note:** tests are still WIP, so please, feel free to create issues If you encounter any problems with it. Currently tests provided for some basic modules and features (Censys, Shodan, Filemanager, Database).
 
 
 ## Usage
 ### Help on Command Line Arguments
 ```bash
-  .,-:::::/ :::::::..   ::::::.    :::.:::::::-.  .,:::::: :::::::..
-,;;-'````'  ;;;;``;;;;  ;;;`;;;;,  `;;; ;;,   `';,;;;;'''' ;;;;``;;;;
-[[[   [[[[[[/[[[,/[[['  [[[  [[[[[. '[[ `[[     [[ [[cccc   [[[,/[[['
-"$$c.    "$$ $$$$$$c    $$$  $$$ "Y$c$$  $$,    $$ $$""""   $$$$$$c
- `Y8bo,,,o88o888b "88bo,888  888    Y88  888_,o8P' 888oo,__ 888b "88bo,
-   `'YMUP"YMMMMMM   "W" MMM  MMM     YM  MMMMP"`   """"YUMMMMMMM   "W"
-
-usage: grinder.py [-h] [-r] [-u] [-q QUERIES_FILE] [-sk SHODAN_KEY]
-                  [-vk VULNERS_KEY] [-cu] [-cp] [-ci CENSYS_ID]
-                  [-cs CENSYS_SECRET] [-cm CENSYS_MAX] [-sm SHODAN_MAX] [-nm]
-                  [-nw NMAP_WORKERS] [-vs] [-vw VULNERS_WORKERS]
-                  [-ht HOST_TIMEOUT] [-tp TOP_PORTS] [-sc]
-                  [-vc VENDOR_CONFIDENCE] [-qc QUERY_CONFIDENCE]
-                  [-v [VENDORS [VENDORS ...]]] [-ml MAX_LIMIT] [-d] [-ts]
-                  [-tsp TLS_SCAN_PATH] [-vr] [-ni]
-
-The Grinder framework was created to automatically enumerate and fingerprint
-different hosts on the Internet using different back-end systems
-
-optional arguments:
   -h, --help            show this help message and exit
   -r, --run             Run scanning
   -u, --update-markers  Update map markers
@@ -260,6 +241,9 @@ optional arguments:
                         Quantity of popular top-ports in addition to Shodan
                         ports
   -sc, --script-check   Initiate custom scripts additional checks
+  -scw SCRIPT_WORKERS, --script-workers SCRIPT_WORKERS
+                        Number of script checking workers
+  -scm, --script-mute   Suppress scripts output (stdout, stderr)
   -vc VENDOR_CONFIDENCE, --vendor-confidence VENDOR_CONFIDENCE
                         Set confidence level for vendors
   -qc QUERY_CONFIDENCE, --query-confidence QUERY_CONFIDENCE
@@ -280,46 +264,145 @@ optional arguments:
                         Turn off incrememental scan - make clean scan (without
                         previous results)
 ```
+  
 ## Wiki
 Additional extended documentation for the framework is available on the [repository wiki](https://github.com/sdnewhop/grinder/wiki), including additional information about flags, the internal structure of the framework, queries, and more.
 
-## Examples
-Run the most basic enumeration with Shodan and Censys engines without map markers and plots (results will be saved in database and output JSON):
-```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -r
-```
-Run an enumeration with 10 Nmap scanning workers, where maximum Censys results is 555 hosts per query and maximum Shodan results is 1337 hosts per query, update map markers, count unique entities and create plots:
-```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -cu -cp -cm 555 -sm 1337 -nm -nw 10 -r 
-```
-Run an enumeration with Nmap scanning, Vulners scanning and Vulners additional reports:
-```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -cu -cp -nm -nw 10 -vs -vw 10 -vr -vk YOUR_VULNERS_API_KEY_HERE -r
-```
-Run an enumeration with TLS scanning features:
-```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -ts -r 
-```
-Run an enumeration with filtering by vendors (only Nginx and Apache, for example) and confidence levels (only "Certain" level, for example) for queries and vendor:
-```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -v nginx apache -qc Certain -vc Certain -r
-```
-Run an enumeration with 10 workers of Nmap Vulners API scanning:
-```bash
-./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -vs -vw 10 -r
-```
-Run an enumeration with custom scripts which are described in .json file with queries:
-```bash
-./grinder.py -sc -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -r
-```
-Run Grinder with debug information about scanning:
-```bash
-./grinder.py -d -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -r
-```
-For more options and help use
+## Usage examples
+### Show help
+#### Description
+Show all available CLI keys for the Grinder Framework
+#### Example
 ```bash
 ./grinder.py -h
 ```
+  
+### Basic enumeration
+#### Description
+Run the most basic enumeration with Shodan and Censys engines without map markers and plots updating (results will be saved in database and output JSON)
+  
+#### Template
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -r
+```
+  
+#### Example
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -r
+```
+  
+### Enumeration with limited results
+#### Description
+Run an enumeration where maximum Censys results is 555 hosts per query and maximum Shodan results is 1337 hosts per query
+  
+#### Template
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -cm CENSYS_RESULTS_LIMIT -sm SHODAN_RESULTS_LIMIT -r 
+```
+  
+#### Example
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -cm 555 -sm 1337 -r 
+```
+  
+### Enumeration with Nmap scanning
+#### Description
+Run an enumeration with 10 Nmap Network Scanner scanning workers
+  
+#### Template
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -nm -nw NUMBER_OF_NMAP_WORKERS -r 
+```
+  
+#### Example
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -nm -nw 10 -r 
+```
+  
+### Enumeration with additional analytics, map and plots
+#### Description
+Run an enumeration, count unique entities, create plots and update Grinder Map markers data
+  
+#### Template
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -cu -cp -u -r 
+```
+  
+#### Example
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -cu -cp -u -r 
+```
+  
+### Enumeration with analytics from Vulners
+#### Description
+Run an enumeration with Vulners scanning and Vulners additional reports, quantity of Vulners workers is equal to 10
+
+#### Template
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -vs -vw NUMBER_OF_VULNERS_WORKERS -vr -vk YOUR_VULNERS_API_KEY_HERE -r
+```
+
+#### Example
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -vs -vw 10 -vr -vk YOUR_VULNERS_API_KEY_HERE -r
+```
+
+### Enumeration with TLS configuration and attacks scanning
+#### Description
+Run an enumeration with TLS scanning features
+  
+#### Template
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -ts -r 
+```
+
+#### Example
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -ts -r 
+```
+
+### Enumeration with additional filtering
+#### Description
+Run an enumeration with filtering by vendors (only Nginx and Apache, for example) and confidence levels (only "Certain" level, for example) for queries and vendor
+  
+#### Template
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q FILE_WITH_QUERIES.json -v VENDOR_TO_INCLUDE_IN_1 VENDOR_TO_INCLUDE_IN_2 -qc QUERY_CONFIDENCE -vc VENDOR_CONFIDENCE -r
+```
+  
+#### Example
+```bash
+./grinder.py -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -u -q queries/servers.json -v nginx apache -qc certain -vc certain -r
+```
+
+### Enumeration with additional custom scripts
+#### Description
+Run an enumeration with custom scripts which are described in JSON file with queries in 10 workers
+  
+#### Template
+```bash
+./grinder.py -sc -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -sc -scw NUMBER_OF_SCRIPT_WORKERS -r
+```
+  
+#### Example
+```bash
+./grinder.py -sc -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -sc -scw 10 -r
+```
+  
+### Enumeration with additional debug information
+#### Description
+Run Grinder with debug information about scanning
+  
+#### Template
+```bash
+./grinder.py -d -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q FILE_WITH_QUERIES.json -r
+```
+  
+#### Example
+```bash
+./grinder.py -d -sk YOUR_SHODAN_API_KEY_HERE -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -q queries/servers.json -r
+```
+  
 ## Add Your Own Queries
 To add your own vendors and products with queries you can simply create a new .json file in the directory with queries and choose it while running Grinder in the "run" scan mode.
 

@@ -26,6 +26,7 @@
    - [TLS configuration](#tls-configuration)
 1. [Current Features](#current-features)
    - [Already Implemented](#already-implemented)
+   - :fire: [Additional Modules](#additional-modules)
    - [Development and Future Updates](#development-and-future-updates)
 1. :pushpin: [Grinder Installing](#grinder-installing)
    - [Setup and Configure Environment](#setup-and-configure-environment)
@@ -112,6 +113,35 @@ Required only for TLS scanning.
 - :chart_with_downwards_trend: Confidence filtering system support
 - :chart_with_upwards_trend: Special vendors scanning and filtering support
 - :bulb: Searching for documents, security bulletins, public exploits and many more things based on detected by Grinder vulnerabilities and software
+
+### Additional Modules
+#### DICOM Patient Info Getter
+**Location:** `py_scripts/dicom_getter/dicom_getter.py`  
+**Description:** This module allows you to grab different patient information (including files) from medical servers
+#### HTTP Raw Response Grabber
+**Location:** `py_scripts/http_response_grabber/http_response_grabber.py`   
+**Description:** This module allows you to grab the HTTP response (headers + body) in decoded raw-bytes format
+#### HTTP Status
+**Location:** `py_scripts/http_status/http_status.py`  
+**Description:** This module allows you to check the HTTP status of the resource
+#### SCP (SSH) Grabber
+**Location:** `py_scripts/scp_grabber/scp_grabber.py`  
+**Description:** This module allows you to grab and download files from different SSH servers (you need to define login/password in the module)
+#### Sleep
+**Location:** `py_scripts/sleep/sleep.py`  
+**Description:** This is just a sleep module for test
+#### SNMP Walker (easysnmp implementation)
+**Location:** `py_scripts/snmp_walker_easysnmp/snmp_walker_easysnmp.py`  
+**Description:** This module allows you to collect information from SNMP servers
+#### SNMP Walker (system call implementation)
+**Location:** `py_scripts/snmp_walker_os/snmp_walker_os.py`  
+**Description:** The same as previous, but in another way
+#### Tensor Serving Server Checker
+**Location:** `py_scripts/tensor_serving_checker/tensor_serving_checker.py`  
+**Description:** This module allows you to check, if the resource is TensorFlow Serving Server or not
+#### Test
+**Location:** `py_scripts/test/test.py`  
+**Description:** Just an empty test script to check the functionality
   
 ### Development and Future Updates
  - [Grinder Development Project](https://github.com/sdnewhop/grinder/projects/2?fullscreen=true)  

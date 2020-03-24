@@ -17,14 +17,30 @@
 1. [Description](#description)
 1. [Grinder Workflow](#grinder-workflow)
 1. [Grinder Map](#grinder-map)
+   - [Screenshots](#screenshots)
+   - [Description](#description)
 1. [Requirements](#requirements)
+   - [Basic](#basic)
+   - [Accounts](#accounts)
+   - [Additional scanning](#additional-scanning)
+   - [TLS configuration](#tls-configuration)
 1. [Current Features](#current-features)
+   - [Already Implemented](#already-implemented)
+   - [Development and Future Updates](#development-and-future-updates)
 1. [Grinder Installing](#grinder-installing)
-1. [Build in Docker](#build-in-docker)
+   - [Setup and Configure Environment](#setup-and-configure-environment)
+   - [Running Grinder Map Server Locally](#running-grinder-map-server-locally)
+1. [Building and Running in Docker](#building-and-running-in-docker)
+   - [Description](#description)
+   - [Services and Images](#services-and-images)
+   - [Provided Scripts and Preparations](#provided-scripts-and-preparations)
+   - [Building](#building)
+   - [Running](#running)
 1. [Tests](#tests)
 1. [Usage](#usage)
+   - [Help on Command Line Arguments](#help-on-command-line-arguments)
 1. [Wiki](#wiki)
-1. [Examples](#examples)
+1. [Usage examples](#usage-examples)
 1. [Add Your Own Queries](#add-your-own-queries)
   
 ## Description
@@ -407,7 +423,7 @@ Run Grinder with debug information about scanning
 ### Description
 To add your own vendors and products with queries you can simply create a new JSON file in the directory with queries and choose it while running Grinder in the "run" scan mode.
 
-### Queries template
+### Queries Template
 ```json
 [
     {
@@ -433,7 +449,7 @@ To add your own vendors and products with queries you can simply create a new JS
     }
 ]
 ```
-### Queries example
+### Queries Example
 ```json
 [
     {

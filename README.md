@@ -41,8 +41,20 @@
    - [Help on Command Line Arguments](#help-on-command-line-arguments)
 1. [Wiki](#wiki)
 1. [Usage Examples](#usage-examples)
-   - 
+   - [Show Help](#show-help)
+   - [Basic Enumeration](#basic-enumeration)
+   - [Enumeration with Limited Results](#enumeration-with-limited-results)
+   - [Enumeration with Nmap Scanning](#enumeration-with-nmap-scanning)
+   - [Enumeration with Additional Analytics, Map and Plots](#enumeration-with-additional-analytics-map-and-plots)
+   - [Enumeration with Analytics from Vulners](#enumeration-with-analytics-from-vulners)
+   - [Enumeration with TLS Configuration and Attacks Scanning](#enumeration-with-tls-configuration-and-attacks-scanning)
+   - [Enumeration with Additional Filtering](#enumeration-with-additional-filtering)
+   - [Enumeration with Additional Custom Scripts](#enumeration-with-additional-custom-scripts)
+   - [Enumeration with Additional Debug Information](#enumeration-with-additional-debug-information)
 1. [Add Your Own Queries](#add-your-own-queries)
+   - [Description](#description)
+   - [Queries Template](#queries-template)
+   - [Queries Example](#queries-example)
   
 ## Description
 The Grinder framework was created to automatically enumerate and fingerprint different hosts on the Internet using various back-end systems: search engines (such as Shodan or Censys) for discovering hosts and NMAP engine for fingerprinting and specific checks. Also, Grinder supports Vulners API to get information about available public exploits and vulnerabilities, documents related to found vulnerabilities and other features.  

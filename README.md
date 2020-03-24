@@ -4,9 +4,15 @@
 [![License](https://img.shields.io/badge/license-GPL--2.0-blue)](/LICENSE)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/psf/black)
 [![Last Commit](https://img.shields.io/github/last-commit/sdnewhop/grinder)](https://github.com/sdnewhop/grinder)
-
+  
 :mag_right: Internet-connected Devices Census Python Framework 
-![Grinder Screenshot](/docs/screenshot.png?raw=true "Grinder Help")
+  
+## Screenshot
+<div align="center">
+  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/screenshot.png" alt="Grinder Framework Interface">
+  <p align="center"><i>The basic CLI interface of the Grinder Framework</i></p>
+</div> 
+  
 ## Contents
 1. [Description](#description)
 1. [Grinder Workflow](#grinder-workflow)
@@ -20,51 +26,69 @@
 1. [Wiki](#wiki)
 1. [Examples](#examples)
 1. [Add Your Own Queries](#add-your-own-queries)
+  
 ## Description
-The Grinder framework was created to automatically enumerate and fingerprint different hosts on the Internet using different back-end systems: search engines, such as Shodan or Censys, for discovering hosts and NMAP engine for fingerprinting and specific checks. The Grinder framework can be used in many different areas of researches, as a connected Python module in your own project or as an independent ready-to-use from the box tool.  
+The Grinder framework was created to automatically enumerate and fingerprint different hosts on the Internet using various back-end systems: search engines (such as Shodan or Censys) for discovering hosts and NMAP engine for fingerprinting and specific checks. Also, Grinder supports Vulners API to get information about available public exploits and vulnerabilities, documents related to found vulnerabilities and other features.  
+  
+The Grinder framework can be used in many different areas of research, as a connected Python module in your project or as an independent ready-to-use from the box tool. 
+  
 ## Grinder Workflow
 ![Grinder Workflow](/docs/workflow.png?raw=true "Grinder Workflow")
+  
 ## Grinder Map
+### Screenshots
+<div align="center">
+  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/map_1.png" alt="Grinder Framework Map (1)">
+  <p align="center"><i>The Grinder Framework can easily build an interactive map with found hosts in your browser</i></p>
+  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/map_2.png" alt="Grinder Framework Map (2)">
+  <p align="center"><i>Also, The Grinder Framework can show you some basic information</i></p>
+  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/map_3.png" alt="Grinder Framework Map (3)">
+  <p align="center"><i>...And some additional information</i></p>
+</div> 
+  
 ### Information
-Grinder Framework can easily build an interactive map with found hosts in your browser:
-![Grinder Map 1](/docs/map_1.png?raw=true "Grinder Map 1")
-Also, Grinder can show you some basic information:
-![Grinder Map 2](/docs/map_2.png?raw=true "Grinder Map 2")
-![Grinder Map 3](/docs/map_3.png?raw=true "Grinder Map 3")
-
-
+To visualize gained data, The Grinder Framework provides an interactive world map with all results. Grinder map back-end that was written in Flask supports additional REST API methods to get more information about all scanned hosts or some particular host from the map, also it is possible to show some additional information about host interactively from the map.  
+  
+For example, the hosts will be automatically checked for availability with ping from back-end, also for every host many additional features are available: current host can be directly opened in Shodan, Censys, and ZoomEye web interfaces, the host can be shown on Google Maps with all available information about geolocation. Also, it is possible to make an IP lookup or open raw information in JSON directly in a browser or from your application with provided API methods.
+  
 ## Requirements
+### Basic
 - [Python 3.6+](https://www.python.org/downloads/)
-- [python3-tk](https://docs.python.org/3/library/tkinter.html)
+- [python3-tk](https://docs.python.org/3/library/tkinter.html) library
+### Accounts
 - [Shodan](https://account.shodan.io/register) and [Censys](https://censys.io/register) accounts  
 Required to collect hosts, both free and full accounts are suitable. Also, it's possible to use only one account (Censys or Shodan, Shodan is preferable).
 - [Vulners](https://vulners.com/) account  
 Required to make additional reports on vulnerabilities and exploits. If this feature is not required for you, you can use Grinder without Vulners account.
+### Additional scanning
 - [Nmap Security Scanner 7.60+](https://nmap.org/download.html)  
 Version 7.60 and newer has been tested with currently used in Grinder scripts (ssl-cert.nse, vulners.nse, etc.).
+### TLS configuration
 - [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/tree/3.0)  
 Required only for TLS scanning.
 - [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/tree/2.9)  
 Required only for TLS scanning.
+  
 ## Current Features
 ### Already Implemented
-- Collecting hosts and additional information using Shodan and Censys search engines
-- Scanning ports and services with boosted multiprocessed Nmap Scanner wrapper
-- Scanning vulnerabilities and additional information about them with Vulners database and Shodan CVEs database
-- Retrieving information about SSL certificates
-- Scanning for SSL/TLS configuration and supported ciphersuites
-- Scanning for SSL/TLS bugs, vulnerabilities and attacks
-- Building an interactive map with information about the hosts found
-- Creating plots and tables based on the collected results
-- Custom scanning scripts support (in LUA or Python3)
-- Confidence filtering system support
-- Special vendors scanning and filtering support
-- Searching for documents, security bulletins, public exploits and many more things based on detected by Grinder vulnerabilities and software
-
+- :mag: Collecting hosts and additional information using Shodan and Censys search engines
+- :rocket: Scanning ports and services with boosted multi-processed Nmap Scanner wrapper
+- :syringe: Scanning vulnerabilities and additional information about them with Vulners database and Shodan CVEs database
+- :memo: Retrieving information about SSL certificates
+- :key: Scanning for SSL/TLS configuration and supported cipher suites
+- :key: Scanning for SSL/TLS bugs, vulnerabilities and attacks
+- :earth_asia: Building an interactive map with information about the hosts found
+- :bar_chart: Creating plots and tables based on the collected results
+- :wrench: Custom scanning scripts support (in LUA or Python3)
+- :chart_with_downwards_trend: Confidence filtering system support
+- :chart_with_upwards_trend: Special vendors scanning and filtering support
+- :bulb: Searching for documents, security bulletins, public exploits and many more things based on detected by Grinder vulnerabilities and software
+  
 ### Development and Future Updates
  - [Grinder Development Project](https://github.com/sdnewhop/grinder/projects/2?fullscreen=true)  
  
-The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
+:construction: The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
+  
 ## Setup and Configure Environment
 ### Grinder Installing
 _Note: If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced by `pipenv sync` command._
@@ -123,7 +147,7 @@ deactivate
 ```
 
 ### Run Local Grinder Map Server
-1. First, complete all steps from the "Setup and Configure Environment/Grinder Installing" section.
+1. First, complete all steps from the "Setup and Configure Environment/Grinder Installing" section above.
 2. After the scan is completed, go to the "map" folder
 ```bash
 cd map/

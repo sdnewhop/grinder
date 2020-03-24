@@ -19,7 +19,7 @@
 1. [Grinder Map](#grinder-map)
 1. [Requirements](#requirements)
 1. [Current Features](#current-features)
-1. [Setup and Configure Environment](#setup-and-configure-environment)
+1. [Grinder Installing](#grinder-installing)
 1. [Build in Docker](#build-in-docker)
 1. [Tests](#tests)
 1. [Usage](#usage)
@@ -41,13 +41,13 @@ The Grinder framework can be used in many different areas of research, as a conn
   <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/map_1.png" alt="Grinder Framework Map (1)">
   <p align="center"><i>The Grinder Framework can easily build an interactive map with found hosts in your browser</i></p>
   <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/map_2.png" alt="Grinder Framework Map (2)">
-  <p align="center"><i>Also, The Grinder Framework can show you some basic information</i></p>
+  <p align="center"><i>Also, the Grinder Framework can show you some basic information</i></p>
   <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/map_3.png" alt="Grinder Framework Map (3)">
   <p align="center"><i>...And some additional information</i></p>
 </div> 
   
-### Information
-To visualize gained data, The Grinder Framework provides an interactive world map with all results. Grinder map back-end that was written in Flask supports additional REST API methods to get more information about all scanned hosts or some particular host from the map, also it is possible to show some additional information about host interactively from the map.  
+### Description
+To visualize gained data, the Grinder Framework provides an interactive world map with all results. Grinder map back-end that was written in Flask supports additional REST API methods to get more information about all scanned hosts or some particular host from the map, also it is possible to show some additional information about host interactively from the map.  
   
 For example, the hosts will be automatically checked for availability with ping from back-end, also for every host many additional features are available: current host can be directly opened in Shodan, Censys, and ZoomEye web interfaces, the host can be shown on Google Maps with all available information about geolocation. Also, it is possible to make an IP lookup or open raw information in JSON directly in a browser or from your application with provided API methods.
   
@@ -89,8 +89,8 @@ Required only for TLS scanning.
  
 :construction: The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
   
-## Setup and Configure Environment
-### Grinder Installing
+## Grinder Installing
+### Setup and Configure Environment
 _Note: If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced by `pipenv sync` command._
 1. Install [Nmap Security Scanner](https://nmap.org/download.html) if not installed.
 2. Install [python3-tk](https://docs.python.org/3/library/tkinter.html) package if not installed (Linux only)
@@ -146,8 +146,8 @@ export VULNERS_API_KEY=YOUR_VULNERS_API_KEY_HERE
 deactivate
 ```
 
-### Run Local Grinder Map Server
-1. First, complete all steps from the "Setup and Configure Environment/Grinder Installing" section above.
+### Running Grinder Map Server Locally
+1. First, complete all steps from the [Setup and Configure Environment/Grinder Installing](#setup-and-configure-environment) section above.
 2. After the scan is completed, go to the "map" folder
 ```bash
 cd map/
@@ -161,15 +161,35 @@ flask run
 http://localhost:5000/
 ```
 Also, Grinder map server provides simple API methods such as `/api/viewall/`, `/api/viewraw/<host_id>`, you can learn more from list of application routes
-```
+```bash
 flask routes
 ```
 
-## Build in Docker
-To build the Grinder framework as an Alpine-based docker image you can use the scripts `docker_build.sh` and `docker_run.sh`:
+## Building and Running in Docker
+### Description
+The Grinder Framework also supports building as a set of Docker images: one for the framework itself, one for the map and the last one temporary image for the TLS-Scanner. You can use them separately from each other, or all at once - all of these services are linked via docker-compose.yml file.  
+
+### Services and Images
+- `tls-scanner` as `grinder/tls-scanner:2.9` image
+- `grinder` as `grinder/grinder-framework:1.0` image
+- `map` as `grinder/grinder-map:1.0` image
+  
+### Provided Scripts and Preparations
+To make the building process simple and convenient, a set of scripts provided in the repository to simplify routine actions.
+- `docker_build.sh` script simply runs `docker-compose build`, so you can do it by yourself.
+- `docker_run.sh` prepare all the required files and directories to link your host files with the ones in containers.
+  
+### Building
+To build the Grinder Framework as an Alpine-based set of Docker images you can use the script `docker_build.sh`:
 ```bash
-chmod +x docker_*.sh
+chmod +x docker_build.sh
 ./docker_build.sh
+```
+  
+### Running
+To run the Grinder Framework with all included services (Map, Framework and TLS-Scanner) you can use the script `docker_run.sh`:
+```bash
+chmod +x docker_run.sh
 ./docker_run.sh
 ```
 

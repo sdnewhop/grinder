@@ -31,5 +31,4 @@ RUN apk add --no-cache nmap nmap-scripts && \
 
 WORKDIR /app
 ENV PYTHONPATH="/app"
-EXPOSE 5000
 ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]

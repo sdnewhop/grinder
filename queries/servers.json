@@ -15,8 +15,12 @@
             }
         ],
         "scripts": {
-            "py_script": "test.py",
-            "nse_script": "test.nse"
+            "py_script": [
+                "http_response_grabber/http_response_grabber.py",
+                "http_status/http_status.py",
+                "test/test.py"
+            ],
+            "nse_script": ""
         },
         "vendor_confidence": "certain"
     },
@@ -36,8 +40,12 @@
             }
         ],
         "scripts": {
-            "py_script": "test.py",
-            "nse_script": "test.nse"
+            "py_script": [
+                "http_response_grabber/http_response_grabber.py",
+                "http_status/http_status.py",
+                "test/test.py"
+            ],
+            "nse_script": ""
         },
         "vendor_confidence": "certain"
     }

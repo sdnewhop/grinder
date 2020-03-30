@@ -6,6 +6,7 @@ class DefaultValues:
     Values that used almost everywhere,
     most basic default values class
     """
+
     SHODAN_API_KEY: str = "YOUR_DEFAULT_API_KEY"
     CENSYS_API_ID: str = "YOUR_CENSYS_API_ID"
     CENSYS_API_SECRET: str = "YOUR_CENSYS_API_SECRET"
@@ -55,6 +56,7 @@ class DefaultScriptCheckerValues:
     """
     Default values for script scanners
     """
+
     WORKERS = 50
 
 
@@ -62,6 +64,7 @@ class DefaultTlsParserValues:
     """
     Default values for TLS-Parser
     """
+
     PARSED_RESULTS_DIR = "tls_processed_data"
 
     FULL_RESULTS_JSON = "tls_scanner_results.json"
@@ -81,6 +84,7 @@ class DefaultTlsScannerValues:
     """
     Default values for TLS-Scanner
     """
+
     PRODUCT_LIMIT = 50
     LENGTH_OF_HOSTS_SUBGROUPS = 100
     NMAP_PING_SCAN_ARGS = "-n -sP"
@@ -98,6 +102,7 @@ class DefaultVulnersScanValues:
     """
     Default values for Nmap Vulners scan
     """
+
     SUDO = False
     PORTS = None
     TOP_PORTS = None
@@ -106,10 +111,23 @@ class DefaultVulnersScanValues:
     VULNERS_SCRIPT_PATH = "/plugins/vulners.nse"
 
 
+class DefaultMasscanScanValues:
+    """
+    Default values for Masscan scan itself
+    """
+
+    PORTS = None
+    TOP_PORTS = None
+    RATE = 5000
+    ARGUMENTS = None
+    SUDO = True
+
+
 class DefaultNmapScanValues:
     """
     Default values for Nmap scan itself
     """
+
     PORTS = None
     TOP_PORTS = None
     SUDO = False
@@ -122,6 +140,7 @@ class DefaultProcessManagerValues:
     """
     Default values for process manager
     """
+
     PORTS = None
     SUDO = False
     ARGUMENTS = "-Pn -A"
@@ -132,6 +151,7 @@ class DefaultPlotValues:
     """
     Default plot values
     """
+
     PLOT_DEFAULT_AUTOPCT = "%1.1f%%"
     PLOT_LABEL_FONT_SIZE = 6
     PLOT_SUPTITLE_FONT_SIZE = 10
@@ -143,4 +163,5 @@ class DefaultDatabaseValues:
     """
     Default database values
     """
+
     DB_NAME = "database.db"

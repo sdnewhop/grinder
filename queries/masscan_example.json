@@ -1,0 +1,21 @@
+[
+    {
+        "vendor": "Masscan scan",
+        "product": "Masscan scan",
+        "shodan_queries": [],
+        "censys_queries": [],
+        "masscan_settings": [
+            {
+                "hosts": "87.250.250.96/28",
+                "ports": "1-1024",
+                "rate": "10000"
+            }
+        ],
+        "scripts": {
+            "py_script": "test.py",
+            "nse_script": "test.nse"
+        },
+        "vendor_confidence": "certain"
+
+    }
+]

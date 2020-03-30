@@ -46,6 +46,7 @@ class GrinderDatabase:
         - scan_information - basic table with all main information about scan
         - scan_data - information about product, vendor, script running and confidence
         - shodan_results/censys_results - for results from backend search engines
+        - masscan_results - for results from masscan scan
         :return: None
         """
         with self.connection as db_connection:
@@ -100,6 +101,23 @@ class GrinderDatabase:
                 """
                 CREATE TABLE IF NOT EXISTS
                 censys_results(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    scan_data_id INTEGER,
+                    scan_information_id INTEGER,
+                    query TEXT,
+                    query_confidence TEXT,
+                    results_count INTEGER,
+                    results TEXT,
+
+                    FOREIGN KEY (scan_data_id) REFERENCES scan_data(id),
+                    FOREIGN KEY (scan_information_id) REFERENCES scan_information(id)
+                )
+                """
+            )
+            db_connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS
+                masscan_results(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     scan_data_id INTEGER,
                     scan_information_id INTEGER,
@@ -321,14 +339,53 @@ class GrinderDatabase:
                 ),
             )
 
+    @exception_handler(expected_exception=GrinderDatabaseAddScanDataError)
+    def add_masscan_scan_data(
+        self, query: dict, results_count: int, results: dict or list
+    ) -> None:
+        """
+        Add results from masscan for current query
+        :param query: result for current query
+        :param results_count: quantity of results
+        :param results: results itself
+        :return: None
+        """
+        with self.connection as db_connection:
+            db_connection.execute(
+                """
+                INSERT OR REPLACE INTO
+                masscan_results(
+                    scan_data_id,
+                    scan_information_id,
+                    query,
+                    query_confidence,
+                    results_count,
+                    results
+                ) VALUES (
+                    (SELECT max(id) FROM scan_data),
+                    (SELECT max(id) FROM scan_information),
+                    ?,
+                    ?,
+                    ?,
+                    json(?)
+                )
+                """,
+                (
+                    query.get("hosts"),
+                    query.get("query_confidence"),
+                    results_count,
+                    json_dumps(results),
+                ),
+            )
+
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_last_results(self) -> dict:
         """
         Load latest scan results from database, without scan linking.
-        This function collects last result from censys scan and
-        last result from shodan scan, and combine it together
-        with union select. Needed if you only need to load
-        any last results combination.
+        This function collects last result from censys scan, last
+        result from shodan scan and last result from masscan scan,
+        and combine it together with union select. Needed if you
+        only need to load any last results combination.
         :return: dict with results
         """
         with self.connection as db_connection:
@@ -342,6 +399,12 @@ class GrinderDatabase:
                 )
                 UNION SELECT json_extract(results, '$')
                 FROM censys_results
+                WHERE scan_information_id = (
+                    SELECT max(id) FROM scan_information
+                    WHERE scan_total_results != 0
+                )
+                UNION SELECT json_extract(results, '$')
+                FROM masscan_results
                 WHERE scan_information_id = (
                     SELECT max(id) FROM scan_information
                     WHERE scan_total_results != 0
@@ -361,11 +424,11 @@ class GrinderDatabase:
         """
         Load last results with some particular scan that can be
         passed via 'scan_name' variable. This function returns results
-        only from one backend system (censys, shodan) at time,
+        only from one backend system (censys, shodan, masscan) at time,
         and only the latest _one_.
         If 'scan_name' is not setted, any last result from
         censys or shodan scan will be loaded.
-        :param engine_table: shodan_results, censys_results, etc.
+        :param engine_table: shodan_results, censys_results, masscan_results, etc.
         :param scan_name: name of scanning - "servers", "sd-wans", etc.
         :return: dict with results
         """
@@ -397,10 +460,10 @@ class GrinderDatabase:
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_all_results_by_name(self, engine_table: str, scan_name: str = "") -> dict:
         """
-        Load collection of all results from one backend system (censys, shodan).
-        For exampe, you can load all records from Shodan with 'servers' scan,
-        and this function will sort only unique hosts from all of the history
-        of 'servers' scanning
+        Load collection of all results from one backend system (censys, shodan,
+        masscan). For example, you can load all records from Shodan with
+        'servers' scan, and this function will sort only unique hosts from
+        all of the history of 'servers' scanning
         :param engine_table: shodan_results, censys_results, etc.
         :param scan_name: name of scanning - "servers", "sd-wans", etc.
         :return: dict with results
@@ -435,14 +498,15 @@ class GrinderDatabase:
     def load_multiple_last_results_by_name(self) -> dict:
         """
         Load last results with some 'scan_name' from multiple
-        backend systems (shodan + censys at once). This function
+        backend systems (shodan + censys + masscan at once). This function
         sort all of the host into one dictionary and returns
         unique results from last scan of some 'scan_name'
         :return: dictionary with all results, like "combined" results
         """
         shodan_results = self.load_last_results_by_name(engine_table="shodan_results", scan_name=self.scan_name)
         censys_results = self.load_last_results_by_name(engine_table="censys_results", scan_name=self.scan_name)
-        return {**shodan_results, **censys_results}
+        masscan_results = self.load_last_results_by_name(engine_table="masscan_results", scan_name=self.scan_name)
+        return {**shodan_results, **censys_results, **masscan_results}
 
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_last_shodan_results(self) -> dict:
@@ -461,6 +525,14 @@ class GrinderDatabase:
         return self.load_last_results_by_name(engine_table="censys_results")
 
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_last_masscan_results(self) -> dict:
+        """
+        Return latest results from masscan only
+        :return: dict with masscan results
+        """
+        return self.load_last_results_by_name(engine_table="masscan_results")
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_last_shodan_results_by_scan_name(self) -> dict:
         """
         Return latest shodan results by some scan name (filename.json)
@@ -477,6 +549,14 @@ class GrinderDatabase:
         return self.load_last_results_by_name(engine_table="censys_results", scan_name=self.scan_name)
 
     @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_last_masscan_results_by_scan_name(self) -> dict:
+        """
+        Return latest masscan results by some scan name (filename.json)
+        :return: dict with results by name
+        """
+        return self.load_last_results_by_name(engine_table="masscan_results", scan_name=self.scan_name)
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
     def load_all_shodan_results_by_scan_name(self) -> dict:
         """
         Return all combined shodan results by some scan name (filename.json)
@@ -491,6 +571,14 @@ class GrinderDatabase:
         :return: dict with results by name
         """
         return self.load_all_results_by_name(engine_table="censys_results", scan_name=self.scan_name)
+
+    @exception_handler(expected_exception=GrinderDatabaseLoadResultsError)
+    def load_all_masscan_results_by_scan_name(self) -> dict:
+        """
+        Return all combined masscan results by some scan name (filename.json)
+        :return: dict with results by name
+        """
+        return self.load_all_results_by_name(engine_table="masscan_results", scan_name=self.scan_name)
 
     @exception_handler(expected_exception=GrinderDatabaseCloseError)
     def close(self) -> None:

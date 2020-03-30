@@ -4,20 +4,20 @@ Basic core module for grinder. All functions from
 Other modules must be wrapped here for proper usage.
 """
 
-from typing import NamedTuple, List, Dict
-from termcolor import cprint
-from re import findall
+from ipaddress import ip_network, ip_address
 from ntpath import basename
+from re import findall
+from typing import NamedTuple, List, Dict
 
-# from enforce import runtime_validation
+from termcolor import cprint
 
-from grinder.vulnersconnector import VulnersConnector
 from grinder.censysconnector import CensysConnector
 from grinder.continents import GrinderContinents
 from grinder.dbhandling import GrinderDatabase
 from grinder.decorators import exception_handler, timer
 from grinder.defaultvalues import (
     DefaultValues,
+    DefaultMasscanScanValues,
     DefaultNmapScanValues,
     DefaultVulnersScanValues,
     DefaultScriptCheckerValues,
@@ -59,17 +59,22 @@ from grinder.errors import (
     GrinderCoreSaveVulnersResultsError,
     GrinderCoreSaveVulnersPlotsError,
     GrinderCoreForceUpdateCombinedResults,
+    GrinderCoreHostMasscanResultsError,
+    GrinderCoreMasscanSaveToDatabaseError,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
+# from enforce import runtime_validation
+from grinder.masscanconnector import MasscanConnector
 from grinder.nmapprocessmanager import NmapProcessingManager
-from grinder.plots import GrinderPlots
-from grinder.shodanconnector import ShodanConnector
-from grinder.utils import GrinderUtils
-from grinder.pyscriptexecutor import PyProcessingManager
 from grinder.nmapscriptexecutor import NmapScriptExecutor
-from grinder.tlsscanner import TlsScanner
+from grinder.plots import GrinderPlots
+from grinder.pyscriptexecutor import PyProcessingManager
+from grinder.shodanconnector import ShodanConnector
 from grinder.tlsparser import TlsParser
+from grinder.tlsscanner import TlsScanner
+from grinder.utils import GrinderUtils
+from grinder.vulnersconnector import VulnersConnector
 
 
 class HostInfo(NamedTuple):
@@ -104,10 +109,11 @@ class GrinderCore:
         shodan_api_key: str = "",
         censys_api_id: str = "",
         censys_api_secret: str = "",
-        vulners_api_key: str = ""
+        vulners_api_key: str = "",
     ) -> None:
         self.shodan_processed_results: dict = {}
         self.censys_processed_results: dict = {}
+        self.masscan_results: dict = {}
         self.combined_results: dict = {}
 
         self.entities_count_all: list = []
@@ -244,7 +250,13 @@ class GrinderCore:
         :param entity_name: name of entity
         :return: modified entity name
         """
-        if entity_name.lower() in ["continent", "port", "product", "vendor", "organization"]:
+        if entity_name.lower() in [
+            "continent",
+            "port",
+            "product",
+            "vendor",
+            "organization",
+        ]:
             return entity_name + "s"
         elif entity_name.lower() in ["country", "vulnerability"]:
             return entity_name[:-1] + "ies"
@@ -409,6 +421,7 @@ class GrinderCore:
         self.combined_results = {
             **self.shodan_processed_results,
             **self.censys_processed_results,
+            **self.masscan_results,
         }
 
     @exception_handler(expected_exception=GrinderCoreLoadResultsFromDbError)
@@ -427,6 +440,7 @@ class GrinderCore:
                 self.combined_results = {}
                 self.shodan_processed_results = {}
                 self.censys_processed_results = {}
+                self.masscan_results = {}
             else:
                 print("Previous scan for this queries list was successfully loaded from database.")
                 return self.combined_results
@@ -435,6 +449,7 @@ class GrinderCore:
                 self.combined_results = self.db.load_last_results()
                 self.shodan_processed_results = self.db.load_last_shodan_results()
                 self.censys_processed_results = self.db.load_last_censys_results()
+                self.masscan_results = self.db.load_last_masscan_results()
                 print("Results of latest scan was successfully loaded from database.")
                 return self.combined_results
             except GrinderDatabaseLoadResultsError:
@@ -448,14 +463,17 @@ class GrinderCore:
         :param queries_filename: name of file with queries to load
         :return: processed search results
         """
-        return self.load_results_from_file() or self.load_results_from_db(queries_filename)
+        return self.load_results_from_file() \
+               or self.load_results_from_db(queries_filename)
 
     @exception_handler(expected_exception=GrinderCoreSaveVulnersResultsError)
-    def save_vulners_results(self,
-                             results: dict,
-                             name: str,
-                             dest_dir=DefaultValues.RESULTS_DIRECTORY,
-                             hosts_results=None) -> None:
+    def save_vulners_results(
+        self,
+        results: dict,
+        name: str,
+        dest_dir=DefaultValues.RESULTS_DIRECTORY,
+        hosts_results=None,
+    ) -> None:
         """
         Save results from vulners separately from another results
         :param results: results to save
@@ -470,9 +488,11 @@ class GrinderCore:
             dest_dir=dest_dir,
             json_file=f"{name.replace(' ', '_')}.json",
         )
-        bypass_list = ["vulners exploits by vulnerabilities",
-                       "vulners by cvss groups",
-                       "hosts groupped by vulnerabilities"]
+        bypass_list = [
+            "vulners exploits by vulnerabilities",
+            "vulners by cvss groups",
+            "hosts groupped by vulnerabilities",
+        ]
         self.filemanager.write_results_csv(
             results.values() if name not in bypass_list else results,
             dest_dir=dest_dir,
@@ -483,11 +503,13 @@ class GrinderCore:
                 results,
                 dest_dir=dest_dir,
                 csv_file=f"{name.replace(' ', '_')}.csv",
-                hosts_results=hosts_results
+                hosts_results=hosts_results,
             )
 
     @exception_handler(expected_exception=GrinderCoreSaveVulnersPlotsError)
-    def save_vulners_plots(self, results: dict or list, name: str, suptitle: str) -> None:
+    def save_vulners_plots(
+        self, results: dict or list, name: str, suptitle: str
+    ) -> None:
         """
         Create plots with vulners results
         :param results: results to save
@@ -498,8 +520,7 @@ class GrinderCore:
         cprint(f"Create Vulners graphical plots for {name}...", "blue", attrs=["bold"])
         plots = GrinderPlots()
         plots.create_pie_chart(
-            results=results,
-            suptitle=f"{suptitle}",
+            results=results, suptitle=f"{suptitle}",
         )
         plots.save_pie_chart(
             relative_path=DefaultValues.PNG_VULNERS_RESULTS,
@@ -559,16 +580,14 @@ class GrinderCore:
             (vulners_exploits_by_cpe, "vulners exploits by software"),
             (vulners_by_cvss_groups, "vulners by cvss groups"),
             (vulners_critical_vulnerabilities_hosts, "hosts with critical vulnerabilities"),
-            (vulners_by_cvss_groups_hosts, "hosts groupped by vulnerabilities")
+            (vulners_by_cvss_groups_hosts, "hosts groupped by vulnerabilities"),
         ]
         # Saver
         for results, name in named_results_to_save:
             if not results:
                 continue
             self.save_vulners_results(
-                results,
-                name=name,
-                hosts_results=self.combined_results,
+                results, name=name, hosts_results=self.combined_results,
             )
 
         # Count length
@@ -576,25 +595,27 @@ class GrinderCore:
         length_critical_vulnerabilities = len(vulners_critical_vulnerabilities.keys())
         length_references_vulnerabilities = len(vulners_exploits_by_cve.keys())
         length_exploitable_hosts = len(vulners_exploits_by_cpe.keys())
-        length_hosts_with_critical_vulnerabilities = len(vulners_critical_vulnerabilities_hosts.keys())
+        length_hosts_with_critical_vulnerabilities = len(
+            vulners_critical_vulnerabilities_hosts.keys()
+        )
         length_all_hosts = len(self.combined_results)
 
         # Set labels and definitions for plots
         hosts_with_critical_vulnerabilities_comparison = {
             "Other": length_all_hosts - length_hosts_with_critical_vulnerabilities,
-            "With Critical Vulnerabilities": length_hosts_with_critical_vulnerabilities
+            "With Critical Vulnerabilities": length_hosts_with_critical_vulnerabilities,
         }
         critical_vulnerabilities_comparison = {
             "Other": length_vulnerabilities - length_critical_vulnerabilities,
-            "Critical": length_critical_vulnerabilities
+            "Critical": length_critical_vulnerabilities,
         }
         vulnerabilities_with_exploits_comparison = {
             "Other": length_vulnerabilities - length_references_vulnerabilities,
-            "Referenced in Exploits": length_references_vulnerabilities
+            "Referenced in Exploits": length_references_vulnerabilities,
         }
         cpes_with_exploits_comparison = {
             "Other": length_all_hosts - length_exploitable_hosts,
-            "With Exploits": length_exploitable_hosts
+            "With Exploits": length_exploitable_hosts,
         }
         vulners_cvss_comparison = {
             key: len(value) for key, value in vulners_by_cvss_groups.items()
@@ -632,13 +653,15 @@ class GrinderCore:
             {
                 "results": vulners_cvss_hosts_comparison,
                 "name": "hosts groupped by cvss rating",
-                "suptitle": "Percentage of nodes divided into groups of CVSS rating vulnerabilities"
-            }
+                "suptitle": "Percentage of nodes divided into groups of CVSS rating vulnerabilities",
+            },
         ]
         for entity_to_save in plots_information_to_save:
-            self.save_vulners_plots(entity_to_save.get("results"),
-                                    name=entity_to_save.get("name"),
-                                    suptitle=entity_to_save.get("suptitle"))
+            self.save_vulners_plots(
+                entity_to_save.get("results"),
+                name=entity_to_save.get("name"),
+                suptitle=entity_to_save.get("suptitle"),
+            )
 
     @exception_handler(expected_exception=GrinderCoreSaveResultsError)
     def save_results(self, dest_dir: str = DefaultValues.RESULTS_DIRECTORY) -> None:
@@ -651,7 +674,12 @@ class GrinderCore:
         cprint("Save all results...", "blue", attrs=["bold"])
 
         # If all scan results were empty
-        if not self.combined_results and not self.shodan_processed_results and not self.censys_processed_results:
+        if (
+            not self.combined_results
+            and not self.shodan_processed_results
+            and not self.censys_processed_results
+            and not self.masscan_results
+        ):
             return
         # If some results are exists, but combined results are empty - refresh it
         elif not self.combined_results:
@@ -698,7 +726,7 @@ class GrinderCore:
     @exception_handler(expected_exception=GrinderCoreIsHostExistedError)
     def __is_host_existed(self, ip: str) -> bool:
         """
-        Check if current host is existed in current results. 
+        Check if current host is existed in current results.
 
         :param ip: host ip
         :return: answer to question "Is current host already scanned?"
@@ -830,6 +858,40 @@ class GrinderCore:
                 {censys_result_as_dict.get("ip"): censys_result_as_dict}
             )
 
+    @exception_handler(expected_exception=GrinderCoreHostMasscanResultsError)
+    def __parse_masscan_results(self, hosts: dict, product_info: dict) -> None:
+        """
+        Parse raw results from Masscan. Results were received from
+        MasscanConnector module.
+
+        :param hosts: all hosts information
+        :param product_info: information about current product
+        :return: None
+        """
+        for host in hosts.keys():
+            ports = ",".join([str(p) for p in hosts.get(host).get("tcp").keys()])
+            host_info = HostInfo(
+                product=product_info.get("product", "Unknown product"),
+                vendor=product_info.get("vendor", "Unknown vendor"),
+                query="",
+                port=ports,
+                proto="",
+                ip=host,
+                lat="",
+                lng="",
+                country="",
+                organization="",
+                vulnerabilities=dict(
+                    shodan_vulnerabilities={},
+                    vulners_vulnerabilities={},
+                ),
+                nmap_scan={},
+                scripts=dict(py_script=None, nse_script=None),
+            )
+            masscan_result_as_dict = dict(host_info._asdict())
+            self.masscan_results.update({host: masscan_result_as_dict})
+
+
     @exception_handler(expected_exception=GrinderCoreInitDatabaseCallError)
     def __init_database(self, queries_filename: str) -> None:
         """
@@ -849,9 +911,12 @@ class GrinderCore:
         """
         self.shodan_processed_results = self.db.load_all_shodan_results_by_scan_name()
         self.censys_processed_results = self.db.load_all_censys_results_by_scan_name()
+        self.masscan_results = self.db.load_all_masscan_results_by_scan_name()
         self.__force_update_combined_results()
         if self.combined_results:
-            print(f"Results from previous scans were loaded: {len(self.combined_results)} hosts")
+            print(
+                f"Results from previous scans were loaded: {len(self.combined_results)} hosts"
+            )
 
     @exception_handler(expected_exception=GrinderCoreCloseDatabaseError)
     def __close_database(self) -> None:
@@ -934,6 +999,31 @@ class GrinderCore:
             query=query, results_count=results_count, results=results_by_query
         )
 
+    @exception_handler(expected_exception=GrinderCoreMasscanSaveToDatabaseError)
+    def __masscan_save_to_database(self, query: dict) -> None:
+        """
+        Save current query-based results to database
+
+        :param query: current search query
+        :return: None
+        """
+        def check_ip(address: str, network: str) -> bool:
+            host = ip_address(address)
+            network = ip_network(network)
+            return host in network or host == network.broadcast_address or host == network.num_addresses
+
+        results_by_query = list(
+            filter(
+                lambda host: check_ip(host.get("ip"), query.get("hosts")),
+                self.masscan_results.values(),
+            )
+        )
+
+        results_count = len(results_by_query) if results_by_query else None
+        self.db.add_masscan_scan_data(
+            query=query, results_count=results_count, results=results_by_query
+        )
+
     @exception_handler(expected_exception=GrinderCoreSaveResultsToDatabaseError)
     def save_results_to_database(self):
         """
@@ -947,6 +1037,8 @@ class GrinderCore:
                 self.__shodan_save_to_database(query)
             for query in product_info.get("censys_queries", []) or []:
                 self.__censys_save_to_database(query)
+            for query in product_info.get("masscan_settings", []) or []:
+                self.__masscan_save_to_database(query)
 
         self.__update_end_time_database()
         self.__update_results_count(
@@ -1004,7 +1096,7 @@ class GrinderCore:
         adds information about product in database, search hosts
         with queries and parse them after that.
 
-        :param product_info (dict): all information about current product 
+        :param product_info (dict): all information about current product
             including queries, vendor, confidence etc.
         :return None:
         """
@@ -1012,12 +1104,20 @@ class GrinderCore:
 
         # Shodan queries processor
         len_of_shodan_queries = len(product_info.get("shodan_queries") or [])
-        for query_index, query_info in enumerate(product_info.get("shodan_queries") or []):
-            if not self.__is_query_confidence_valid(query_info.get("query_confidence", "") or ""):
+        for query_index, query_info in enumerate(
+            product_info.get("shodan_queries") or []
+        ):
+            if not self.__is_query_confidence_valid(
+                query_info.get("query_confidence", "") or ""
+            ):
                 continue
             query = query_info.get("query")
-            cprint(f"{query_index} / {len_of_shodan_queries} :: "
-                   f"Current Shodan query is: {query or 'Empty query field'}", "blue", attrs=["bold"])
+            cprint(
+                f"{query_index} / {len_of_shodan_queries} :: "
+                f"Current Shodan query is: {query or 'Empty query field'}",
+                "blue",
+                attrs=["bold"],
+            )
             if not query:
                 print("Query field is empty, skip this search")
                 continue
@@ -1029,12 +1129,20 @@ class GrinderCore:
 
         # Censys queries processor
         len_of_censys_queries = len(product_info.get("censys_queries") or [])
-        for query_index, query_info in enumerate(product_info.get("censys_queries") or []):
-            if not self.__is_query_confidence_valid(query_info.get("query_confidence", "") or ""):
+        for query_index, query_info in enumerate(
+            product_info.get("censys_queries") or []
+        ):
+            if not self.__is_query_confidence_valid(
+                query_info.get("query_confidence", "") or ""
+            ):
                 continue
             query = query_info.get("query")
-            cprint(f"{query_index} / {len_of_censys_queries} :: "
-                   f"Current Censys query is: {query or 'Empty query field'}", "blue", attrs=["bold"])
+            cprint(
+                f"{query_index} / {len_of_censys_queries} :: "
+                f"Current Censys query is: {query or 'Empty query field'}",
+                "blue",
+                attrs=["bold"],
+            )
             if not query:
                 print("Query field is empty, skip this search")
                 continue
@@ -1043,6 +1151,28 @@ class GrinderCore:
                 self.__parse_current_host_censys_results(
                     current_host, query, product_info
                 )
+
+        # Masscan queries processor
+        len_of_masscan_settings = len(product_info.get("masscan_settings") or [])
+        for query_index, query_info in enumerate(
+            product_info.get("masscan_settings") or []
+        ):
+            hosts = query_info.get("hosts")
+            ports = query_info.get("ports")
+            rate = query_info.get("rate")
+            cprint(
+                f"{query_index} / {len_of_masscan_settings} :: "
+                f"Current Masscan scan is: {hosts or 'Empty query field'}",
+                "blue",
+                attrs=["bold"],
+            )
+            if not hosts:
+                print("Hosts field is empty, skip this search")
+                continue
+            masscan_raw_results = self.masscan_scan(
+                hosts, ports, arguments=f"--rate {rate}"
+            )
+            self.__parse_masscan_results(masscan_raw_results, product_info)
 
     @exception_handler(expected_exception=GrinderCoreTlsScanner)
     def tls_scan(self, scanner_path: str) -> None:
@@ -1156,9 +1286,43 @@ class GrinderCore:
             self.shodan_processed_results[host]["nmap_scan"] = nmap_results.get(host)
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["nmap_scan"] = nmap_results.get(host)
+        for host in self.masscan_results.keys():
+            self.masscan_results[host]["nmap_scan"] = nmap_results.get(host)
         # Trigger to update overall results (shodan + censys as combined results)
         for host in self.combined_results.keys():
             self.combined_results[host]["nmap_scan"] = nmap_results.get(host)
+
+
+    @exception_handler(expected_exception=GrinderCoreNmapScanError)
+    def masscan_scan(
+        self,
+        hosts: str = None,
+        ports: str = DefaultMasscanScanValues.PORTS,
+        rate: int = DefaultMasscanScanValues.RATE,
+        arguments: str = DefaultMasscanScanValues.ARGUMENTS,
+        sudo: bool = DefaultMasscanScanValues.SUDO,
+    ) -> dict:
+        """
+        Initiate Masscan scan on hosts
+
+        :param hosts: ip to scan
+        :param ports: ports to scan
+        :param rate: packet rate
+        :param arguments: masscan arguments
+        :param sudo: sudo if needed
+        :return: None
+        """
+        cprint("Start Masscan scanning", "blue", attrs=["bold"])
+        cprint(
+            f'Masscan scan arguments: {arguments}, rate "{str(rate)}", hosts: "{str(hosts)}", ports: "{str(ports)}"',
+            "blue",
+            attrs=["bold"],
+        )
+
+        masscan = MasscanConnector()
+        masscan.scan(host=hosts, ports=ports, rate=rate, arguments=arguments, sudo=sudo)
+
+        return masscan.get_results()
 
     @exception_handler(expected_exception=GrinderCoreVulnersScanError)
     def vulners_scan(
@@ -1237,6 +1401,10 @@ class GrinderCore:
             self.censys_processed_results[host]["vulnerabilities"].update(
                 {"vulners_vulnerabilities": hosts_vulners.get(host)}
             )
+        for host in self.masscan_results.keys():
+            self.masscan_results[host]["vulnerabilities"].update(
+                {"vulners_vulnerabilities": hosts_vulners.get(host)}
+            )
         # Trigger to update combined results, for example, when shodan and censys results
         # are empty
         for host in self.combined_results.keys():
@@ -1281,7 +1449,9 @@ class GrinderCore:
         if not self.vendor_confidence:
             return
         if not isinstance(self.vendor_confidence, str):
-            print("Confidence level for vendors is not valid: wrong type of confidence level")
+            print(
+                "Confidence level for vendors is not valid: wrong type of confidence level"
+            )
             self.queries_file = []
             return
         if not self.vendor_confidence.lower() in ["firm", "certain", "tentative"]:
@@ -1378,7 +1548,9 @@ class GrinderCore:
             if nse_script:
                 nse_script_res = NmapScriptExecutor.run_script(host_info, nse_script)
                 if not nse_script_res:
-                    print(f"[{cur_position}] [NseExecutor: Empty output] Script {nse_script} done for {ip}")
+                    print(
+                        f"[{cur_position}] [NseExecutor: Empty output] Script {nse_script} done for {ip}"
+                    )
                 else:
                     print(
                         f"[{cur_position}] [NseExecutor: Successful] Script {nse_script} done for {ip}"
@@ -1397,24 +1569,33 @@ class GrinderCore:
         :return: None
         """
         # Reduce original queries to smaller dict with scripts
-        py_scripts_per_product = {f"{product.get('vendor', 'unknown')}:{product.get('product', 'unknown')}":
-                                  product.get('scripts', {}).get('py_script')
-                                  for product in self.queries_file
-                                  if product.get('scripts', {}).get('py_script')}
+        py_scripts_per_product = {
+            f"{product.get('vendor', 'unknown')}:{product.get('product', 'unknown')}": product.get(
+                "scripts", {}
+            ).get(
+                "py_script"
+            )
+            for product in self.queries_file
+            if product.get("scripts", {}).get("py_script")
+        }
 
         # Compare ips to required scripts
         py_ip_script_mapping = dict()
         for ip, host_info in self.combined_results.items():
-            compatible_script = py_scripts_per_product.get(f"{host_info.get('vendor')}:{host_info.get('product')}")
+            compatible_script = py_scripts_per_product.get(
+                f"{host_info.get('vendor')}:{host_info.get('product')}"
+            )
             if not compatible_script:
                 continue
             py_ip_script_mapping.update({ip: compatible_script})
 
         # Run scripts
-        py_runner = PyProcessingManager(ip_script_mapping=py_ip_script_mapping,
-                                        hosts_info=self.combined_results,
-                                        workers=workers,
-                                        mute=mute)
+        py_runner = PyProcessingManager(
+            ip_script_mapping=py_ip_script_mapping,
+            hosts_info=self.combined_results,
+            workers=workers,
+            mute=mute,
+        )
         py_runner.start()
         scripts_results = py_runner.get_results()
 
@@ -1428,10 +1609,12 @@ class GrinderCore:
                 continue
 
     @exception_handler(expected_exception=GrinderCoreRunScriptsError)
-    def run_scripts(self,
-                    queries_filename: str,
-                    workers: int = DefaultScriptCheckerValues.WORKERS,
-                    mute: bool = False) -> None:
+    def run_scripts(
+        self,
+        queries_filename: str,
+        workers: int = DefaultScriptCheckerValues.WORKERS,
+        mute: bool = False,
+    ) -> None:
         """
         Initiate script execution
 
@@ -1483,12 +1666,14 @@ class GrinderCore:
 
     @timer
     @exception_handler(expected_exception=GrinderCoreBatchSearchError)
-    def batch_search(self, queries_filename: str, not_incremental: bool = False) -> dict:
+    def batch_search(
+        self, queries_filename: str, not_incremental: bool = False
+    ) -> dict:
         """
         Run batch search for all products from input JSON product list file.
         Here we are try to load JSON file with queries for different search
         systems, also we initialize our database (if it was not initialized
-        earlier), and we process every product in queries file (parsing, 
+        earlier), and we process every product in queries file (parsing,
         processing, etc.). Basically it is the main search method in module.
 
         :param queries_filename: name of json file with input data
@@ -1499,7 +1684,7 @@ class GrinderCore:
                 host_ip: {
                     host_information
                     ...
-                    } 
+                    }
                 ...
             }
         """
@@ -1534,9 +1719,14 @@ class GrinderCore:
 
         len_of_products = len(self.queries_file)
         for product_index, product_info in enumerate(self.queries_file):
-            cprint(f"{product_index} / {len_of_products} :: Current product: {product_info.get('product')}", "blue", attrs=["bold"])
+            cprint(
+                f"{product_index} / {len_of_products} :: Current product: {product_info.get('product')}",
+                "blue",
+                attrs=["bold"],
+            )
             self.__process_current_product_queries(product_info)
 
         # Force create combined results container
         self.__force_update_combined_results()
+
         return self.combined_results

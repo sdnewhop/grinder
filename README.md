@@ -20,6 +20,7 @@
    - [Screenshots](#screenshots)
    - [Description](#description)
 1. [Requirements](#requirements)
+   - [Legend](#legend)
    - :pushpin: [Basic](#basic)
    - :pushpin: [Accounts](#accounts)
    - [Additional scanning](#additional-scanning)
@@ -82,21 +83,24 @@ To visualize gained data, the Grinder Framework provides an interactive world ma
 For example, the hosts will be automatically checked for availability with ping from back-end, also for every host many additional features are available: current host can be directly opened in Shodan, Censys, and ZoomEye web interfaces, the host can be shown on Google Maps with all available information about geolocation. Also, it is possible to make an IP lookup or open raw information in JSON directly in a browser or from your application with provided API methods.
   
 ## Requirements
+### Legend
+:heavy_exclamation_mark: required  
+:heavy_plus_sign: not required to run (or required only for additional modules)
 ### Basic
-- [Python 3.6+](https://www.python.org/downloads/)
-- [python3-tk](https://docs.python.org/3/library/tkinter.html) library
+- :heavy_exclamation_mark: [Python 3.6+](https://www.python.org/downloads/)
+- :heavy_exclamation_mark: [python3-tk](https://docs.python.org/3/library/tkinter.html) library
 ### Accounts
-- [Shodan](https://account.shodan.io/register) and [Censys](https://censys.io/register) accounts  
+- :heavy_exclamation_mark: [Shodan](https://account.shodan.io/register) and [Censys](https://censys.io/register) accounts  
 Required to collect hosts, both free and full accounts are suitable. Also, it's possible to use only one account (Censys or Shodan, Shodan is preferable).
-- [Vulners](https://vulners.com/) account  
+- :heavy_plus_sign: [Vulners](https://vulners.com/) account  
 Required to make additional reports on vulnerabilities and exploits. If this feature is not required for you, you can use Grinder without Vulners account.
 ### Additional scanning
-- [Nmap Security Scanner 7.60+](https://nmap.org/download.html)  
+- :heavy_plus_sign: [Nmap Security Scanner 7.60+](https://nmap.org/download.html)  
 Version 7.60 and newer has been tested with currently used in Grinder scripts (ssl-cert.nse, vulners.nse, etc.).
 ### TLS configuration
-- [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/tree/3.0)  
+- :heavy_plus_sign: [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/tree/3.0)  
 Required only for TLS scanning.
-- [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/tree/2.9)  
+- :heavy_plus_sign: [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/tree/2.9)  
 Required only for TLS scanning.
   
 ## Current Features
@@ -153,7 +157,7 @@ Required only for TLS scanning.
 :construction: **Note:** The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
   
 ## Grinder Installing
-:bulb: **Note #1:** If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced by `pipenv sync` command.  
+:bulb: **Note #1:** If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced with `pipenv sync` command.  
   
 :bulb: **Note #2:** If you are familiar with Docker and docker-compose, you can build framework with Docker, see [Building and Running in Docker](#building-and-running-in-docker)
   

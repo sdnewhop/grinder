@@ -20,6 +20,7 @@
    - [Screenshots](#screenshots)
    - [Description](#description)
 1. [Requirements](#requirements)
+   - [Legend](#legend)
    - :pushpin: [Basic](#basic)
    - :pushpin: [Accounts](#accounts)
    - [Additional scanning](#additional-scanning)
@@ -82,21 +83,24 @@ To visualize gained data, the Grinder Framework provides an interactive world ma
 For example, the hosts will be automatically checked for availability with ping from back-end, also for every host many additional features are available: current host can be directly opened in Shodan, Censys, and ZoomEye web interfaces, the host can be shown on Google Maps with all available information about geolocation. Also, it is possible to make an IP lookup or open raw information in JSON directly in a browser or from your application with provided API methods.
   
 ## Requirements
+### Legend
+:heavy_exclamation_mark: required  
+:heavy_plus_sign: not required to run (or required only for additional modules)
 ### Basic
-- [Python 3.6+](https://www.python.org/downloads/)
-- [python3-tk](https://docs.python.org/3/library/tkinter.html) library
+- :heavy_exclamation_mark: [Python 3.6+](https://www.python.org/downloads/)
+- :heavy_exclamation_mark: [python3-tk](https://docs.python.org/3/library/tkinter.html) library
 ### Accounts
-- [Shodan](https://account.shodan.io/register) and [Censys](https://censys.io/register) accounts  
+- :heavy_exclamation_mark: [Shodan](https://account.shodan.io/register) and [Censys](https://censys.io/register) accounts  
 Required to collect hosts, both free and full accounts are suitable. Also, it's possible to use only one account (Censys or Shodan, Shodan is preferable).
-- [Vulners](https://vulners.com/) account  
+- :heavy_plus_sign: [Vulners](https://vulners.com/) account  
 Required to make additional reports on vulnerabilities and exploits. If this feature is not required for you, you can use Grinder without Vulners account.
 ### Additional scanning
-- [Nmap Security Scanner 7.60+](https://nmap.org/download.html)  
+- :heavy_plus_sign: [Nmap Security Scanner 7.60+](https://nmap.org/download.html)  
 Version 7.60 and newer has been tested with currently used in Grinder scripts (ssl-cert.nse, vulners.nse, etc.).
 ### TLS configuration
-- [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/tree/3.0)  
+- :heavy_plus_sign: [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/tree/3.0)  
 Required only for TLS scanning.
-- [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/tree/2.9)  
+- :heavy_plus_sign: [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/tree/2.9)  
 Required only for TLS scanning.
   
 ## Current Features
@@ -115,6 +119,10 @@ Required only for TLS scanning.
 - :bulb: Searching for documents, security bulletins, public exploits and many more things based on detected by Grinder vulnerabilities and software
 
 ### Additional Modules
+:rocket: **Note #1:** You can run multiple Python scripts simultaneously per multiple hosts, so you can build your own chain of scripts and checks to get the most information from your hosts. Feel free to add your modules with PR or give us an idea with feature issue.  
+  
+:construction: **Note #2:** Multiple NSE scripts running task is still in WIP status. So, NSE scripts will be ran consistently, one after one. New NSE script engine for Grinder is comming up, stay tuned.  
+
 #### DICOM Patient Info Getter
 **Location:** `py_scripts/dicom_getter/dicom_getter.py`  
 **Description:** This module allows you to grab different patient information (including files) from medical servers
@@ -149,8 +157,11 @@ Required only for TLS scanning.
 :construction: **Note:** The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
   
 ## Grinder Installing
-### Setup and Configure Environment
-_Note: If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced by `pipenv sync` command._
+:bulb: **Note #1:** If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced with `pipenv sync` command.  
+  
+:bulb: **Note #2:** If you are familiar with Docker and docker-compose, you can build framework with Docker, see [Building and Running in Docker](#building-and-running-in-docker)
+  
+### Setup and Configure Environment  
 1. Install [Nmap Security Scanner](https://nmap.org/download.html) if not installed.
 2. Install [python3-tk](https://docs.python.org/3/library/tkinter.html) package if not installed (Linux only)
 ```bash
@@ -470,72 +481,102 @@ To add your own vendors and products with queries you can simply create a new JS
 ```json
 [
     {
-        "vendor": "YOUR OWN VENDOR HERE",
-        "product": "YOUR OWN PRODUCT HERE",
-        "shodan_queries": [
+        "vendor":"Your vendor name here ('Apache', for example; any string is allowed and required)",
+        "product":"Your product name here ('HTTP Server', for example; any string is allowed and required)",
+        "shodan_queries":[
             {
-                "query": "YOUR SHODAN QUERY HERE",
-                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative | firm | certain}"
+                "query":"Shodan query here ('Apache', 'Server: Apache', for example; any string is allowed and required)",
+                "query_confidence":"Query confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use query confidence flag for this purpose)"
             }
         ],
-        "censys_queries": [
+        "censys_queries":[
             {
-                "query": "YOUR CENSYS QUERY HERE",
-                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative | firm | certain}"
+                "query":"Censys query here ('Apache', 'Server: Apache', for example; any string is allowed and required)",
+                "query_confidence":"Query confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use query confidence flag for this purpose)"
             }
         ],
-        "scripts": {
-            "py_script": "NAME OF MODULE AND PYTHON SCRIPT FROM /custom_scripts/py_scripts",
-            "nse_script": "NAME OF MODULE AND NSE SCRIPT FROM /custom_scripts/nse_scripts"
+        "scripts":{
+            "py_script":"3 types of definitions are allowed: you can use a simple string here, for example, 'test/test.py'; you can use a list here, for example, ['test1/test1.py', 'test2/test2.py']; you can use a dictionary here, for example, {'test': 'test/test.py'}",
+            "nse_script":"Currently, you can run only 1 NSE script per time, this is WIP. Define the script with string, for example, 'test/test.nse'"
         },
-        "vendor_confidence": "VENDOR CONFIDENCE LEVEL {tentative | firm | certain}"
+        "vendor_confidence":"Vendor confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use vendor and product confidence flags for this purpose)"
     }
 ]
 ```
 ### Queries Example
+:construction: **Note:** Queries in the `queries/` directory may be different due to the different stages of development, but mostly all of them are still supported and tested. The most actual query template and an example provided below, so if you need or want to try your queries, you can use this example to get the freshest features. 
 ```json
 [
     {
-        "vendor": "Apache Software Foundation",
-        "product": "Apache HTTP Server",
-        "shodan_queries": [
+        "vendor":"Apache Software Foundation",
+        "product":"Apache HTTP Server",
+        "shodan_queries":[
             {
-                "query": "Apache",
-                "query_confidence": "certain"
+                "query":"Apache",
+                "query_confidence":"certain"
             }
         ],
-        "censys_queries": [
+        "censys_queries":[
             {
-                "query": "Apache",
-                "query_confidence": "certain"
+                "query":"Apache",
+                "query_confidence":"certain"
             }
         ],
-        "scripts": {
-            "py_script": "http_response_grabber/http_response_grabber.py",
-            "nse_script": "test/test.nse"
+        "scripts":{
+            "py_script":"http_status/http_status.py",
+            "nse_script":""
         },
-        "vendor_confidence": "certain"
+        "vendor_confidence":"certain"
     },
     {
-        "vendor": "Nginx",
-        "product": "Nginx",
-        "shodan_queries": [
+        "vendor":"Nginx",
+        "product":"Nginx",
+        "shodan_queries":[
             {
-                "query": "Nginx",
-                "query_confidence": "certain"
+                "query":"Nginx",
+                "query_confidence":"certain"
             }
         ],
-        "censys_queries": [
+        "censys_queries":[
             {
-                "query": "Nginx",
-                "query_confidence": "certain"
+                "query":"Nginx",
+                "query_confidence":"certain"
             }
         ],
-        "scripts": {
-            "py_script": "http_response_grabber/http_response_grabber.py",
-            "nse_script": "test/test.nse"
+        "scripts":{
+            "py_script":[
+                "http_response_grabber/http_response_grabber.py",
+                "http_status/http_status.py",
+                "test/test.py"
+            ],
+            "nse_script":""
         },
-        "vendor_confidence": "certain"
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Flask",
+        "product":"Flask",
+        "shodan_queries":[
+            {
+                "query":"Flask",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+            {
+                "query":"Flask",
+                "query_confidence":"certain"
+            }
+        ],
+        "scripts":{
+            "py_script":{
+                "grabber":"http_response_grabber/http_response_grabber.py",
+                "status":"http_status/http_status.py",
+                "test":"test/test.py"
+            },
+            "nse_script":""
+        },
+        "vendor_confidence":"certain"
     }
 ]
 ```

@@ -470,25 +470,25 @@ To add your own vendors and products with queries you can simply create a new JS
 ```json
 [
     {
-        "vendor": "Your vendor name here ('Apache', for example; any string is allowed and required)",
-        "product": "Your product name here ('HTTP Server', for example; any string is allowed and required)",
-        "shodan_queries": [
+        "vendor":"Your vendor name here ('Apache', for example; any string is allowed and required)",
+        "product":"Your product name here ('HTTP Server', for example; any string is allowed and required)",
+        "shodan_queries":[
             {
-                "query": "Shodan query here ('Apache', 'Server: Apache', for example; any string is allowed and required)",
-                "query_confidence": "Query confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use query confidence flag for this purpose)"
+                "query":"Shodan query here ('Apache', 'Server: Apache', for example; any string is allowed and required)",
+                "query_confidence":"Query confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use query confidence flag for this purpose)"
             }
         ],
-        "censys_queries": [
+        "censys_queries":[
             {
-                "query": "Censys query here ('Apache', 'Server: Apache', for example; any string is allowed and required)",
-                "query_confidence": "Query confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use query confidence flag for this purpose)"
+                "query":"Censys query here ('Apache', 'Server: Apache', for example; any string is allowed and required)",
+                "query_confidence":"Query confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use query confidence flag for this purpose)"
             }
         ],
-        "scripts": {
-            "py_script": "3 types of definitions are allowed: you can use a simple string here, for example, 'test/test.py'; you can use a list here, for example, ['test1/test1.py', 'test2/test2.py']; you can use a dictionary here, for example, {'test': 'test/test.py'}",
-            "nse_script": "Currently, you can run only 1 NSE script per time, this is WIP. Define the script with string, for example, 'test/test.nse'"
+        "scripts":{
+            "py_script":"3 types of definitions are allowed: you can use a simple string here, for example, 'test/test.py'; you can use a list here, for example, ['test1/test1.py', 'test2/test2.py']; you can use a dictionary here, for example, {'test': 'test/test.py'}",
+            "nse_script":"Currently, you can run only 1 NSE script per time, this is WIP. Define the script with string, for example, 'test/test.nse'"
         },
-        "vendor_confidence": "Vendor confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use vendor and product confidence flags for this purpose)"
+        "vendor_confidence":"Vendor confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use vendor and product confidence flags for this purpose)"
     }
 ]
 ```

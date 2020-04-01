@@ -115,6 +115,10 @@ Required only for TLS scanning.
 - :bulb: Searching for documents, security bulletins, public exploits and many more things based on detected by Grinder vulnerabilities and software
 
 ### Additional Modules
+:rocket: **Note #1:** You can run multiple Python scripts simultaneously per multiple hosts, so you can build your own chain of scripts and checks to get the most information from your hosts. Feel free to add your modules with PR or give us an idea with feature issue.  
+  
+:construction: **Note #2:** Multiple NSE scripts running task is still in WIP status. So, NSE scripts will be ran consistently, one after one. New NSE script engine for Grinder is comming up, stay tuned.  
+
 #### DICOM Patient Info Getter
 **Location:** `py_scripts/dicom_getter/dicom_getter.py`  
 **Description:** This module allows you to grab different patient information (including files) from medical servers
@@ -149,8 +153,11 @@ Required only for TLS scanning.
 :construction: **Note:** The Grinder framework is still in progress and got features to improve, so all the tasks and other features will always be described in this project. If you got some awesome ideas or any other interesting things for Grinder, you can always open a pull request or some issues in this repository.
   
 ## Grinder Installing
-### Setup and Configure Environment
-_Note: If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced by `pipenv sync` command._
+:bulb: **Note #1:** If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced by `pipenv sync` command.  
+  
+:bulb: **Note #2:** If you are familiar with Docker and docker-compose, you can build framework with Docker, see [Building and Running in Docker](#building-and-running-in-docker)
+  
+### Setup and Configure Environment  
 1. Install [Nmap Security Scanner](https://nmap.org/download.html) if not installed.
 2. Install [python3-tk](https://docs.python.org/3/library/tkinter.html) package if not installed (Linux only)
 ```bash
@@ -493,6 +500,7 @@ To add your own vendors and products with queries you can simply create a new JS
 ]
 ```
 ### Queries Example
+:construction: **Note:** Queries in the `queries/` directory may be different due to the different stages of development, but mostly all of them are still supported and tested. The most actual query template and an example provided below, so if you need or want to try your queries, you can use this example to get the freshest features. 
 ```json
 [
     {

@@ -1,52 +1,73 @@
 [
     {
-        "vendor": "Apache Software Foundation",
-        "product": "Apache HTTP Server",
-        "shodan_queries": [
+        "vendor":"Apache Software Foundation",
+        "product":"Apache HTTP Server",
+        "shodan_queries":[
             {
-                "query": "Apache",
-                "query_confidence": "certain"
+                "query":"Apache",
+                "query_confidence":"certain"
             }
         ],
-        "censys_queries": [
+        "censys_queries":[
             {
-                "query": "Apache",
-                "query_confidence": "certain"
+                "query":"Apache",
+                "query_confidence":"certain"
             }
         ],
-        "scripts": {
-            "py_script": [
-                "http_response_grabber/http_response_grabber.py",
-                "http_status/http_status.py",
-                "test/test.py"
-            ],
-            "nse_script": ""
+        "scripts":{
+            "py_script":"http_status/http_status.py",
+            "nse_script":""
         },
-        "vendor_confidence": "certain"
+        "vendor_confidence":"certain"
     },
     {
-        "vendor": "Nginx",
-        "product": "Nginx",
-        "shodan_queries": [
+        "vendor":"Nginx",
+        "product":"Nginx",
+        "shodan_queries":[
             {
-                "query": "Nginx",
-                "query_confidence": "certain"
+                "query":"Nginx",
+                "query_confidence":"certain"
             }
         ],
-        "censys_queries": [
+        "censys_queries":[
             {
-                "query": "Nginx",
-                "query_confidence": "certain"
+                "query":"Nginx",
+                "query_confidence":"certain"
             }
         ],
-        "scripts": {
-            "py_script": [
+        "scripts":{
+            "py_script":[
                 "http_response_grabber/http_response_grabber.py",
                 "http_status/http_status.py",
                 "test/test.py"
             ],
-            "nse_script": ""
+            "nse_script":""
         },
-        "vendor_confidence": "certain"
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Flask",
+        "product":"Flask",
+        "shodan_queries":[
+            {
+                "query":"Flask",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+            {
+                "query":"Flask",
+                "query_confidence":"certain"
+            }
+        ],
+        "scripts":{
+            "py_script":{
+                "grabber":"http_response_grabber/http_response_grabber.py",
+                "status":"http_status/http_status.py",
+                "test":"test/test.py"
+            },
+            "nse_script":""
+        },
+        "vendor_confidence":"certain"
     }
 ]

@@ -470,25 +470,25 @@ To add your own vendors and products with queries you can simply create a new JS
 ```json
 [
     {
-        "vendor": "YOUR OWN VENDOR HERE",
-        "product": "YOUR OWN PRODUCT HERE",
+        "vendor": "Your vendor name here ('Apache', for example; any string is allowed and required)",
+        "product": "Your product name here ('HTTP Server', for example; any string is allowed and required)",
         "shodan_queries": [
             {
-                "query": "YOUR SHODAN QUERY HERE",
-                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative | firm | certain}"
+                "query": "Shodan query here ('Apache', 'Server: Apache', for example; any string is allowed and required)",
+                "query_confidence": "Query confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use query confidence flag for this purpose)"
             }
         ],
         "censys_queries": [
             {
-                "query": "YOUR CENSYS QUERY HERE",
-                "query_confidence": "QUERY CONFIDENCE LEVEL {tentative | firm | certain}"
+                "query": "Censys query here ('Apache', 'Server: Apache', for example; any string is allowed and required)",
+                "query_confidence": "Query confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use query confidence flag for this purpose)"
             }
         ],
         "scripts": {
-            "py_script": "NAME OF MODULE AND PYTHON SCRIPT FROM /custom_scripts/py_scripts",
-            "nse_script": "NAME OF MODULE AND NSE SCRIPT FROM /custom_scripts/nse_scripts"
+            "py_script": "3 types of definitions are allowed: you can use a simple string here, for example, 'test/test.py'; you can use a list here, for example, ['test1/test1.py', 'test2/test2.py']; you can use a dictionary here, for example, {'test': 'test/test.py'}",
+            "nse_script": "Currently, you can run only 1 NSE script per time, this is WIP. Define the script with string, for example, 'test/test.nse'"
         },
-        "vendor_confidence": "VENDOR CONFIDENCE LEVEL {tentative | firm | certain}"
+        "vendor_confidence": "Vendor confidence level ('tentative', 'firm' or 'certain' - you can sort and modify your search with these keywords, use vendor and product confidence flags for this purpose)"
     }
 ]
 ```
@@ -496,46 +496,75 @@ To add your own vendors and products with queries you can simply create a new JS
 ```json
 [
     {
-        "vendor": "Apache Software Foundation",
-        "product": "Apache HTTP Server",
-        "shodan_queries": [
+        "vendor":"Apache Software Foundation",
+        "product":"Apache HTTP Server",
+        "shodan_queries":[
             {
-                "query": "Apache",
-                "query_confidence": "certain"
+                "query":"Apache",
+                "query_confidence":"certain"
             }
         ],
-        "censys_queries": [
+        "censys_queries":[
             {
-                "query": "Apache",
-                "query_confidence": "certain"
+                "query":"Apache",
+                "query_confidence":"certain"
             }
         ],
-        "scripts": {
-            "py_script": "http_response_grabber/http_response_grabber.py",
-            "nse_script": "test/test.nse"
+        "scripts":{
+            "py_script":"http_status/http_status.py",
+            "nse_script":""
         },
-        "vendor_confidence": "certain"
+        "vendor_confidence":"certain"
     },
     {
-        "vendor": "Nginx",
-        "product": "Nginx",
-        "shodan_queries": [
+        "vendor":"Nginx",
+        "product":"Nginx",
+        "shodan_queries":[
             {
-                "query": "Nginx",
-                "query_confidence": "certain"
+                "query":"Nginx",
+                "query_confidence":"certain"
             }
         ],
-        "censys_queries": [
+        "censys_queries":[
             {
-                "query": "Nginx",
-                "query_confidence": "certain"
+                "query":"Nginx",
+                "query_confidence":"certain"
             }
         ],
-        "scripts": {
-            "py_script": "http_response_grabber/http_response_grabber.py",
-            "nse_script": "test/test.nse"
+        "scripts":{
+            "py_script":[
+                "http_response_grabber/http_response_grabber.py",
+                "http_status/http_status.py",
+                "test/test.py"
+            ],
+            "nse_script":""
         },
-        "vendor_confidence": "certain"
+        "vendor_confidence":"certain"
+    },
+    {
+        "vendor":"Flask",
+        "product":"Flask",
+        "shodan_queries":[
+            {
+                "query":"Flask",
+                "query_confidence":"certain"
+            }
+        ],
+        "censys_queries":[
+            {
+                "query":"Flask",
+                "query_confidence":"certain"
+            }
+        ],
+        "scripts":{
+            "py_script":{
+                "grabber":"http_response_grabber/http_response_grabber.py",
+                "status":"http_status/http_status.py",
+                "test":"test/test.py"
+            },
+            "nse_script":""
+        },
+        "vendor_confidence":"certain"
     }
 ]
 ```

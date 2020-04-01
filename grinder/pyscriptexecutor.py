@@ -102,7 +102,11 @@ class PyProcessing(Process):
                 # Wait while queue will get some tasks to do
                 sleep(PyProcessingValues.EMPTY_QUEUE_POLLING_RATE)
                 continue
-            log_progress, log_host, py_script = "Error", "Unknown host", "Unknown script"
+            log_progress, log_host, py_script = (
+                "Error",
+                "Unknown host",
+                "Unknown script",
+            )
             try:
                 current_progress, host_info, py_script = self.queue.get()
                 ip = host_info.get("ip")
@@ -137,7 +141,9 @@ class PyProcessing(Process):
                     self.queue.task_done()
                     continue
             except Exception as script_err:
-                print(f'{log_progress} -> script "{py_script}" crash for {log_host}: {str(script_err)}')
+                print(
+                    f'{log_progress} -> script "{py_script}" crash for {log_host}: {str(script_err)}'
+                )
                 self.queue.task_done()
             else:
                 print(f'{log_progress} -> script "{py_script}" done for {log_host}')
@@ -190,21 +196,31 @@ class PyProcessingManager:
             # In case of:
             # "py_script": "package/script.py"
             if isinstance(py_script, str):
-                queue.put(((index, hosts_length, f"{percentage}%"), host_info, py_script))
+                queue.put(
+                    ((index, hosts_length, f"{percentage}%"), host_info, py_script)
+                )
             # In case of:
             # "py_script": ["package1/script1.py", "package2/script2.py", ...]
             elif isinstance(py_script, list):
                 for script in py_script:
                     if not script:
                         continue
-                    queue.put(((index, hosts_length, f"{percentage}%"), host_info, script))
+                    queue.put(
+                        ((index, hosts_length, f"{percentage}%"), host_info, script)
+                    )
             # In case of:
             # "py_script": {"script1": "package1/script1.py", "script2": "package2/script2.py"}
             elif isinstance(py_script, dict):
                 for script_name, script_file in py_script.items():
                     if not script_file:
                         continue
-                    queue.put(((index, hosts_length, f"{percentage}%"), host_info, script_file))
+                    queue.put(
+                        (
+                            (index, hosts_length, f"{percentage}%"),
+                            host_info,
+                            script_file,
+                        )
+                    )
         queue.join()
 
     def start(self) -> None:

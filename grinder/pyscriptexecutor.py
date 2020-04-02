@@ -75,13 +75,15 @@ class PyProcessing(Process):
         """
         if isinstance(py_script, str) and py_script.endswith(".py"):
             full_path = self.base_path.joinpath(py_script)
+            py_script_wo_extension = py_script.replace(".py", "")
             loader = SourceFileLoader("main", str(full_path))
             module = ModuleType(loader.name)
             loader.exec_module(module)
+            script_result = {py_script_wo_extension: module.main(host_info)}
             if not self.mute:
-                return module.main(host_info)
+                return script_result
             with redirect_stderr(None), redirect_stdout(None):
-                return module.main(host_info)
+                return script_result
 
     @exception_handler(expected_exception=PyScriptExecutorRunProcessError)
     def run(self) -> None:
@@ -100,13 +102,22 @@ class PyProcessing(Process):
                 # Wait while queue will get some tasks to do
                 sleep(PyProcessingValues.EMPTY_QUEUE_POLLING_RATE)
                 continue
+            log_progress, log_host, py_script = (
+                "Error",
+                "Unknown host",
+                "Unknown script",
+            )
             try:
                 current_progress, host_info, py_script = self.queue.get()
+                ip = host_info.get("ip")
+                port = host_info.get("port")
+
                 # Poll with POLLING_RATE interval
                 sleep(PyProcessingValues.POLLING_RATE)
 
+                # Setup logging
                 log_progress = f"[{current_progress[0]}/{current_progress[1]}] ({current_progress[2]})"
-                log_host = f"{host_info.get('ip')}:{host_info.get('port')}"
+                log_host = f"{ip}:{port}"
 
                 try:
                     result = self._exec_script(host_info=host_info, py_script=py_script)
@@ -117,15 +128,22 @@ class PyProcessing(Process):
                     self.queue.task_done()
                     continue
                 try:
-                    PyProcessingResults.RESULTS.update({host_info.get("ip"): result})
+                    if ip not in PyProcessingResults.RESULTS.keys():
+                        PyProcessingResults.RESULTS.update({ip: result})
+                    else:
+                        old_result = PyProcessingResults.RESULTS.get(ip)
+                        old_result.update(result)
+                        PyProcessingResults.RESULTS[ip] = old_result
                 except (AttributeError, ConnectionRefusedError):
                     print(
                         f"{log_progress} -> Caught manager error on host {log_host}: simultaneous shared-dict call"
                     )
                     self.queue.task_done()
                     continue
-            except:
-                print(f'{log_progress} -> script "{py_script}" crash for {log_host}')
+            except Exception as script_err:
+                print(
+                    f'{log_progress} -> script "{py_script}" crash for {log_host}: {str(script_err)}'
+                )
                 self.queue.task_done()
             else:
                 print(f'{log_progress} -> script "{py_script}" done for {log_host}')
@@ -175,7 +193,34 @@ class PyProcessingManager:
             if not py_script:
                 continue
             percentage = round((index / hosts_length) * 100, 2)
-            queue.put(((index, hosts_length, f"{percentage}%"), host_info, py_script))
+            # In case of:
+            # "py_script": "package/script.py"
+            if isinstance(py_script, str):
+                queue.put(
+                    ((index, hosts_length, f"{percentage}%"), host_info, py_script)
+                )
+            # In case of:
+            # "py_script": ["package1/script1.py", "package2/script2.py", ...]
+            elif isinstance(py_script, list):
+                for script in py_script:
+                    if not script:
+                        continue
+                    queue.put(
+                        ((index, hosts_length, f"{percentage}%"), host_info, script)
+                    )
+            # In case of:
+            # "py_script": {"script1": "package1/script1.py", "script2": "package2/script2.py"}
+            elif isinstance(py_script, dict):
+                for script_name, script_file in py_script.items():
+                    if not script_file:
+                        continue
+                    queue.put(
+                        (
+                            (index, hosts_length, f"{percentage}%"),
+                            host_info,
+                            script_file,
+                        )
+                    )
         queue.join()
 
     def start(self) -> None:

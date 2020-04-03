@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
-from multiprocessing import Process, JoinableQueue, Manager
+from datetime import datetime
+from multiprocessing import Process, JoinableQueue, Manager, freeze_support
 from os import system
 from time import sleep
-from datetime import datetime
 
 from grinder.decorators import exception_handler
+from grinder.defaultvalues import DefaultProcessManagerValues
 from grinder.errors import (
     NmapProcessingRunError,
     NmapProcessingManagerOrganizeProcessesError,
 )
 from grinder.nmapconnector import NmapConnector
-from grinder.defaultvalues import DefaultProcessManagerValues
 
 
 class NmapProcessingDefaultManagerValues:
@@ -21,15 +21,7 @@ class NmapProcessingDefaultManagerValues:
 
     POLLING_RATE = 0.5
     EMPTY_QUEUE_POLLING_RATE = 1.0
-
-
-class NmapProcessingResults:
-    """
-    This is results collector to gain
-    results directly from a process
-    """
-
-    RESULTS = Manager().dict({})
+    PROCESS_TIMEOUT = 300
 
 
 class NmapProcessing(Process):
@@ -49,6 +41,7 @@ class NmapProcessing(Process):
         ports: str,
         sudo: bool,
         hosts_quantity: int,
+        results_pool: dict,
     ):
         Process.__init__(self)
         self.queue = queue
@@ -56,6 +49,7 @@ class NmapProcessing(Process):
         self.ports = ports
         self.sudo = sudo
         self.quantity = hosts_quantity
+        self.results_pool = results_pool
 
     @exception_handler(expected_exception=NmapProcessingRunError)
     def run(self) -> None:
@@ -74,8 +68,14 @@ class NmapProcessing(Process):
                 sleep(NmapProcessingDefaultManagerValues.EMPTY_QUEUE_POLLING_RATE)
                 continue
             try:
-                index, host = self.queue.get()
+                # Poll with POLLING_RATE interval
                 sleep(NmapProcessingDefaultManagerValues.POLLING_RATE)
+
+                # Get host info from queue
+                index, host = self.queue.get()
+                if (index, host) == (None, None):
+                    self.queue.task_done()
+                    return
 
                 host_ip = host.get("ip", "")
                 host_port = host.get("port", "")
@@ -103,13 +103,12 @@ class NmapProcessing(Process):
 
                 results = nm.get_results()
                 if results.get(host_ip).values():
-                    NmapProcessingResults.RESULTS.update(
-                        {host_ip: results.get(host_ip)}
-                    )
+                    self.results_pool.update({host_ip: results.get(host_ip)})
             except:
-                self.queue.task_done()
-            else:
-                self.queue.task_done()
+                pass
+            self.queue.task_done()
+            if self.queue.empty():
+                return
 
 
 class NmapProcessingManager:
@@ -127,6 +126,9 @@ class NmapProcessingManager:
         arguments=DefaultProcessManagerValues.ARGUMENTS,
         workers=DefaultProcessManagerValues.WORKERS,
     ):
+        freeze_support()
+        self.manager = Manager()
+        self.results_pool = self.manager.dict({})
         self.hosts = hosts
         self.workers = workers
         self.arguments = arguments
@@ -140,18 +142,31 @@ class NmapProcessingManager:
         :return: None
         """
         queue = JoinableQueue()
-        for index, host in enumerate(self.hosts):
-            queue.put((index, host))
         processes = []
         for _ in range(self.workers):
+            freeze_support()
             process = NmapProcessing(
-                queue, self.arguments, self.ports, self.sudo, len(self.hosts)
+                queue,
+                self.arguments,
+                self.ports,
+                self.sudo,
+                len(self.hosts),
+                self.results_pool,
             )
             process.daemon = True
             processes.append(process)
         for process in processes:
-            process.start()
+            try:
+                process.start()
+            except OSError:
+                pass
+        for index, host in enumerate(self.hosts):
+            queue.put((index, host))
+        for _ in range(self.workers):
+            queue.put((None, None))
         queue.join()
+        for process in processes:
+            process.join(timeout=NmapProcessingDefaultManagerValues.PROCESS_TIMEOUT)
 
     def start(self) -> None:
         """
@@ -160,21 +175,19 @@ class NmapProcessingManager:
         """
         self.organize_processes()
 
-    @staticmethod
-    def get_results() -> dict:
+    def get_results(self) -> dict:
         """
         Return dictionary with Nmap results
         :return: Nmap results
         """
-        return NmapProcessingResults.RESULTS
+        return self.results_pool
 
-    @staticmethod
-    def get_results_count() -> int:
+    def get_results_count(self) -> int:
         """
         Return quantity of Nmap results
         :return: quantity of results
         """
-        return len(NmapProcessingResults.RESULTS)
+        return len(self.results_pool)
 
     def __del__(self):
         """

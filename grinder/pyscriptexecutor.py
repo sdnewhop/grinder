@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
+from contextlib import redirect_stdout, redirect_stderr
+from importlib.machinery import SourceFileLoader
 from multiprocessing import Process, JoinableQueue, Manager, freeze_support
 from os import system
-from importlib.machinery import SourceFileLoader
-from types import ModuleType
 from pathlib import Path
-from contextlib import redirect_stdout, redirect_stderr
 from time import sleep
+from types import ModuleType
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
@@ -190,7 +190,9 @@ class PyProcessingManager:
         processes = []
         for _ in range(self.workers):
             freeze_support()
-            process = PyProcessing(results_pool=self.results_pool, queue=queue, mute=self.mute)
+            process = PyProcessing(
+                results_pool=self.results_pool, queue=queue, mute=self.mute
+            )
             process.daemon = True
             processes.append(process)
         for process in processes:

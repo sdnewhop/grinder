@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 from multiprocessing import Process, JoinableQueue, Manager, freeze_support
 from os import system
 from time import sleep
-from datetime import datetime
 
 from grinder.decorators import exception_handler
+from grinder.defaultvalues import DefaultProcessManagerValues
 from grinder.errors import (
     NmapProcessingRunError,
     NmapProcessingManagerOrganizeProcessesError,
 )
 from grinder.nmapconnector import NmapConnector
-from grinder.defaultvalues import DefaultProcessManagerValues
 
 
 class NmapProcessingDefaultManagerValues:
@@ -103,9 +103,7 @@ class NmapProcessing(Process):
 
                 results = nm.get_results()
                 if results.get(host_ip).values():
-                    self.results_pool.update(
-                        {host_ip: results.get(host_ip)}
-                    )
+                    self.results_pool.update({host_ip: results.get(host_ip)})
             except:
                 pass
             self.queue.task_done()
@@ -148,7 +146,12 @@ class NmapProcessingManager:
         for _ in range(self.workers):
             freeze_support()
             process = NmapProcessing(
-                queue, self.arguments, self.ports, self.sudo, len(self.hosts), self.results_pool
+                queue,
+                self.arguments,
+                self.ports,
+                self.sudo,
+                len(self.hosts),
+                self.results_pool,
             )
             process.daemon = True
             processes.append(process)

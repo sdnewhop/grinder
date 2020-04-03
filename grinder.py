@@ -2,11 +2,28 @@
 
 import sys
 
+from multiprocessing import freeze_support
+
 from grinder.asciiart import AsciiOpener
-from grinder.core import GrinderCore
 from grinder.interface import GrinderInterface
 
+
+class GrinderProcessWrap:
+    """
+    Fix Processes "RuntimeError" related
+    to bootstrapping phase (MacOS case)
+    """
+
+    @staticmethod
+    def import_core():
+        freeze_support()
+        from grinder.core import GrinderCore as _core
+
+        return _core
+
+
 if __name__ == "__main__":
+    GrinderCore = GrinderProcessWrap.import_core()
     AsciiOpener.print_opener()
     interface = GrinderInterface()
     interface.check_python_version()
@@ -34,8 +51,7 @@ if __name__ == "__main__":
 
     search_results = (
         core.batch_search(
-            queries_filename=args.queries_file,
-            not_incremental=args.not_incremental
+            queries_filename=args.queries_file, not_incremental=args.not_incremental
         )
         if args.run
         else core.load_results(queries_filename=args.queries_file)

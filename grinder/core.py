@@ -1191,7 +1191,7 @@ class GrinderCore:
 
         # Check for top-ports if defined
         arguments = (
-            f"-Pn -sV --script=.{vulners_path} --host-timeout {str(host_timeout)}s"
+            f"-Pn -sV --open --script=.{vulners_path} --host-timeout {str(host_timeout)}s"
         )
         if top_ports:
             arguments = f"{arguments} --top-ports {str(top_ports)}"

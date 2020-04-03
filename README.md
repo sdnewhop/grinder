@@ -89,6 +89,7 @@ For example, the hosts will be automatically checked for availability with ping 
 ### Basic
 - :heavy_exclamation_mark: [Python 3.6+](https://www.python.org/downloads/)
 - :heavy_exclamation_mark: [python3-tk](https://docs.python.org/3/library/tkinter.html) library
+- :heavy_exclamation_mark: [FreeType](https://www.freetype.org/) library (Python 3.8+ and MacOS required)
 ### Accounts
 - :heavy_exclamation_mark: [Shodan](https://account.shodan.io/register) and [Censys](https://censys.io/register) accounts  
 Required to collect hosts, both free and full accounts are suitable. Also, it's possible to use only one account (Censys or Shodan, Shodan is preferable).

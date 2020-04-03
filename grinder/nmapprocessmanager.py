@@ -21,7 +21,6 @@ class NmapProcessingDefaultManagerValues:
 
     POLLING_RATE = 0.5
     EMPTY_QUEUE_POLLING_RATE = 1.0
-    PROCESS_TIMEOUT = 300
 
 
 class NmapProcessing(Process):
@@ -166,7 +165,8 @@ class NmapProcessingManager:
             queue.put((None, None))
         queue.join()
         for process in processes:
-            process.join(timeout=NmapProcessingDefaultManagerValues.PROCESS_TIMEOUT)
+            if process.is_alive():
+                process.terminate()
 
     def start(self) -> None:
         """

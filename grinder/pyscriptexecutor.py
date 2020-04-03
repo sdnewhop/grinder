@@ -24,7 +24,6 @@ class PyProcessingValues:
 
     POLLING_RATE = 0.5
     EMPTY_QUEUE_POLLING_RATE = 1.0
-    PROCESS_TIMEOUT = 300
 
 
 class PyProcessing(Process):
@@ -238,7 +237,8 @@ class PyProcessingManager:
             queue.put((None, None, None))
         queue.join()
         for process in processes:
-            process.join(timeout=PyProcessingValues.PROCESS_TIMEOUT)
+            if process.is_alive():
+                process.terminate()
 
     def start(self) -> None:
         """

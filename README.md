@@ -13,7 +13,7 @@
   <p align="center"><i>The basic CLI interface of the Grinder Framework</i></p>
 </div> 
   
-## Contents
+## Table of Contents
 1. [Description](#description)
 1. [Grinder Workflow](#grinder-workflow)
 1. [Grinder Map](#grinder-map)

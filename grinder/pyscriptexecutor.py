@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-from multiprocessing import Process, JoinableQueue, Manager
-from os import system
-from importlib.machinery import SourceFileLoader
-from types import ModuleType
-from pathlib import Path
 from contextlib import redirect_stdout, redirect_stderr
+from importlib.machinery import SourceFileLoader
+from multiprocessing import Process, JoinableQueue, Manager, freeze_support
+from os import system
+from pathlib import Path
 from time import sleep
+from types import ModuleType
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
@@ -26,30 +26,24 @@ class PyProcessingValues:
     EMPTY_QUEUE_POLLING_RATE = 1.0
 
 
-class PyProcessingResults:
-    """
-    Collect python scripts results
-    """
-
-    RESULTS = Manager().dict({})
-
-
 class PyProcessing(Process):
     """
     Create a custom process to run python scripts as an independent worker
     """
 
-    def __init__(self, queue: JoinableQueue, mute: bool = False):
+    def __init__(self, results_pool: dict, queue: JoinableQueue, mute: bool = False):
         """
         Initialize the process worker
 
         :param queue: general joinable task queue
         :param mute: bool flag for running scripts in silent mode (w/o output at all)
+        :param results_pool: pool of results
         """
         Process.__init__(self)
         self.queue = queue
         self.mute = mute
         self.base_path = self._initialize_base_path()
+        self.results_pool = results_pool
 
     @staticmethod
     def _initialize_base_path() -> Path:
@@ -108,12 +102,17 @@ class PyProcessing(Process):
                 "Unknown script",
             )
             try:
-                current_progress, host_info, py_script = self.queue.get()
-                ip = host_info.get("ip")
-                port = host_info.get("port")
-
                 # Poll with POLLING_RATE interval
                 sleep(PyProcessingValues.POLLING_RATE)
+
+                # Get host info from queue
+                current_progress, host_info, py_script = self.queue.get()
+                if (current_progress, host_info, py_script) == (None, None, None):
+                    self.queue.task_done()
+                    return
+
+                ip = host_info.get("ip")
+                port = host_info.get("port")
 
                 # Setup logging
                 log_progress = f"[{current_progress[0]}/{current_progress[1]}] ({current_progress[2]})"
@@ -128,12 +127,12 @@ class PyProcessing(Process):
                     self.queue.task_done()
                     continue
                 try:
-                    if ip not in PyProcessingResults.RESULTS.keys():
-                        PyProcessingResults.RESULTS.update({ip: result})
+                    if ip not in self.results_pool.keys():
+                        self.results_pool.update({ip: result})
                     else:
-                        old_result = PyProcessingResults.RESULTS.get(ip)
+                        old_result = self.results_pool.get(ip)
                         old_result.update(result)
-                        PyProcessingResults.RESULTS[ip] = old_result
+                        self.results_pool[ip] = old_result
                 except (AttributeError, ConnectionRefusedError):
                     print(
                         f"{log_progress} -> Caught manager error on host {log_host}: simultaneous shared-dict call"
@@ -144,10 +143,11 @@ class PyProcessing(Process):
                 print(
                     f'{log_progress} -> script "{py_script}" crash for {log_host}: {str(script_err)}'
                 )
-                self.queue.task_done()
             else:
                 print(f'{log_progress} -> script "{py_script}" done for {log_host}')
-                self.queue.task_done()
+            self.queue.task_done()
+            if self.queue.empty():
+                return
 
 
 class PyProcessingManager:
@@ -170,6 +170,9 @@ class PyProcessingManager:
         :param workers: number of running processes
         :param mute: bool flag for running scripts in silent mode (w/o output at all)
         """
+        freeze_support()
+        self.manager = Manager()
+        self.results_pool = self.manager.dict({})
         self.ip_script_mapping = ip_script_mapping
         self.hosts_info = hosts_info
         self.workers = workers
@@ -183,10 +186,19 @@ class PyProcessingManager:
         :return: None
         """
         queue = JoinableQueue()
+        processes = []
         for _ in range(self.workers):
-            process = PyProcessing(queue, mute=self.mute)
+            freeze_support()
+            process = PyProcessing(
+                results_pool=self.results_pool, queue=queue, mute=self.mute
+            )
             process.daemon = True
-            process.start()
+            processes.append(process)
+        for process in processes:
+            try:
+                process.start()
+            except OSError:
+                pass
         hosts_length = len(self.hosts_info)
         for index, (ip, host_info) in enumerate(self.hosts_info.items()):
             py_script = self.ip_script_mapping.get(ip)
@@ -221,7 +233,12 @@ class PyProcessingManager:
                             script_file,
                         )
                     )
+        for _ in range(self.workers):
+            queue.put((None, None, None))
         queue.join()
+        for process in processes:
+            if process.is_alive():
+                process.terminate()
 
     def start(self) -> None:
         """
@@ -231,23 +248,21 @@ class PyProcessingManager:
         """
         self.organize_processes()
 
-    @staticmethod
-    def get_results() -> dict:
+    def get_results(self) -> dict:
         """
         Return process manager results
 
         :return: dictionary with {ip: results} format
         """
-        return PyProcessingResults.RESULTS
+        return self.results_pool
 
-    @staticmethod
-    def get_results_count() -> int:
+    def get_results_count(self) -> int:
         """
         Return overall quantity of results
 
         :return: None
         """
-        return len(PyProcessingResults.RESULTS)
+        return len(self.results_pool)
 
     def __del__(self) -> None:
         """

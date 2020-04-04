@@ -132,7 +132,7 @@ class DefaultNmapScanValues:
     TOP_PORTS = None
     SUDO = False
     HOST_TIMEOUT = 30
-    ARGUMENTS = "-Pn -T4 -A"
+    ARGUMENTS = "-Pn -T4 -A --open"
     WORKERS = 10
 
 
@@ -143,7 +143,7 @@ class DefaultProcessManagerValues:
 
     PORTS = None
     SUDO = False
-    ARGUMENTS = "-Pn -A"
+    ARGUMENTS = "-Pn -A --open"
     WORKERS = 10
 
 

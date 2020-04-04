@@ -116,10 +116,10 @@ class DefaultMasscanScanValues:
     Default values for Masscan scan itself
     """
 
-    PORTS = None
+    PORTS = "1-1024"
     TOP_PORTS = None
-    RATE = 5000
-    ARGUMENTS = None
+    RATE = 1000
+    ARGUMENTS = ""
     SUDO = True
 
 

@@ -6,9 +6,9 @@
         "censys_queries": [],
         "masscan_settings": [
             {
-                "hosts": "87.250.250.96/28",
+                "hosts": "87.250.250.96/27",
                 "ports": "1-1024",
-                "rate": "10000"
+                "rate": "1000"
             }
         ],
         "scripts": {

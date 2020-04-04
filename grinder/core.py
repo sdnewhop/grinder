@@ -859,7 +859,7 @@ class GrinderCore:
             )
 
     @exception_handler(expected_exception=GrinderCoreHostMasscanResultsError)
-    def __parse_masscan_results(self, hosts: dict, product_info: dict) -> None:
+    def __parse_masscan_results(self, hosts: dict, query: str, product_info: dict) -> None:
         """
         Parse raw results from Masscan. Results were received from
         MasscanConnector module.
@@ -869,11 +869,11 @@ class GrinderCore:
         :return: None
         """
         for host in hosts.keys():
-            ports = ",".join([str(p) for p in hosts.get(host).get("tcp").keys()])
+            ports = ",".join([str(p) for p in hosts.get(host, {}).get("tcp", {}).keys()])
             host_info = HostInfo(
                 product=product_info.get("product", "Unknown product"),
                 vendor=product_info.get("vendor", "Unknown vendor"),
-                query="",
+                query=query,
                 port=ports,
                 proto="",
                 ip=host,
@@ -1157,22 +1157,27 @@ class GrinderCore:
         for query_index, query_info in enumerate(
             product_info.get("masscan_settings") or []
         ):
+            if not query_info.get("hosts"):
+                print("Hosts field is empty, skip this search")
+                continue
+
+            query_info["hosts"] = str(ip_network(query_info.get("hosts"), False))
+
             hosts = query_info.get("hosts")
-            ports = query_info.get("ports")
-            rate = query_info.get("rate")
+            ports = query_info.get("ports", DefaultMasscanScanValues.PORTS)
+            rate = query_info.get("rate", DefaultMasscanScanValues.RATE)
+
             cprint(
                 f"{query_index} / {len_of_masscan_settings} :: "
-                f"Current Masscan scan is: {hosts or 'Empty query field'}",
+                f"Current Masscan scan is: {hosts}",
                 "blue",
                 attrs=["bold"],
             )
-            if not hosts:
-                print("Hosts field is empty, skip this search")
-                continue
+
             masscan_raw_results = self.masscan_scan(
-                hosts, ports, arguments=f"--rate {rate}"
+                hosts, ports, rate=rate
             )
-            self.__parse_masscan_results(masscan_raw_results, product_info)
+            self.__parse_masscan_results(masscan_raw_results, hosts, product_info)
 
     @exception_handler(expected_exception=GrinderCoreTlsScanner)
     def tls_scan(self, scanner_path: str) -> None:
@@ -1314,7 +1319,7 @@ class GrinderCore:
         """
         cprint("Start Masscan scanning", "blue", attrs=["bold"])
         cprint(
-            f'Masscan scan arguments: {arguments}, rate "{str(rate)}", hosts: "{str(hosts)}", ports: "{str(ports)}"',
+            f'Masscan scan arguments: {arguments or None}, rate "{str(rate)}", hosts: "{str(hosts)}", ports: "{str(ports)}"',
             "blue",
             attrs=["bold"],
         )

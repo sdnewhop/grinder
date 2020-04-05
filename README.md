@@ -160,7 +160,13 @@ Required only for TLS scanning.
 ## Grinder Installing
 :bulb: **Note #1:** If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced with `pipenv sync` command.  
   
-:bulb: **Note #2:** If you are familiar with Docker and docker-compose, you can build framework with Docker, see [Building and Running in Docker](#building-and-running-in-docker)
+:bulb: **Note #2:** If you are familiar with Docker and docker-compose, you can build framework with Docker, see [Building and Running in Docker](#building-and-running-in-docker)  
+  
+:bulb: **Note #3:** Only for macOS version 10.13 and higher, Python version 3.7.* and lower: to use additional scripts, which include other network libraries, you must additionally set the environment variable before starting - in your shell configuration file (`~/.bashrc`, `~/.zshrc`) or before starting the framework:
+```bash
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+./grinder.py -h
+```
   
 ### Setup and Configure Environment  
 1. Install [Nmap Security Scanner](https://nmap.org/download.html) if not installed.
@@ -168,7 +174,8 @@ Required only for TLS scanning.
 ```bash
 sudo apt-get install python3-tk
 ```
-3. Install virtualenv if not installed
+3. Install [FreeType](https://www.freetype.org/) library (MacOS only)
+4. Install virtualenv if not installed
 ```bash
 sudo pip3 install virtualenv 
 ```
@@ -176,32 +183,37 @@ or
 ```bash
 pip3 install --upgrade virtualenv
 ```
-4. Clone the repository
+5. Clone the repository
 ```bash
 git clone https://github.com/sdnewhop/grinder
 ```
-5. Clone and install [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker) (if you want to use TLS scanning features with Grinder).
-6. Clone [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner) in directory with Grinder and install it (if you want to use TLS scanning features with Grinder.
-7. Create virtual environment
+6. Clone and install [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker) (if you want to use TLS scanning features with Grinder).
+7. Clone [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner) in directory with Grinder and install it (if you want to use TLS scanning features with Grinder.
+8. Create virtual environment
 ```bash
 cd grinder
 python3 -m venv grindervenv
 source grindervenv/bin/activate
 ```
-8. Check if virtual environment successfully loaded
+9. Check if virtual environment successfully loaded
 ```bash
-which python
-which pip
+which python3
+which pip3
 ```
-9. Install project requirements in virtual environment
+10. Install project requirements in virtual environment
 ```bash
 pip3 install -r requirements.txt
 ```
-10. Run the script
+11. _(MacOS version 10.13 and higher, Python version 3.7.* and lower)_  
+Export additional environment variable to run different Python3 scripts
+```bash
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+12. Run the script
 ```bash
 ./grinder.py -h
 ```
-11. Set your Shodan, Censys and Vulners keys via a command line arguments on every run
+13. Set your Shodan, Censys and Vulners keys via a command line arguments on every run
 ```bash
 ./grinder.py -sk YOUR_SHODAN_KEY -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -vk YOUR_VULNERS_KEY
 ```
@@ -212,7 +224,7 @@ export CENSYS_API_ID=YOUR_CENSYS_API_ID_HERE
 export CENSYS_API_SECRET=YOUR_CENSYS_API_SECRET_HERE
 export VULNERS_API_KEY=YOUR_VULNERS_API_KEY_HERE
 ```
-12. Deactivate virtual environment after use and restore default python interpreter
+14. Deactivate virtual environment after use and restore default python interpreter
 ```bash
 deactivate
 ```

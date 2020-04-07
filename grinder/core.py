@@ -407,8 +407,9 @@ class GrinderCore:
         #     ...
         # }
         self.combined_results = {
-            **self.shodan_processed_results,
+            **self.combined_results,
             **self.censys_processed_results,
+            **self.shodan_processed_results,
         }
 
     @exception_handler(expected_exception=GrinderCoreLoadResultsFromDbError)
@@ -703,9 +704,11 @@ class GrinderCore:
         :param ip: host ip
         :return: answer to question "Is current host already scanned?"
         """
-        return self.shodan_processed_results.get(
-            ip
-        ) or self.censys_processed_results.get(ip)
+        return (
+            ip in self.shodan_processed_results.keys()
+            or ip in self.censys_processed_results.keys()
+            or ip in self.combined_results.keys()
+        )
 
     def set_unique_entities_quantity(self, max_entities: int) -> None:
         """
@@ -935,10 +938,11 @@ class GrinderCore:
         )
 
     @exception_handler(expected_exception=GrinderCoreSaveResultsToDatabaseError)
-    def save_results_to_database(self):
+    def save_results_to_database(self, close: bool = True):
         """
         Save all results to database
 
+        :param close: Should we close current database connection or not
         :return: None
         """
         cprint("Save all results to database...", "blue", attrs=["bold"])
@@ -953,7 +957,8 @@ class GrinderCore:
             total_products=len(self.queries_file),
             total_results=len(self.combined_results),
         )
-        self.__close_database()
+        if close is True:
+            self.__close_database()
 
     def __is_query_confidence_valid(self, query_confidence: str) -> bool:
         """

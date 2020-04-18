@@ -16,4 +16,4 @@ mkdir -p ./map/static/data/
 
 # Run it all
 docker-compose up -d map
-docker-compose run --name grinder_framework grinder
+docker-compose run --rm --name grinder_framework grinder

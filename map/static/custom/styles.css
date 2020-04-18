@@ -5,6 +5,11 @@ html, body {
     padding: 0;
     }
 
+body {
+    /* see: https://stackoverflow.com/questions/28820335/leaflet-clicking-zoom-control-removes-paging-top */
+    height: calc(100% - 56px);
+}
+
 #map {
     position:absolute;
     top:0;
@@ -20,3 +25,7 @@ html, body {
     left: 0.0%;
     top: 0.0%;
     }
+
+header.navbar {
+    margin-bottom: 0;
+}

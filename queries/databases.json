@@ -1,0 +1,17 @@
+[
+  {
+        "vendor": "",
+        "product": "",
+        "shodan_queries": [
+            {
+                "query": "\"MongoDB Server Information\" port:27017 -authentication",
+                "query_confidence": "certain"
+            }
+        ],
+        "censys_queries": [ ],
+        "scripts": {
+            "py_script": "db_scanner/db_scanner.py",
+            "nse_script": ""
+        }
+  }
+]

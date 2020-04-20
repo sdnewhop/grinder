@@ -89,7 +89,7 @@ For example, the hosts will be automatically checked for availability with ping 
 ### Basic
 - :heavy_exclamation_mark: [Python 3.6+](https://www.python.org/downloads/)
 - :heavy_exclamation_mark: [python3-tk](https://docs.python.org/3/library/tkinter.html) library
-- :heavy_exclamation_mark: [FreeType](https://www.freetype.org/) library (Python 3.8+ and MacOS required)
+- :heavy_exclamation_mark: [FreeType](https://www.freetype.org/) library (Python 3.8+)
 ### Accounts
 - :heavy_exclamation_mark: [Shodan](https://account.shodan.io/register) and [Censys](https://censys.io/register) accounts  
 Required to collect hosts, both free and full accounts are suitable. Also, it's possible to use only one account (Censys or Shodan, Shodan is preferable).
@@ -99,6 +99,8 @@ Required to make additional reports on vulnerabilities and exploits. If this fea
 - :heavy_plus_sign: [Nmap Security Scanner 7.60+](https://nmap.org/download.html)  
 Version 7.60 and newer has been tested with currently used in Grinder scripts (ssl-cert.nse, vulners.nse, etc.).
 ### TLS configuration
+- :heavy_plus_sign: [Java 8](https://openjdk.java.net/install/)  
+Required to build TLS-Attacker and TLS-Scanner.  
 - :heavy_plus_sign: [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/tree/3.0)  
 Required only for TLS scanning.
 - :heavy_plus_sign: [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/tree/2.9)  

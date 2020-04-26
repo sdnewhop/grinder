@@ -325,13 +325,19 @@ class GrinderCore:
             if not vulnerabilities:
                 continue
 
-            shodan_vulnerabilities = vulnerabilities.get("shodan_vulnerabilities")
-            if shodan_vulnerabilities:
-                shodan_cve_list = list(shodan_vulnerabilities.keys())
+            try:
+                shodan_vulnerabilities = vulnerabilities.get("shodan_vulnerabilities")
+                if shodan_vulnerabilities:
+                    shodan_cve_list = list(shodan_vulnerabilities.keys())
+            except:
+                pass
 
-            vulners_vulnerabilities = vulnerabilities.get("vulners_vulnerabilities")
-            if vulners_vulnerabilities:
-                vulners_cve_list = list(vulners_vulnerabilities.keys())
+            try:
+                vulners_vulnerabilities = vulnerabilities.get("vulners_vulnerabilities")
+                if vulners_vulnerabilities:
+                    vulners_cve_list = list(vulners_vulnerabilities.keys())
+            except:
+                pass
 
             # If nothing was found from Shodan or Vulners for current host
             if not (shodan_cve_list or vulners_cve_list):
@@ -1527,7 +1533,6 @@ class GrinderCore:
             )
             print(f"Error message: {open_err.error_args}")
             return self.combined_results
-
         self.__filter_queries_by_vendor_confidence()
         self.__filter_queries_by_vendors()
         if not self.queries_file:

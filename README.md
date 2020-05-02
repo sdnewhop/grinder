@@ -101,9 +101,9 @@ Version 7.60 and newer has been tested with currently used in Grinder scripts (s
 ### TLS configuration
 - :heavy_plus_sign: [Java 8](https://openjdk.java.net/install/)  
 Required to build TLS-Attacker and TLS-Scanner.  
-- :heavy_plus_sign: [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/tree/3.0)  
+- :heavy_plus_sign: [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/releases/tag/3.0)  
 Required only for TLS scanning.
-- :heavy_plus_sign: [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/tree/2.9)  
+- :heavy_plus_sign: [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/releases/tag/2.9)  
 Required only for TLS scanning.
   
 ## Current Features
@@ -176,7 +176,10 @@ export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 ```bash
 sudo apt-get install python3-tk
 ```
-3. Install [FreeType](https://www.freetype.org/) library (MacOS only)
+3. Install [FreeType](https://www.freetype.org/) library (Python 3.8+)
+```bash
+sudo apt-get install build-essential libfreetype6-dev python-dev
+```
 4. Install virtualenv if not installed
 ```bash
 sudo pip3 install virtualenv 
@@ -189,8 +192,8 @@ pip3 install --upgrade virtualenv
 ```bash
 git clone https://github.com/sdnewhop/grinder
 ```
-6. Clone and install [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker) (if you want to use TLS scanning features with Grinder).
-7. Clone [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner) in directory with Grinder and install it (if you want to use TLS scanning features with Grinder.
+6. Clone and install [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/releases/tag/3.0) (if you want to use TLS scanning features with Grinder).
+7. Clone [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/releases/tag/2.9) in directory with Grinder and install it (if you want to use TLS scanning features with Grinder.
 8. Create virtual environment
 ```bash
 cd grinder
@@ -211,7 +214,7 @@ Export additional environment variable to run different Python3 scripts
 ```bash
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 ```
-12. Run the script
+12. Run the framework
 ```bash
 ./grinder.py -h
 ```

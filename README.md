@@ -287,7 +287,7 @@ To run basic tests for different scanning and analytics modules, you need to cha
 ```bash
 cd tests/
 ```
-And run basic tests with the next command - please, pay attention that you need to provide API keys for some modules (like Shodan, Censys) because tests are implemented to check all real functional features of this search engines in Grinder modules and wrappers:
+And run basic tests with the next command - please, pay attention that you need to provide API keys for some modules (like Shodan, Censys) because tests are implemented to check all real functional features of these search engines in Grinder modules and wrappers:
 ```bash
 pytest --shodan_key SHODAN_API_KEY --censys_id CENSYS_ID_KEY --censys_secret CENSYS_SECRET_KEY
 ```

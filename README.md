@@ -287,7 +287,7 @@ To run basic tests for different scanning and analytics modules, you need to cha
 ```bash
 cd tests/
 ```
-And run basic tests with the next command - please, pay attention that you need to provide API keys for some modules (like Shodan, Censys) because tests are implemented to check all real functional features of this search engines in Grinder modules and wrappers:
+And run basic tests with the next command - please, pay attention that you need to provide API keys for some modules (like Shodan, Censys) because tests are implemented to check all real functional features of these search engines in Grinder modules and wrappers:
 ```bash
 pytest --shodan_key SHODAN_API_KEY --censys_id CENSYS_ID_KEY --censys_secret CENSYS_SECRET_KEY
 ```
@@ -522,7 +522,7 @@ To add your own vendors and products with queries you can simply create a new JS
 ]
 ```
 ### Queries Example
-:construction: **Note:** Queries in the `queries/` directory may be different due to the different stages of development, but mostly all of them are still supported and tested. The most actual query template and an example provided below, so if you need or want to try your queries, you can use this example to get the freshest features. 
+:construction: **Note:** Queries in the `queries/` directory may be different due to the different stages of development, but mostly all of them are still supported and tested. The most actual query template and an example are provided below, so if you need or want to try your queries, you can use this example to get the freshest features. 
 ```json
 [
     {

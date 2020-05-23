@@ -522,7 +522,7 @@ To add your own vendors and products with queries you can simply create a new JS
 ]
 ```
 ### Queries Example
-:construction: **Note:** Queries in the `queries/` directory may be different due to the different stages of development, but mostly all of them are still supported and tested. The most actual query template and an example provided below, so if you need or want to try your queries, you can use this example to get the freshest features. 
+:construction: **Note:** Queries in the `queries/` directory may be different due to the different stages of development, but mostly all of them are still supported and tested. The most actual query template and an example are provided below, so if you need or want to try your queries, you can use this example to get the freshest features. 
 ```json
 [
     {

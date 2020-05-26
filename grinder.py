@@ -80,3 +80,5 @@ if __name__ == "__main__":
     if args.run:
         core.save_results_to_database()
     core.save_results()
+    if args.onehost:
+        core.onehost(host_address=args.host_ip)

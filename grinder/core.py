@@ -3,11 +3,12 @@
 Basic core module for grinder. All functions from
 Other modules must be wrapped here for proper usage.
 """
-
+import json
 from typing import NamedTuple, List, Dict
 from termcolor import cprint
 from re import findall
 from ntpath import basename
+import requests
 
 # from enforce import runtime_validation
 
@@ -69,6 +70,7 @@ from grinder.pyscriptexecutor import PyScriptExecutor
 from grinder.nmapscriptexecutor import NmapScriptExecutor
 from grinder.tlsscanner import TlsScanner
 from grinder.tlsparser import TlsParser
+import csv
 
 
 class HostInfo(NamedTuple):
@@ -99,11 +101,11 @@ class GrinderCore:
     """
 
     def __init__(
-        self,
-        shodan_api_key: str = "",
-        censys_api_id: str = "",
-        censys_api_secret: str = "",
-        vulners_api_key: str = ""
+            self,
+            shodan_api_key: str = "",
+            censys_api_id: str = "",
+            censys_api_secret: str = "",
+            vulners_api_key: str = ""
     ) -> None:
         self.shodan_processed_results: dict = {}
         self.censys_processed_results: dict = {}
@@ -129,6 +131,32 @@ class GrinderCore:
         self.filemanager = GrinderFileManager()
         self.db = GrinderDatabase()
 
+    def onehost(self, host_address: str) -> List[dict]:
+
+        if self.shodan_api_key == "YOUR_DEFAULT_API_KEY":
+            print(f"│ Shodan key is not defined. Skip scan.")
+            print(f"└ ", end="")
+            return []
+
+        dnsResolve = 'https://api.shodan.io/dns/resolve?hostnames=' + host_address + '&key=' + self.shodan_api_key
+        resolved = requests.get(dnsResolve)
+        host_address = resolved.json()[host_address]
+        shodan = ShodanConnector(api_key=self.shodan_api_key)
+        shodan.get_host_info(host_address)
+        shodan_raw_results = shodan.get_onehost_result()
+
+        with open("results_shodan.json", "w") as write_file:
+            json.dump(shodan_raw_results, write_file, indent=2)
+
+        censys = CensysConnector(api_id=self.censys_api_id, api_secret=self.censys_api_secret)
+        censys.get_host_info(host_address)
+        censys_raw_results = censys.get_onehost_result()
+
+        with open("results_censys.json", "w") as write_file:
+            json.dump(censys_raw_results, write_file, indent=2)
+
+        
+
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)
     def shodan_search(self, query: str, results_count: int = None) -> List[dict]:
@@ -149,8 +177,8 @@ class GrinderCore:
 
         if not results_count:
             results_count = (
-                self.shodan_results_limit
-                or DefaultValues.SHODAN_DEFAULT_RESULTS_QUANTITY
+                    self.shodan_results_limit
+                    or DefaultValues.SHODAN_DEFAULT_RESULTS_QUANTITY
             )
 
         shodan = ShodanConnector(api_key=self.shodan_api_key)
@@ -197,8 +225,8 @@ class GrinderCore:
 
         # Skip default values
         if (
-            self.censys_api_id == "YOUR_CENSYS_API_ID"
-            or self.censys_api_secret == "YOUR_CENSYS_API_SECRET"
+                self.censys_api_id == "YOUR_CENSYS_API_ID"
+                or self.censys_api_secret == "YOUR_CENSYS_API_SECRET"
         ):
             print(f"│ Censys key is not defined. Skip scan.")
             print(f"└ ", end="")
@@ -206,8 +234,8 @@ class GrinderCore:
 
         if not results_count:
             results_count = (
-                self.censys_results_limit
-                or DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
+                    self.censys_results_limit
+                    or DefaultValues.CENSYS_DEFAULT_RESULTS_QUANTITY
             )
 
         censys = CensysConnector(
@@ -356,10 +384,10 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreLoadResultsFromFileError)
     def load_results_from_file(
-        self,
-        load_dir: str = DefaultValues.RESULTS_DIRECTORY,
-        load_file: str = DefaultValues.JSON_RESULTS_FILE,
-        load_json_dir: str = DefaultValues.JSON_RESULTS_DIRECTORY,
+            self,
+            load_dir: str = DefaultValues.RESULTS_DIRECTORY,
+            load_file: str = DefaultValues.JSON_RESULTS_FILE,
+            load_json_dir: str = DefaultValues.JSON_RESULTS_DIRECTORY,
     ) -> dict:
         """
         Load saved results of latest previous scan from json file
@@ -421,6 +449,7 @@ class GrinderCore:
             self.combined_results = self.db.load_last_results()
             self.shodan_processed_results = self.db.load_last_shodan_results()
             self.censys_processed_results = self.db.load_last_censys_results()
+
             print("Results of latest scan was successfully loaded from database.")
             return self.combined_results
         except GrinderDatabaseLoadResultsError:
@@ -636,7 +665,7 @@ class GrinderCore:
         cprint("Save all results...", "blue", attrs=["bold"])
 
         # If all scan results were empty
-        if not self.combined_results and not self.shodan_processed_results and not self.censys_processed_results:
+        if not self.combined_results and not self.shodan_processed_results and not self.censys_processed_results and not self.onehost_scan_result:
             return
         # If some results are exists, but combined results are empty - refresh it
         elif not self.combined_results:
@@ -680,6 +709,7 @@ class GrinderCore:
                     csv_file=f'limited_{entity.get("entity")}.csv',
                 )
 
+
     @exception_handler(expected_exception=GrinderCoreIsHostExistedError)
     def __is_host_existed(self, ip: str) -> bool:
         """
@@ -703,7 +733,7 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreCountUniqueProductsError)
     def count_unique_entities(
-        self, entity_name: str, search_results: dict = None, max_entities: int = None
+            self, entity_name: str, search_results: dict = None, max_entities: int = None
     ) -> None:
         """
         Count every unique entity (like country, protocol, port, etc.)
@@ -739,7 +769,7 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreHostShodanResultsError)
     def __parse_current_host_shodan_results(
-        self, current_host: dict, query: str, product_info: dict
+            self, current_host: dict, query: str, product_info: dict
     ) -> None:
         """
         Parse raw results from shodan. Results were received from
@@ -751,8 +781,8 @@ class GrinderCore:
         :return: None
         """
         if not (
-            current_host.get("location").get("latitude")
-            and current_host.get("location").get("longitude")
+                current_host.get("location").get("latitude")
+                and current_host.get("location").get("longitude")
         ):
             return
         host_info = HostInfo(
@@ -781,7 +811,7 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreHostCensysResultsError)
     def __parse_current_host_censys_results(
-        self, current_host: dict, query: str, product_info: dict
+            self, current_host: dict, query: str, product_info: dict
     ) -> None:
         """
         Parse raw results from censys. Results were received from
@@ -1088,13 +1118,13 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
     def nmap_scan(
-        self,
-        ports: str = DefaultNmapScanValues.PORTS,
-        top_ports: int = DefaultNmapScanValues.TOP_PORTS,
-        sudo: bool = DefaultNmapScanValues.SUDO,
-        host_timeout: int = DefaultNmapScanValues.HOST_TIMEOUT,
-        arguments: str = DefaultNmapScanValues.ARGUMENTS,
-        workers: int = DefaultNmapScanValues.WORKERS,
+            self,
+            ports: str = DefaultNmapScanValues.PORTS,
+            top_ports: int = DefaultNmapScanValues.TOP_PORTS,
+            sudo: bool = DefaultNmapScanValues.SUDO,
+            host_timeout: int = DefaultNmapScanValues.HOST_TIMEOUT,
+            arguments: str = DefaultNmapScanValues.ARGUMENTS,
+            workers: int = DefaultNmapScanValues.WORKERS,
     ) -> None:
         """
         Initiate Nmap scan on hosts
@@ -1144,13 +1174,13 @@ class GrinderCore:
 
     @exception_handler(expected_exception=GrinderCoreVulnersScanError)
     def vulners_scan(
-        self,
-        sudo: bool = DefaultVulnersScanValues.SUDO,
-        ports: str = DefaultVulnersScanValues.PORTS,
-        top_ports: int = DefaultVulnersScanValues.TOP_PORTS,
-        workers: int = DefaultVulnersScanValues.WORKERS,
-        host_timeout: int = DefaultVulnersScanValues.HOST_TIMEOUT,
-        vulners_path: str = DefaultVulnersScanValues.VULNERS_SCRIPT_PATH,
+            self,
+            sudo: bool = DefaultVulnersScanValues.SUDO,
+            ports: str = DefaultVulnersScanValues.PORTS,
+            top_ports: int = DefaultVulnersScanValues.TOP_PORTS,
+            workers: int = DefaultVulnersScanValues.WORKERS,
+            host_timeout: int = DefaultVulnersScanValues.HOST_TIMEOUT,
+            vulners_path: str = DefaultVulnersScanValues.VULNERS_SCRIPT_PATH,
     ) -> None:
         """
         Almost the same as Nmap scan but with slightly different features
@@ -1282,7 +1312,7 @@ class GrinderCore:
         self.queries_file = list(
             filter(
                 lambda product: str(product.get("vendor_confidence", "")).lower()
-                in required_confidences,
+                                in required_confidences,
                 self.queries_file,
             )
         )
@@ -1322,7 +1352,7 @@ class GrinderCore:
         self.queries_file = list(
             filter(
                 lambda product: product.get("vendor").lower()
-                in map(str.lower, founded_vendors),
+                                in map(str.lower, founded_vendors),
                 self.queries_file,
             )
         )
@@ -1354,8 +1384,8 @@ class GrinderCore:
             scripts = None
             for product in self.queries_file:
                 if (product.get("vendor"), product.get("product")) == (
-                    host_info.get("vendor"),
-                    host_info.get("product"),
+                        host_info.get("vendor"),
+                        host_info.get("product"),
                 ):
                     scripts = product.get("scripts")
                     break
@@ -1458,7 +1488,8 @@ class GrinderCore:
 
         len_of_products = len(self.queries_file)
         for product_index, product_info in enumerate(self.queries_file):
-            cprint(f"{product_index} / {len_of_products} :: Current product: {product_info.get('product')}", "blue", attrs=["bold"])
+            cprint(f"{product_index} / {len_of_products} :: Current product: {product_info.get('product')}", "blue",
+                   attrs=["bold"])
             self.__process_current_product_queries(product_info)
 
         # Force create combined results container

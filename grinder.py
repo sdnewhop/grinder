@@ -31,6 +31,8 @@ if __name__ == "__main__":
         core.set_unique_entities_quantity(args.max_limit)
     if args.vendors:
         core.set_vendors(args.vendors)
+    if args.one_host:
+        core.one_host(host_address=args.one_host)
 
     search_results = (
         core.batch_search(
@@ -80,5 +82,3 @@ if __name__ == "__main__":
     if args.run:
         core.save_results_to_database()
     core.save_results()
-    if args.onehost:
-        core.onehost(host_address=args.host_ip)

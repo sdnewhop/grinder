@@ -131,7 +131,7 @@ class GrinderCore:
         self.filemanager = GrinderFileManager()
         self.db = GrinderDatabase()
 
-    def onehost(self, host_address: str) -> List[dict]:
+    def one_host(self, host_address: str) -> List[dict]:
 
         if self.shodan_api_key == "YOUR_DEFAULT_API_KEY":
             print(f"│ Shodan key is not defined. Skip scan.")
@@ -154,8 +154,6 @@ class GrinderCore:
 
         with open("results_censys.json", "w") as write_file:
             json.dump(censys_raw_results, write_file, indent=2)
-
-        
 
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)

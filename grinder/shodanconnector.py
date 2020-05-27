@@ -87,6 +87,10 @@ class ShodanConnector:
         }
 
     def get_onehost_result(self) -> dict:
+        """
+        Return results in dict
+        :return: host info
+        """
         return self.onehost_result
 
     def get_host_info(self, host_address: str):

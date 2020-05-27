@@ -50,3 +50,9 @@ Werkzeug==0.16.0
 wrapt==1.11.2
 XlsxWriter==1.2.2
 zipp==0.6.0
+
+
+pip~=19.0.3
+wheel~=0.34.2
+setuptools~=40.8.0
+pytz~=2020.1

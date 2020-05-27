@@ -27,9 +27,8 @@ class CensysConnector:
         self,
         api_id: str = DefaultValues.CENSYS_API_ID,
         api_secret: str = DefaultValues.CENSYS_API_SECRET,
-        
     ):
-        self.onehost_result = {}
+        self.one_host_result: dict = {}
         """
         Initialize Censys Search Engine API
         :param api_id: Censys ID key
@@ -138,11 +137,15 @@ class CensysConnector:
         return self.censys_results_count
     
     def get_onehost_result(self) -> dict:
-        return self.onehost_result
+        """
+        Return results in dict
+        :return: view of host
+        """
+        return self.one_host_result
 
     def get_host_info(self, host_address: str):
         try:
             self.censys_host_info = self.api.view(host_address)
-            self.onehost_result = self.censys_host_info
+            self.one_host_result = self.censys_host_info
         except AttributeError as api_not_defined:
             print(f"Censys API was not initialized: {api_not_defined}")

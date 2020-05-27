@@ -83,13 +83,6 @@ class GrinderInterface:
             default="queries.json",
             help="JSON File with Shodan queries",
         )
-        parser.add_argument(
-            "-target",
-            "--host-ip",
-            action="store",
-            default=None,
-            help="IP address of host",
-        )
 
         parser.add_argument(
             "-sk", "--shodan-key", action="store", default=None, help="Shodan API key"
@@ -98,7 +91,7 @@ class GrinderInterface:
             "-vk", "--vulners-key", action="store", default=None, help="Vulners API key"
         )
         parser.add_argument(
-            "-oh", "--onehost", action="store_true", default=False, help="One host scan"
+            "-oh", "--one-host", action="store", default=None, help="One host scan, write ip address or domain name"
         )
 
         parser.add_argument(

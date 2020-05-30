@@ -147,5 +147,12 @@ class CensysConnector:
         try:
             self.censys_host_info = self.api.view(host_address)
             self.one_host_result = self.censys_host_info
+        except (
+            CensysRateLimitExceededException,
+            CensysJSONDecodeException,
+            CensysNotFoundException,
+            CensysUnauthorizedException,
+        ) as api_error:
+            print(f"Censys API error: {api_error}")
         except AttributeError as api_not_defined:
             print(f"Censys API was not initialized: {api_not_defined}")

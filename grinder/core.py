@@ -137,6 +137,15 @@ class GrinderCore:
             print(f"│ Shodan key is not defined. Skip scan.")
             print(f"└ ", end="")
             return []
+        
+        if (
+                self.censys_api_id == "YOUR_CENSYS_API_ID"
+                or self.censys_api_secret == "YOUR_CENSYS_API_SECRET"
+        ):
+            print(f"│ Censys key is not defined. Skip scan.")
+            print(f"└ ", end="")
+            return []
+
 
         dnsResolve = 'https://api.shodan.io/dns/resolve?hostnames=' + host_address + '&key=' + self.shodan_api_key
         resolved = requests.get(dnsResolve)

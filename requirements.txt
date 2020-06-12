@@ -18,7 +18,7 @@ Jinja2==2.10.3
 kiwisolver==1.1.0
 lazy-object-proxy==1.4.2
 MarkupSafe==1.1.1
-matplotlib==3.1.1
+matplotlib==3.2.1
 mccabe==0.6.1
 more-itertools==7.2.0
 netaddr==0.7.19

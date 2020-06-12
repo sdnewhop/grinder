@@ -89,7 +89,7 @@ For example, the hosts will be automatically checked for availability with ping 
 ### Basic
 - :heavy_exclamation_mark: [Python 3.6+](https://www.python.org/downloads/)
 - :heavy_exclamation_mark: [python3-tk](https://docs.python.org/3/library/tkinter.html) library
-- :heavy_exclamation_mark: [FreeType](https://www.freetype.org/) library (Python 3.8+ and MacOS required)
+- :heavy_exclamation_mark: [FreeType](https://www.freetype.org/) library (Python 3.8+)
 ### Accounts
 - :heavy_exclamation_mark: [Shodan](https://account.shodan.io/register) and [Censys](https://censys.io/register) accounts  
 Required to collect hosts, both free and full accounts are suitable. Also, it's possible to use only one account (Censys or Shodan, Shodan is preferable).
@@ -99,9 +99,11 @@ Required to make additional reports on vulnerabilities and exploits. If this fea
 - :heavy_plus_sign: [Nmap Security Scanner 7.60+](https://nmap.org/download.html)  
 Version 7.60 and newer has been tested with currently used in Grinder scripts (ssl-cert.nse, vulners.nse, etc.).
 ### TLS configuration
-- :heavy_plus_sign: [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/tree/3.0)  
+- :heavy_plus_sign: [Java 8](https://openjdk.java.net/install/)  
+Required to build TLS-Attacker and TLS-Scanner.  
+- :heavy_plus_sign: [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/releases/tag/3.0)  
 Required only for TLS scanning.
-- :heavy_plus_sign: [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/tree/2.9)  
+- :heavy_plus_sign: [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/releases/tag/2.9)  
 Required only for TLS scanning.
   
 ## Current Features
@@ -160,7 +162,13 @@ Required only for TLS scanning.
 ## Grinder Installing
 :bulb: **Note #1:** If you are familiar with pipenv package manager, all steps related to virtualenv can be replaced with `pipenv sync` command.  
   
-:bulb: **Note #2:** If you are familiar with Docker and docker-compose, you can build framework with Docker, see [Building and Running in Docker](#building-and-running-in-docker)
+:bulb: **Note #2:** If you are familiar with Docker and docker-compose, you can build framework with Docker, see [Building and Running in Docker](#building-and-running-in-docker)  
+  
+:bulb: **Note #3:** Only for macOS version 10.13 and higher, Python version 3.7.* and lower: to use additional scripts, which include other network libraries, you must additionally set the environment variable before starting - in your shell configuration file (`~/.bashrc`, `~/.zshrc`) or before starting the framework:
+```bash
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+./grinder.py -h
+```
   
 ### Setup and Configure Environment  
 1. Install [Nmap Security Scanner](https://nmap.org/download.html) if not installed.
@@ -168,7 +176,11 @@ Required only for TLS scanning.
 ```bash
 sudo apt-get install python3-tk
 ```
-3. Install virtualenv if not installed
+3. Install [FreeType](https://www.freetype.org/) library (Python 3.8+)
+```bash
+sudo apt-get install build-essential libfreetype6-dev python-dev
+```
+4. Install virtualenv if not installed
 ```bash
 sudo pip3 install virtualenv 
 ```
@@ -176,32 +188,37 @@ or
 ```bash
 pip3 install --upgrade virtualenv
 ```
-4. Clone the repository
+5. Clone the repository
 ```bash
 git clone https://github.com/sdnewhop/grinder
 ```
-5. Clone and install [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker) (if you want to use TLS scanning features with Grinder).
-6. Clone [TLS-Scanner](https://github.com/RUB-NDS/TLS-Scanner) in directory with Grinder and install it (if you want to use TLS scanning features with Grinder.
-7. Create virtual environment
+6. Clone and install [TLS-Attacker 3.0](https://github.com/RUB-NDS/TLS-Attacker/releases/tag/3.0) (if you want to use TLS scanning features with Grinder).
+7. Clone [TLS-Scanner 2.9](https://github.com/RUB-NDS/TLS-Scanner/releases/tag/2.9) in directory with Grinder and install it (if you want to use TLS scanning features with Grinder.
+8. Create virtual environment
 ```bash
 cd grinder
 python3 -m venv grindervenv
 source grindervenv/bin/activate
 ```
-8. Check if virtual environment successfully loaded
+9. Check if virtual environment successfully loaded
 ```bash
-which python
-which pip
+which python3
+which pip3
 ```
-9. Install project requirements in virtual environment
+10. Install project requirements in virtual environment
 ```bash
 pip3 install -r requirements.txt
 ```
-10. Run the script
+11. _(MacOS version 10.13 and higher, Python version 3.7.* and lower)_  
+Export additional environment variable to run different Python3 scripts
+```bash
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+12. Run the framework
 ```bash
 ./grinder.py -h
 ```
-11. Set your Shodan, Censys and Vulners keys via a command line arguments on every run
+13. Set your Shodan, Censys and Vulners keys via a command line arguments on every run
 ```bash
 ./grinder.py -sk YOUR_SHODAN_KEY -ci YOUR_CENSYS_ID -cs YOUR_CENSYS_SECRET -vk YOUR_VULNERS_KEY
 ```
@@ -212,7 +229,7 @@ export CENSYS_API_ID=YOUR_CENSYS_API_ID_HERE
 export CENSYS_API_SECRET=YOUR_CENSYS_API_SECRET_HERE
 export VULNERS_API_KEY=YOUR_VULNERS_API_KEY_HERE
 ```
-12. Deactivate virtual environment after use and restore default python interpreter
+14. Deactivate virtual environment after use and restore default python interpreter
 ```bash
 deactivate
 ```
@@ -270,7 +287,7 @@ To run basic tests for different scanning and analytics modules, you need to cha
 ```bash
 cd tests/
 ```
-And run basic tests with the next command - please, pay attention that you need to provide API keys for some modules (like Shodan, Censys) because tests are implemented to check all real functional features of this search engines in Grinder modules and wrappers:
+And run basic tests with the next command - please, pay attention that you need to provide API keys for some modules (like Shodan, Censys) because tests are implemented to check all real functional features of these search engines in Grinder modules and wrappers:
 ```bash
 pytest --shodan_key SHODAN_API_KEY --censys_id CENSYS_ID_KEY --censys_secret CENSYS_SECRET_KEY
 ```
@@ -505,7 +522,7 @@ To add your own vendors and products with queries you can simply create a new JS
 ]
 ```
 ### Queries Example
-:construction: **Note:** Queries in the `queries/` directory may be different due to the different stages of development, but mostly all of them are still supported and tested. The most actual query template and an example provided below, so if you need or want to try your queries, you can use this example to get the freshest features. 
+:construction: **Note:** Queries in the `queries/` directory may be different due to the different stages of development, but mostly all of them are still supported and tested. The most actual query template and an example are provided below, so if you need or want to try your queries, you can use this example to get the freshest features. 
 ```json
 [
     {

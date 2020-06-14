@@ -17,10 +17,11 @@ COPY . /app/
 COPY /docker/grinder/entrypoint.sh /app/entrypoint.sh
 COPY --from=tls-scanner-build /TLS-Scanner/apps /app/TLS-Scanner/apps
 
-RUN apk add --no-cache nmap nmap-scripts && \
+RUN apk add --no-cache nmap nmap-scripts masscan libpcap && \
 	apk add --no-cache libpng freetype libstdc++ pkgconfig openjdk8 && \
 	apk add --no-cache --virtual .build-deps gcc build-base python-dev libpng-dev musl-dev freetype-dev && \
 	ln -s /usr/include/locale.h /usr/include/xlocale.h && \
+	ln -s /usr/lib/libpcap.so.1 /usr/lib/libpcap.so && \
 	pip install --no-cache-dir -r /app/requirements.txt && \
 	pip uninstall -y flask && \
 	apk del .build-deps && \

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-from masscan import PortScanner
+import logging
+
+import masscan
 
 from grinder.decorators import exception_handler
 from grinder.errors import (
@@ -14,8 +16,10 @@ from grinder.errors import (
 class MasscanConnector:
     @exception_handler(expected_exception=MasscanConnectorInitError)
     def __init__(self):
-        self.masscan = PortScanner()
+        self.masscan = masscan.PortScanner()
         self.results: dict = {}
+
+        masscan.logger.setLevel(logging.CRITICAL)
 
     @exception_handler(expected_exception=MasscanConnectorScanError)
     def scan(

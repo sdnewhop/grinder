@@ -3,7 +3,7 @@
 Basic core module for grinder. All functions from
 Other modules must be wrapped here for proper usage.
 """
-
+import os
 from ipaddress import ip_network, ip_address
 from ntpath import basename
 from re import findall
@@ -73,6 +73,7 @@ from grinder.pyscriptexecutor import PyProcessingManager
 from grinder.shodanconnector import ShodanConnector
 from grinder.tlsparser import TlsParser
 from grinder.tlsscanner import TlsScanner
+from grinder.top_ports import TopPorts
 from grinder.utils import GrinderUtils
 from grinder.vulnersconnector import VulnersConnector
 
@@ -1124,7 +1125,7 @@ class GrinderCore:
                 continue
             query = query_info.get("query")
             cprint(
-                f"{query_index} / {len_of_shodan_queries} :: "
+                f"{query_index + 1} / {len_of_shodan_queries} :: "
                 f"Current Shodan query is: {query or 'Empty query field'}",
                 "blue",
                 attrs=["bold"],
@@ -1149,7 +1150,7 @@ class GrinderCore:
                 continue
             query = query_info.get("query")
             cprint(
-                f"{query_index} / {len_of_censys_queries} :: "
+                f"{query_index + 1} / {len_of_censys_queries} :: "
                 f"Current Censys query is: {query or 'Empty query field'}",
                 "blue",
                 attrs=["bold"],
@@ -1175,18 +1176,24 @@ class GrinderCore:
             query_info["hosts"] = str(ip_network(query_info.get("hosts"), False))
 
             hosts = query_info.get("hosts")
+            top_ports = int(query_info.get("top-ports", 0))
             ports = query_info.get("ports", DefaultMasscanScanValues.PORTS)
+            if ports == "" and top_ports == 0:
+                top_ports = DefaultMasscanScanValues.TOP_PORTS
             rate = query_info.get("rate", DefaultMasscanScanValues.RATE)
 
             cprint(
-                f"{query_index} / {len_of_masscan_settings} :: "
+                f"{query_index + 1} / {len_of_masscan_settings} :: "
                 f"Current Masscan scan is: {hosts}",
                 "blue",
                 attrs=["bold"],
             )
 
             masscan_raw_results = self.masscan_scan(
-                hosts, ports, rate=rate
+                hosts=hosts,
+                ports=ports,
+                top_ports=top_ports,
+                rate=rate,
             )
             self.__parse_masscan_results(masscan_raw_results, hosts, product_info)
 
@@ -1314,6 +1321,7 @@ class GrinderCore:
         self,
         hosts: str = None,
         ports: str = DefaultMasscanScanValues.PORTS,
+        top_ports: int = DefaultMasscanScanValues.TOP_PORTS,
         rate: int = DefaultMasscanScanValues.RATE,
         arguments: str = DefaultMasscanScanValues.ARGUMENTS,
         sudo: bool = DefaultMasscanScanValues.SUDO,
@@ -1323,6 +1331,7 @@ class GrinderCore:
 
         :param hosts: ip to scan
         :param ports: ports to scan
+        :param top_ports: number of first ports in top ports list
         :param rate: packet rate
         :param arguments: masscan arguments
         :param sudo: sudo if needed
@@ -1330,13 +1339,28 @@ class GrinderCore:
         """
         cprint("Start Masscan scanning", "blue", attrs=["bold"])
         cprint(
-            f'Masscan scan arguments: {arguments or None}, rate "{str(rate)}", hosts: "{str(hosts)}", ports: "{str(ports)}"',
+            f'Masscan scan arguments: {arguments or None}, rate "{str(rate)}", hosts: "{str(hosts)}", ports: "{str(ports)}", top ports: "{str(top_ports)}"',
             "blue",
             attrs=["bold"],
         )
 
+        # check if we already root user,
+        # this is necessary to run grinder in docker
+        if os.getuid() == 0:
+            sudo = False
+
+        if ports != "" and top_ports != 0:
+            ports += ","
+        ports += ",".join([str(port) for port in TopPorts.MASSCAN_TOP_PORTS[:top_ports]])
+
         masscan = MasscanConnector()
-        masscan.scan(host=hosts, ports=ports, rate=rate, arguments=arguments, sudo=sudo)
+        masscan.scan(
+            host=hosts,
+            ports=ports,
+            rate=rate,
+            arguments=arguments,
+            sudo=sudo
+        )
 
         return masscan.get_results()
 

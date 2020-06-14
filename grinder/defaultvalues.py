@@ -116,11 +116,11 @@ class DefaultMasscanScanValues:
     Default values for Masscan scan itself
     """
 
-    PORTS = "1-1024"
-    TOP_PORTS = None
-    RATE = 1000
-    ARGUMENTS = ""
-    SUDO = True
+    PORTS: str = ""
+    TOP_PORTS: int = 1000
+    RATE: int = 1000
+    ARGUMENTS: str = ""
+    SUDO: bool = True
 
 
 class DefaultNmapScanValues:

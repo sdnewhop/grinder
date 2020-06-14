@@ -1190,13 +1190,23 @@ class GrinderCore:
             )
 
 
-            masscan_raw_results = self.masscan_scan(
-                hosts=hosts,
-                ports=ports,
-                top_ports=top_ports,
-                rate=rate,
-            )
-            self.__parse_masscan_results(masscan_raw_results, hosts, product_info)
+            try:
+                masscan_raw_results = self.masscan_scan(
+                    hosts=hosts,
+                    ports=ports,
+                    top_ports=top_ports,
+                    rate=rate,
+                )
+                self.__parse_masscan_results(masscan_raw_results, hosts, product_info)
+            except Exception as masscan_exception:
+                if "FAIL: failed to detect MAC address of interface" in str(masscan_exception):
+                    print("│ ", end="")
+                    cprint(f"You are probably using a VPN, but Masscan is not working with one", "yellow")
+                    print(f"└ ", end="")
+                    cprint(f"Skip all Masscan tasks", "yellow")
+                else:
+                    raise masscan_exception
+
 
     @exception_handler(expected_exception=GrinderCoreTlsScanner)
     def tls_scan(self, scanner_path: str) -> None:
@@ -1367,10 +1377,7 @@ class GrinderCore:
         except Exception as masscan_exception:
             if "network is unreachable" in str(masscan_exception):
                 print("│ ", end="")
-                cprint(
-                    f"Network {hosts} is unreachable, skip",
-                    "yellow",
-                )
+                cprint(f"Network {hosts} is unreachable, skip", "yellow")
             else:
                 raise masscan_exception
 

@@ -87,7 +87,7 @@ class NmapProcessing(Process):
 
                 print(
                     f"⭕ "
-                    f"Current scan host ({index}/{self.quantity}): "
+                    f"Current scan host ({index + 1}/{self.quantity}): "
                     f"{host_ip}:{port_postfix} "
                     f"(started at: {str(datetime.now().strftime('%H:%M:%S'))})"
                 )

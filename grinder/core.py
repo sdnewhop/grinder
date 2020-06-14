@@ -1598,7 +1598,7 @@ class GrinderCore:
             if not scripts:
                 continue
 
-            cur_position = f"{index}/{results_len}"
+            cur_position = f"{index + 1}/{results_len}"
             nse_script = scripts.get("nse_script")
             if nse_script:
                 nse_script_res = NmapScriptExecutor.run_script(host_info, nse_script)

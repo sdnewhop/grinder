@@ -1030,6 +1030,10 @@ class GrinderCore:
         )
 
         results_count = len(results_by_query) if results_by_query else None
+
+        if results_count is None:
+            return
+
         self.db.add_masscan_scan_data(
             query=query, results_count=results_count, results=results_by_query
         )

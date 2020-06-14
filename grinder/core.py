@@ -1189,6 +1189,7 @@ class GrinderCore:
                 attrs=["bold"],
             )
 
+
             masscan_raw_results = self.masscan_scan(
                 hosts=hosts,
                 ports=ports,
@@ -1316,6 +1317,7 @@ class GrinderCore:
             self.combined_results[host]["nmap_scan"] = nmap_results.get(host)
 
 
+    @timer
     @exception_handler(expected_exception=GrinderCoreNmapScanError)
     def masscan_scan(
         self,
@@ -1337,11 +1339,9 @@ class GrinderCore:
         :param sudo: sudo if needed
         :return: None
         """
-        cprint("Start Masscan scanning", "blue", attrs=["bold"])
-        cprint(
-            f'Masscan scan arguments: {arguments or None}, rate "{str(rate)}", hosts: "{str(hosts)}", ports: "{str(ports)}", top ports: "{str(top_ports)}"',
-            "blue",
-            attrs=["bold"],
+        print(
+            f'│ Masscan scan arguments: {arguments or None}, rate "{str(rate)}", '
+            f'hosts: "{str(hosts)}", ports: "{str(ports)}", top ports: "{str(top_ports)}"',
         )
 
         # check if we already root user,
@@ -1354,13 +1354,28 @@ class GrinderCore:
         ports += ",".join([str(port) for port in TopPorts.MASSCAN_TOP_PORTS[:top_ports]])
 
         masscan = MasscanConnector()
-        masscan.scan(
-            host=hosts,
-            ports=ports,
-            rate=rate,
-            arguments=arguments,
-            sudo=sudo
-        )
+
+        try:
+            masscan.scan(
+                host=hosts,
+                ports=ports,
+                rate=rate,
+                arguments=arguments,
+                sudo=sudo
+            )
+
+        except Exception as masscan_exception:
+            if "network is unreachable" in str(masscan_exception):
+                print("│ ", end="")
+                cprint(
+                    f"Network {hosts} is unreachable, skip",
+                    "yellow",
+                )
+            else:
+                raise masscan_exception
+
+        print(f"│ Hosts count: {masscan.get_results_count()}")
+        print(f"└ ", end="")
 
         return masscan.get_results()
 
@@ -1759,7 +1774,7 @@ class GrinderCore:
         len_of_products = len(self.queries_file)
         for product_index, product_info in enumerate(self.queries_file):
             cprint(
-                f"{product_index} / {len_of_products} :: Current product: {product_info.get('product')}",
+                f"{product_index + 1} / {len_of_products} :: Current product: {product_info.get('product')}",
                 "blue",
                 attrs=["bold"],
             )

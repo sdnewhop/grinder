@@ -9,6 +9,7 @@ from termcolor import cprint
 from re import findall
 from ntpath import basename
 import requests
+import dns.resolver
 
 # from enforce import runtime_validation
 
@@ -131,7 +132,33 @@ class GrinderCore:
         self.filemanager = GrinderFileManager()
         self.db = GrinderDatabase()
 
+    
+    def __handle_one_address(self, host_address: str):
+        """
+        Save all information about host/domain. 
+        return: results of shodan and censys search in json
+        """
+
+        shodan = ShodanConnector(api_key=self.shodan_api_key)
+        shodan.get_host_info(host_address)
+        shodan_raw_results = shodan.get_onehost_result()
+
+        with open("results_shodan.json", "a") as write_file:
+            json.dump(shodan_raw_results, write_file, indent=2)
+
+        censys = CensysConnector(api_id=self.censys_api_id, api_secret=self.censys_api_secret)
+        censys.get_host_info(host_address)
+        censys_raw_results = censys.get_onehost_result()
+
+        with open("results_censys.json", "a") as write_file:
+            json.dump(censys_raw_results, write_file, indent=2)
+
+
     def one_host(self, host_address: str) -> List[dict]:
+        """
+        Search in shodan and censys database with 
+        one_host methods in ShodanConnector and CensysConnector modules
+        """
 
         if self.shodan_api_key == "YOUR_DEFAULT_API_KEY":
             print(f"│ Shodan key is not defined. Skip scan.")
@@ -146,23 +173,16 @@ class GrinderCore:
             print(f"└ ", end="")
             return []
 
+        print(host_address)
 
-        dnsResolve = 'https://api.shodan.io/dns/resolve?hostnames=' + host_address + '&key=' + self.shodan_api_key
-        resolved = requests.get(dnsResolve)
-        host_address = resolved.json()[host_address]
-        shodan = ShodanConnector(api_key=self.shodan_api_key)
-        shodan.get_host_info(host_address)
-        shodan_raw_results = shodan.get_onehost_result()
-
-        with open("results_shodan.json", "w") as write_file:
-            json.dump(shodan_raw_results, write_file, indent=2)
-
-        censys = CensysConnector(api_id=self.censys_api_id, api_secret=self.censys_api_secret)
-        censys.get_host_info(host_address)
-        censys_raw_results = censys.get_onehost_result()
-
-        with open("results_censys.json", "w") as write_file:
-            json.dump(censys_raw_results, write_file, indent=2)
+        if findall('^\d+\.\d+\.\d+\.\d+$', str(host_address)):
+            self.__handle_one_address(host_address)
+        else:
+            for qtype in ['A']:
+                resolveds = dns.resolver.query(host_address, qtype, raise_on_no_answer=False)
+            for answer in resolveds:
+                print(answer)
+                self.__handle_one_address(str(answer))
 
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)

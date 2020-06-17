@@ -49,7 +49,7 @@ class DBScannerDefaultValues:
         r"\d{4}[\s-]?\d{6}[\s-]?\d{5}",
         # r"\d{1,2}\s?\d{1,2}\s?\d{4}",
         r"(\\\\?([^\\\/]*[\\\/])*)([^\\\/]+)",
-        r"(?:[0-9]{1,3}\.){3}[0-9]{1,3}",
+        r"(?!0.0.0.0)(?:[0-9]{1,3}\.){3}[0-9]{1,3}",
         r"^3[47][0-9]{13}",
         r"^((\d{5}-\d{4})|(\d{5})|([A-Z]\d[A-Z]\s\d[A-Z]\d))",
         r"^\d{3}-\d{2}-\d{3}-\d-\d{4}-\d{6}",
@@ -119,7 +119,7 @@ def save_temporary_results(
     """
     ip_values = DBScannerDefaultValues.MODULE_RESULTS.keys()
     for ip in ip_values:
-        filename = str(temporary_directory.joinpath(str(ip) + ".txt"))
+        filename = str(temporary_directory.joinpath(str(ip) + ".json"))
         with open(filename, mode="a") as result_file:
             dump(
                 DBScannerDefaultValues.MODULE_RESULTS[ip],
@@ -476,7 +476,7 @@ class MongoDB:
                 OperationFailure,
                 KeyError,
             ) as err:
-                print(f"Host was unreachable: {ip_value} with {err}")
+                print(f"Host was unreachable: {self.ip} with {err}")
                 return err
             if db_names is None:
                 return
@@ -523,13 +523,13 @@ def main(host_info: dict) -> dict:
         if host_info.get("port") == 27017:
             host_ip = host_info.get("ip")
             mongodb = MongoDB(host_ip)
-            err = mongodb.initialize()
+            error = mongodb.initialize()
             if DBScannerDefaultValues.MODULE_RESULTS:
                 if len(list(DBScannerDefaultValues.MODULE_RESULTS[host_ip].keys())) > 3:
                     save_temporary_results()
             if error:
                 return {
-                    "status": str(err),
+                    "status": str(error),
                     "host_info": DBScannerDefaultValues.MODULE_RESULTS[host_ip],
                 }
             else:
@@ -554,5 +554,5 @@ if __name__ == "__main__":
             print(error)
         else:
             print("Connection ended without errors")
-        # save_temporary_results()
-        save_results(DBScannerDefaultValues.MODULE_RESULTS)
+    # save_temporary_results()
+    save_results(DBScannerDefaultValues.MODULE_RESULTS)

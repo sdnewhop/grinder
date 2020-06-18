@@ -9,6 +9,7 @@ map/static/data
 database.db
 .idea/
 old_databases/
+paused.conf
 
 # Tests files
 tests/test_data/test_database

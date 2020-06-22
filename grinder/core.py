@@ -62,6 +62,7 @@ from grinder.errors import (
     GrinderCoreForceUpdateCombinedResults,
     GrinderCoreHostMasscanResultsError,
     GrinderCoreMasscanSaveToDatabaseError,
+    MasscanConnectorScanError,
 )
 from grinder.filemanager import GrinderFileManager
 from grinder.mapmarkers import MapMarkers
@@ -1197,7 +1198,7 @@ class GrinderCore:
                 continue
 
             hosts = query_info.get("hosts")
-            top_ports = int(query_info.get("top-ports", 0))
+            top_ports = int(query_info.get("top-ports") or 0)
             ports = query_info.get("ports", DefaultMasscanScanValues.PORTS)
             if ports == "" and top_ports == 0:
                 top_ports = DefaultMasscanScanValues.TOP_PORTS
@@ -1394,12 +1395,8 @@ class GrinderCore:
                 arguments=arguments,
                 sudo=sudo
             )
-
-        except Exception as masscan_exception:
-            if "network is unreachable" in str(masscan_exception):
-                print("│ ", end="")
-                cprint(f"Network {hosts} is unreachable, skip", "yellow")
-            else:
+        except MasscanConnectorScanError as masscan_exception:
+            if "network is unreachable" not in str(masscan_exception):
                 raise masscan_exception
 
         print(f"│ Hosts count: {masscan.get_results_count()}")

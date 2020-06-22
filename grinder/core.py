@@ -21,6 +21,7 @@ from grinder.defaultvalues import (
     DefaultNmapScanValues,
     DefaultVulnersScanValues,
     DefaultScriptCheckerValues,
+    TopPorts,
 )
 from grinder.errors import (
     GrinderCoreSearchError,
@@ -73,7 +74,6 @@ from grinder.pyscriptexecutor import PyProcessingManager
 from grinder.shodanconnector import ShodanConnector
 from grinder.tlsparser import TlsParser
 from grinder.tlsscanner import TlsScanner
-from grinder.top_ports import TopPorts
 from grinder.utils import GrinderUtils
 from grinder.vulnersconnector import VulnersConnector
 
@@ -1017,10 +1017,29 @@ class GrinderCore:
         :param query: current search query
         :return: None
         """
-        def check_ip(address: str, network: str) -> bool:
-            host = ip_address(address)
-            network = ip_network(network)
-            return host in network or host == network.broadcast_address or host == network.num_addresses
+        def check_ip(address: str, networks: str) -> bool:
+            ranges = networks.split(',')
+            host_ip = ip_address(address)
+
+            for r in ranges:
+                if '-' in r:
+                    scope = r.split('-')
+                    min_address = ip_address(scope[0])
+                    max_address = ip_address(scope[1])
+                    if min_address <= host_ip <= max_address:
+                        return True
+
+                if '/' in r:
+                    net = ip_network(r, False)
+                    if host_ip in net \
+                            or host_ip == net.broadcast_address \
+                            or host_ip == net.num_addresses:
+                        return True
+
+                if address == r:
+                    return True
+
+            return False
 
         results_by_query = list(
             filter(
@@ -1176,8 +1195,6 @@ class GrinderCore:
             if not query_info.get("hosts"):
                 print("Hosts field is empty, skip this search")
                 continue
-
-            query_info["hosts"] = str(ip_network(query_info.get("hosts"), False))
 
             hosts = query_info.get("hosts")
             top_ports = int(query_info.get("top-ports", 0))

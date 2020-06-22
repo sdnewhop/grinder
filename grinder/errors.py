@@ -502,6 +502,11 @@ class GrinderCoreNmapScanError(GrinderCoreException):
         super().__init__(error_args)
 
 
+class GrinderCoreMasscanScanError(GrinderCoreException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
+
+
 class GrinderCoreTlsScanner(GrinderCoreException):
     def __init__(self, error_args: Exception or str):
         super().__init__(error_args)

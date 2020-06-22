@@ -52,6 +52,7 @@ from grinder.errors import (
     GrinderCoreCensysSaveToDatabaseError,
     GrinderCoreSaveResultsToDatabaseError,
     GrinderCoreNmapScanError,
+    GrinderCoreMasscanScanError,
     GrinderCoreFilterQueriesError,
     GrinderCoreVulnersScanError,
     GrinderCoreRunScriptsError,
@@ -1220,7 +1221,7 @@ class GrinderCore:
                     rate=rate,
                 )
                 self.__parse_masscan_results(masscan_raw_results, hosts, product_info)
-            except Exception as masscan_exception:
+            except GrinderCoreMasscanScanError as masscan_exception:
                 if "FAIL: failed to detect MAC address of interface" in str(masscan_exception):
                     print("│ ", end="")
                     cprint(f"You are probably using a VPN, but Masscan is not working with one", "yellow")
@@ -1350,7 +1351,7 @@ class GrinderCore:
 
 
     @timer
-    @exception_handler(expected_exception=GrinderCoreNmapScanError)
+    @exception_handler(expected_exception=GrinderCoreMasscanScanError)
     def masscan_scan(
         self,
         hosts: str = None,

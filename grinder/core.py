@@ -1227,6 +1227,7 @@ class GrinderCore:
                     cprint(f"You are probably using a VPN, but Masscan is not working with one", "yellow")
                     print(f"└ ", end="")
                     cprint(f"Skip all Masscan tasks", "yellow")
+                    break
                 else:
                     raise masscan_exception
 

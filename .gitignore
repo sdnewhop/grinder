@@ -10,6 +10,7 @@ database.db
 .idea/
 old_databases/
 paused.conf
+test_data/
 
 # Tests files
 tests/test_data/test_database

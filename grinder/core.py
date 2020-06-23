@@ -1020,18 +1020,18 @@ class GrinderCore:
         :return: None
         """
         def check_ip(address: str, networks: str) -> bool:
-            ranges = networks.split(',')
+            ranges = networks.split(",")
             host_ip = ip_address(address)
 
             for r in ranges:
-                if '-' in r:
-                    scope = r.split('-')
+                if "-" in r:
+                    scope = r.split("-")
                     min_address = ip_address(scope[0])
                     max_address = ip_address(scope[1])
                     if min_address <= host_ip <= max_address:
                         return True
 
-                if '/' in r:
+                if "/" in r:
                     net = ip_network(r, False)
                     if host_ip in net \
                             or host_ip == net.broadcast_address \
@@ -1212,7 +1212,6 @@ class GrinderCore:
                 attrs=["bold"],
             )
 
-
             try:
                 masscan_raw_results = self.masscan_scan(
                     hosts=hosts,
@@ -1230,7 +1229,6 @@ class GrinderCore:
                     break
                 else:
                     raise masscan_exception
-
 
     @exception_handler(expected_exception=GrinderCoreTlsScanner)
     def tls_scan(self, scanner_path: str) -> None:

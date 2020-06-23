@@ -166,6 +166,7 @@ class DefaultDatabaseValues:
 
     DB_NAME = "database.db"
 
+
 class TopPorts:
     MASSCAN_TOP_PORTS = [
         "1", "3", "4", "6", "7", "9", "13", "17", "19", "20", "21", "22", "23",

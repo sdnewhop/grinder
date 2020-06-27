@@ -34,8 +34,8 @@ CONTAINER ID        IMAGE                           COMMAND                  CRE
 1ebac2c5dc6e        grinder/grinder-framework:1.0   "/bin/sh /app/entryp…"   6 seconds ago       Up 5 seconds                                 grinder_framework
 33620c19ab60        grinder/grinder-map:1.0         "python3 app.py"         7 seconds ago       Up 6 seconds        0.0.0.0:5000->5000/tcp   grinder_map
 ```
-If everything is okay - congratulations! **You are ready to go.**  
-If something is wrong, see the **Troubleshooting** notes below. If you want to try different possible options of the installation, see the [Installation and running](#installation-and-running) part below.
+If everything is okay - congratulations! :sparkles: **You are ready to go.**  
+If something is wrong, see the **Troubleshooting** notes below. If you want to try different possible options of the installation, see the :point_right:[Installation and running](#installation-and-running) part below.
   
 :bulb: **Note #2 (Troubleshooting):** If something goes wrong with `./docker_build.sh` or `./docker_run.sh`, run it with `sudo`:  
 ```bash
@@ -56,13 +56,13 @@ Log out and log in to activate the group changes, and try to run the scripts aga
 ### Installation and Running Options
 To run the scan with the Grinder Framework you need to have the computer or virtual machine with installed Linux-flavoured system like Kali Linux or Ubuntu. MacOS is also ok and fully supported.
 
-The prefered way to run the Grinder Framework in case of the lab environment (or if you don't want to install all the dependencies and other things directly into your system) is to build it with Docker - for more information about this method you can follow the next section of the documentation: [Building and Running in Docker](https://github.com/sdnewhop/grinder/tree/add_labs#building-and-running-in-docker)
+The prefered way to run the Grinder Framework in case of the lab environment (or if you don't want to install all the dependencies and other things directly into your system) is to build it with Docker - for more information about this method you can follow the next section of the documentation: :point_right: [Building and Running in Docker](https://github.com/sdnewhop/grinder/tree/add_labs#building-and-running-in-docker)
 
-To install the Grinder framework with all the dependencies directly, you can follow the next section of the documentation: [Grinder Installing](https://github.com/sdnewhop/grinder/tree/add_labs#grinder-installing)
+To install the Grinder framework with all the dependencies directly, you can follow the next section of the documentation: :point_right: [Grinder Installing](https://github.com/sdnewhop/grinder/tree/add_labs#grinder-installing)
 
 ## Running and Scanning
 ### Basic Scan
-:bulb: **Note #4 (Speed):** This is the most basic scan, so depends on different reasons it might be **slow** (30-45 minutes for all 50+ products from AI-Finger). If you want to try the basic idea faster with less results, you can go to the next part below (see [Faster Scan with Less Results](#faster-scan-with-less-results))
+:bulb: **Note #4 (Speed):** This is the most basic scan, so depends on different reasons it might be **slow** (30-45 minutes for all 50+ products from AI-Finger). If you want to try the basic idea faster with less results, you can go to the next part below (see :point_right: [Faster Scan with Less Results](#faster-scan-with-less-results))
 
 To get the basic scanning results with different ML/AI solutions from the Grinder Framework you can run the following command inside the running Docker container shell (which you will get after `./docker_run.sh` running):
 ```bash
@@ -191,6 +191,33 @@ The resulting file (`all_results.json`) format can be described with the followi
     }
 ]
 ```
-The plots example from the `results/png/limited_results/`
+The plots example from the `results/png/limited_results/`. This plots were based on the data from 100 random hosts.
 
-![Results by Countries](/docs/labs/1-aisec/scan-example/assets/results_countries.png?raw=true "Results by Countries")
+![Results by Countries](/docs/labs/1-aisec-scan-example/assets/results_countries.png?raw=true "Results by Countries")
+![Results by Organizations](/docs/labs/1-aisec-scan-example/assets/results_organizations.png?raw=true "Results by Organizations")
+
+## Interactive Map
+Map starts automatically with the container. Container will expose port 5000 to the host machine, so you can get access to the map via [http://localhost:5000/](http://localhost:5000/) when scanning is finished. 
+
+Map allows you to find and sort results by vendor, products, CVEs and many other things. To do it, try to use search field in the right upper corner of the map. Also, map provides basic information about the hosts.
+
+For example:  
+1. To show only American Megatrends Megarac SP product on the map, search for it with "Megarac SP" phrase:  
+:point_right: [http://localhost:5000/search?query=Megarac+SP](http://localhost:5000/search?query=Megarac+SP)
+1. To find host by ip, you can search for it directly:  
+:point_right: [http://localhost:5000/search?query=180.150.54.99](http://localhost:5000/search?query=180.150.54.99)
+1. To search for some particular protocol, for example, `https-simple-new`:  
+:point_right: [http://localhost:5000/search?query=https-simple-new](http://localhost:5000/search?query=https-simple-new)
+
+All available routes:
+```
+Endpoint           Methods  Rule
+-----------------  -------  ---------------------------------
+api_raw_all        GET      /api/viewall
+api_raw_host       GET      /api/viewraw/<path:host_id>
+api_raw_host_ping  GET      /api/viewraw/<path:host_id>/ping
+api_update_data    GET      /update
+reset_search       GET      /reset
+root               GET      /
+search             GET      /search
+```

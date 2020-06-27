@@ -57,7 +57,7 @@ export SHODAN_API_KEY=YOUR_SHODAN_API_KEY_HERE
 ```
 7. _(Additional)_ Run any script from `/app/commands/` in your running container to start the scan
 ```bash
-./basic.sh
+./commands/basic.sh
 ```
   
 ### Troubleshooting

@@ -42,7 +42,8 @@ CONTAINER ID        IMAGE                           COMMAND                  CRE
 ```
 5. Copy scripts to the container from the other terminal window (or you can copy-paste commands from them, that will be fine too)
 ```bash
-docker cp docs/labs/1-aisec-scan-example/commands grinder_framework:/app
+(on host system)        docker cp docs/labs/1-aisec-scan-example/commands grinder_framework:/app
+(in running container)  chmod +x /app/commands/*
 ```
 6. _(Additional)_ You can set your Shodan or Censys keys as an environment variable (to skip the `-sk` key and use the Grinder Framework without this key)  
 ```bash

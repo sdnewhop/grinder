@@ -6,6 +6,8 @@ Internet census of Machine Learning and Artificial Intelligence Frameworks and A
 1. [Goals](#goals)
 1. [Prerequisites and requirements](#prerequisites-and-requirements)
 1. [Running and Scanning](#running-and-scanning)
+1. [Results](#results)
+1. [Interactive Map](#interactive-map)
 
 ## Goals 
 The goal of this lab is to reproduce the results of passive and active fingerprinting of Machine Learning and Artificial Intelligence Frameworks and Applications using a common Threat Intelligence approach and to answer the following questions:
@@ -13,6 +15,10 @@ The goal of this lab is to reproduce the results of passive and active fingerpri
 * How to detect AI/ML backed systems in the Internet and Entreprise network? 
 * Is AI/ML apps secure at Internet scale? 
 * What is AI/ML apps security level in a general sense at the present time? 
+
+## This Lab Contains
+1. This document with additional information and description
+1. Additional `.sh` script with set of different scanning commands
 
 ## Prerequisites and Requirements
 ### TL;DR
@@ -35,8 +41,9 @@ CONTAINER ID        IMAGE                           COMMAND                  CRE
 33620c19ab60        grinder/grinder-map:1.0         "python3 app.py"         7 seconds ago       Up 6 seconds        0.0.0.0:5000->5000/tcp   grinder_map
 ```
 If everything is okay - congratulations! :sparkles: **You are ready to go.**  
-If something is wrong, see the **Troubleshooting** notes below. If you want to try different possible options of the installation, see the :point_right:[Installation and running](#installation-and-running) part below.
+If something is wrong, see the **Troubleshooting** notes below. If you want to try different possible options of the installation, see the :point_right:[Installation and Running Options](#installation-and-running-options) part below.
   
+### Troubleshooting
 :bulb: **Note #2 (Troubleshooting):** If something goes wrong with `./docker_build.sh` or `./docker_run.sh`, run it with `sudo`:  
 ```bash
 sudo ./docker_build.sh
@@ -109,6 +116,21 @@ This command will do the following:
 1. `-cm 50` - limit Censys results with 50 hosts per query (if Censys keys are provided)
 1. `-vc certain` - include only trusted presice vendors
 1. `-qc certain` - include only trusted presice queries
+
+### Include Additional Checks
+You can also run an active phase scanning with Nmap Network Scanner or/and Vulners API Script. To do it, add the following keys:
+```
+  -nm, --nmap-scan      Initiate Nmap scanning
+  -nw NMAP_WORKERS, --nmap-workers NMAP_WORKERS
+                        Number of Nmap workers to scan
+  -vs, --vulners-scan   Initiate Vulners API scanning
+  -vw VULNERS_WORKERS, --vulners-workers VULNERS_WORKERS
+                        Number of Vulners workers to scan
+```
+So the Grinder Framework scanning command can be the following:
+```bash
+./grinder.py -r -u -q queries/aisec_aifinger_all.json -sk YOUR_SHODAN_API_KEY_HERE -cu -cp -ni -sm 50 -cm 50 -vc certain -qc certain -nm -nw 50 -vs -vw 50
+```
 
 ## Results
 ### Framework Output

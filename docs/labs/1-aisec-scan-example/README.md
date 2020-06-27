@@ -26,7 +26,7 @@ The goal of this lab is to reproduce the results of passive and active fingerpri
   
 1. Install [Docker](https://docs.docker.com/engine/install/ubuntu/)  
 1. Install [Docker Compose](https://docs.docker.com/compose/install/)  
-1. Clone and run the Grinder Framework  
+1. Clone and run the Grinder Framework. These commands will drop you into the running container with Grinder
 ```bash
 git clone https://github.com/sdnewhop/grinder.git
 cd grinder/
@@ -34,24 +34,26 @@ chmod +x docker_build.sh docker_run.sh
 ./docker_build.sh
 ./docker_run.sh
 ```
-4. From the other terminal window, check that services are ready  
+4. From the other terminal window, check that both services are ready and up  
 ```bash
 CONTAINER ID        IMAGE                           COMMAND                  CREATED             STATUS              PORTS                    NAMES
 1ebac2c5dc6e        grinder/grinder-framework:1.0   "/bin/sh /app/entryp…"   6 seconds ago       Up 5 seconds                                 grinder_framework
 33620c19ab60        grinder/grinder-map:1.0         "python3 app.py"         7 seconds ago       Up 6 seconds        0.0.0.0:5000->5000/tcp   grinder_map
 ```
+  
+If everything is okay here - congratulations! :sparkles: **You are ready to go.**  
+If something is wrong, see the **Troubleshooting** notes below. If you want to try different possible options of the installation, see the :point_right:[Installation and Running Options](#installation-and-running-options) part below.
+  
 5. Copy scripts to the container from the other terminal window (or you can copy-paste commands from them, that will be fine too)
 ```bash
 (on host system)        docker cp docs/labs/1-aisec-scan-example/commands grinder_framework:/app
 (in running container)  chmod +x /app/commands/*
 ```
-6. _(Additional)_ You can set your Shodan or Censys keys as an environment variable (to skip the `-sk` key and use the Grinder Framework without this key)  
+6. Set your Shodan or Censys keys as an environment variable (to skip the `-sk` key and use the Grinder Framework without this key)  
 ```bash
 export SHODAN_API_KEY=YOUR_SHODAN_API_KEY_HERE
 ```
-  
-If everything is okay - congratulations! :sparkles: **You are ready to go.**  
-If something is wrong, see the **Troubleshooting** notes below. If you want to try different possible options of the installation, see the :point_right:[Installation and Running Options](#installation-and-running-options) part below.
+7. Run any script from `/app/commands/` in your running container to start the scan
   
 ### Troubleshooting
 :bulb: **Note #2 (Troubleshooting):** If something goes wrong with `./docker_build.sh` or `./docker_run.sh`, run it with `sudo`:  

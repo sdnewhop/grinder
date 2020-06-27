@@ -5,6 +5,7 @@ Internet census of Machine Learning and Artificial Intelligence Frameworks and A
 ## Table of Contents
 1. [Goals](#goals)
 1. [Prerequisites and requirements](#prerequisites-and-requirements)
+   - :pushpin: [TL;DR (in 2 words)](#tldr)
 1. [Running and Scanning](#running-and-scanning)
 1. [Results](#results)
 1. [Interactive Map](#interactive-map)

@@ -28,7 +28,7 @@ chmod +x docker_build.sh docker_run.sh
 ./docker_build.sh
 ./docker_run.sh
 ```
-4. Check that services ready:  
+4. Check that services are ready  
 ```bash
 CONTAINER ID        IMAGE                           COMMAND                  CREATED             STATUS              PORTS                    NAMES
 1ebac2c5dc6e        grinder/grinder-framework:1.0   "/bin/sh /app/entryp…"   6 seconds ago       Up 5 seconds                                 grinder_framework
@@ -111,6 +111,7 @@ This command will do the following:
 1. `-qc certain` - include only trusted presice queries
 
 ## Results
+### Framework Output
 After running any of the commands from above, you will see the the following output (the quantity and queries is just an example, your results and output may be slightly different):
 ```
   .,-:::::/ :::::::..   ::::::.    :::.:::::::-.  .,:::::: :::::::..
@@ -144,6 +145,7 @@ File with queries: queries/aisec_aifinger_all.json
 ```
 Wait until scanning process will finish (it will take some time, which is depends on your network connection, API plan, Shodan API endpoint load etc.).
 
+### Results Structure
 When scanning process is finished, you can see the results in `grinder/results/` directory. The structure of the results is:  
 ```bash
 results
@@ -162,6 +164,7 @@ Structure can be described as:
 1. `json` - all results in `JSON` format representation
 1. `png` - different plots and graphics
 
+### Results Format
 The resulting file (`all_results.json`) format can be described with the following example:
 ```json
 [

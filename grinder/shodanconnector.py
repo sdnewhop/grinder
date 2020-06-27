@@ -13,7 +13,7 @@ class ShodanConnector:
     def __init__(self, api_key=DefaultValues.SHODAN_API_KEY):
         self.api = Shodan(api_key)
         self.results: list = []
-        self.onehost_result = {}
+        self.one_host_result = {}
         self.shodan_results_count: int = 0
         self.real_results_count: int = 0
 
@@ -86,16 +86,16 @@ class ShodanConnector:
             host["ip_str"]: host["vulns"] for host in self.results if host.get("vulns")
         }
 
-    def get_onehost_result(self) -> dict:
+    def get_one_host_result(self) -> dict:
         """
         Return results in dict
         :return: host info
         """
-        return self.onehost_result
+        return self.one_host_result
 
     def get_host_info(self, host_address: str):
         try:
             self.shodan_host_info = self.api.host(host_address, history=False)
-            self.onehost_result = self.shodan_host_info
+            self.one_host_result = self.shodan_host_info
         except (APIError, APITimeout) as api_error:
             print(f"Shodan API error: {api_error}")

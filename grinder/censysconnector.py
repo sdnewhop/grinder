@@ -136,7 +136,7 @@ class CensysConnector:
         """
         return self.censys_results_count
     
-    def get_onehost_result(self) -> dict:
+    def get_one_host_result(self) -> dict:
         """
         Return results in dict
         :return: view of host

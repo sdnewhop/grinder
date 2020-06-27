@@ -8,8 +8,8 @@ from typing import NamedTuple, List, Dict
 from termcolor import cprint
 from re import findall
 from ntpath import basename
-import requests
 import dns.resolver
+import nmap
 
 # from enforce import runtime_validation
 
@@ -71,7 +71,7 @@ from grinder.pyscriptexecutor import PyScriptExecutor
 from grinder.nmapscriptexecutor import NmapScriptExecutor
 from grinder.tlsscanner import TlsScanner
 from grinder.tlsparser import TlsParser
-import csv
+from grinder.nmapconnector import NmapConnector
 
 
 class HostInfo(NamedTuple):
@@ -138,28 +138,31 @@ class GrinderCore:
         Save all information about host/domain. 
         return: results of shodan and censys search in json
         """
-
         shodan = ShodanConnector(api_key=self.shodan_api_key)
         shodan.get_host_info(host_address)
-        shodan_raw_results = shodan.get_onehost_result()
+        shodan_raw_results = shodan.get_one_host_result()
 
         with open("results_shodan.json", "a") as write_file:
             json.dump(shodan_raw_results, write_file, indent=2)
 
         censys = CensysConnector(api_id=self.censys_api_id, api_secret=self.censys_api_secret)
         censys.get_host_info(host_address)
-        censys_raw_results = censys.get_onehost_result()
+        censys_raw_results = censys.get_one_host_result()
 
         with open("results_censys.json", "a") as write_file:
             json.dump(censys_raw_results, write_file, indent=2)
 
+        nmScan = nmap.PortScanner()
+        ans = nmScan.scan(host_address, '22-443')
+        
+        with open("results_nmap.json", "a") as write_file:
+            json.dump(ans, write_file, indent=2)
 
     def one_host(self, host_address: str) -> List[dict]:
         """
         Search in shodan and censys database with 
         one_host methods in ShodanConnector and CensysConnector modules
         """
-
         if self.shodan_api_key == "YOUR_DEFAULT_API_KEY":
             print(f"│ Shodan key is not defined. Skip scan.")
             print(f"└ ", end="")
@@ -183,7 +186,7 @@ class GrinderCore:
             for answer in resolveds:
                 print(answer)
                 self.__handle_one_address(str(answer))
-
+        
     @timer
     @exception_handler(expected_exception=GrinderCoreSearchError)
     def shodan_search(self, query: str, results_count: int = None) -> List[dict]:
@@ -692,7 +695,7 @@ class GrinderCore:
         cprint("Save all results...", "blue", attrs=["bold"])
 
         # If all scan results were empty
-        if not self.combined_results and not self.shodan_processed_results and not self.censys_processed_results and not self.onehost_scan_result:
+        if not self.combined_results and not self.shodan_processed_results and not self.censys_processed_results:
             return
         # If some results are exists, but combined results are empty - refresh it
         elif not self.combined_results:

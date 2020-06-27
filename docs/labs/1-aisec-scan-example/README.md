@@ -191,3 +191,6 @@ The resulting file (`all_results.json`) format can be described with the followi
     }
 ]
 ```
+The plots example from the `results/png/limited_results/`
+
+![Results by Countries](/docs/labs/1-aisec/scan-example/assets/results_countries.png?raw=true "Results by Countries")

@@ -18,7 +18,7 @@ The goal of this lab is to reproduce the results of passive and active fingerpri
 
 ## This Lab Contains
 1. This document with additional information and description
-1. Additional `.sh` script with set of different scanning commands
+1. Additional `.sh` scripts with set of different scanning commands
 
 ## Prerequisites and Requirements
 ### TL;DR
@@ -34,12 +34,21 @@ chmod +x docker_build.sh docker_run.sh
 ./docker_build.sh
 ./docker_run.sh
 ```
-4. Check that services are ready  
+4. From the other terminal window, check that services are ready  
 ```bash
 CONTAINER ID        IMAGE                           COMMAND                  CREATED             STATUS              PORTS                    NAMES
 1ebac2c5dc6e        grinder/grinder-framework:1.0   "/bin/sh /app/entryp…"   6 seconds ago       Up 5 seconds                                 grinder_framework
 33620c19ab60        grinder/grinder-map:1.0         "python3 app.py"         7 seconds ago       Up 6 seconds        0.0.0.0:5000->5000/tcp   grinder_map
 ```
+5. Copy scripts to the container from the other terminal window (or you can copy-paste commands from them, that will be fine too)
+```bash
+docker cp docs/labs/1-aisec-scan-example/commands grinder_framework:/app
+```
+6. _(Additional)_ You can set your Shodan or Censys keys as an environment variable (to skip the `-sk` key and use the Grinder Framework without this key)  
+```bash
+export SHODAN_API_KEY=YOUR_SHODAN_API_KEY_HERE
+```
+  
 If everything is okay - congratulations! :sparkles: **You are ready to go.**  
 If something is wrong, see the **Troubleshooting** notes below. If you want to try different possible options of the installation, see the :point_right:[Installation and Running Options](#installation-and-running-options) part below.
   

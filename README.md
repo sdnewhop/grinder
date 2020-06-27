@@ -9,12 +9,13 @@
   
 ## Screenshot
 <div align="center">
-  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/screenshot.png" alt="Grinder Framework Interface">
+  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/images/screenshot.png" alt="Grinder Framework Interface">
   <p align="center"><i>The basic CLI interface of the Grinder Framework</i></p>
 </div> 
   
 ## Table of Contents
 1. [Description](#description)
+1. [Slides](#slides)
 1. [Grinder Workflow](#grinder-workflow)
 1. [Grinder Map](#grinder-map)
    - [Screenshots](#screenshots)
@@ -63,17 +64,20 @@ The Grinder framework was created to automatically enumerate and fingerprint dif
   
 The Grinder framework can be used in many different areas of research, as a connected Python module in your project or as an independent ready-to-use from the box tool. 
   
+## Slides
+1. One framework to rule them all: a framework for Internet-connected device census. PHDays 2019. ([Talk Page](http://2019.phdays.com/en/program/reports/one-framework-to-rule-them-all-a-framework-for-internet-connected-device-census/), [Slides](/docs/slides/phdays-9-one-framework-to-rule-them-all-a-framework-for-internet-connected-device-census.pdf))
+1. One Framework to rule them all: A framework for Internet-connected Device Census. OFFZONE 2019. ([Talk Page](https://2019.offzone.moscow/report/one-framework-to-rule-them-all-a-framework-for-internet-connected-device-census/), [Slides](/docs/slides/offzone-grinder-2019.pdf))
 ## Grinder Workflow
-![Grinder Workflow](/docs/workflow.png?raw=true "Grinder Workflow")
+![Grinder Workflow](/docs/images/workflow.png?raw=true "Grinder Workflow")
   
 ## Grinder Map
 ### Screenshots
 <div align="center">
-  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/map_1.png" alt="Grinder Framework Map (1)">
+  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/images/map_1.png" alt="Grinder Framework Map (1)">
   <p align="center"><i>The Grinder Framework can easily build an interactive map with found hosts in your browser</i></p>
-  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/map_2.png" alt="Grinder Framework Map (2)">
+  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/images/map_2.png" alt="Grinder Framework Map (2)">
   <p align="center"><i>Also, the Grinder Framework can show you some basic information</i></p>
-  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/map_3.png" alt="Grinder Framework Map (3)">
+  <img src="https://raw.githubusercontent.com/sdnewhop/grinder/master/docs/images/map_3.png" alt="Grinder Framework Map (3)">
   <p align="center"><i>...And some additional information</i></p>
 </div> 
   

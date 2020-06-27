@@ -12,9 +12,9 @@ Internet census of Machine Learning and Artificial Intelligence Frameworks and A
 ## Goals 
 The goal of this lab is to reproduce the results of passive and active fingerprinting of Machine Learning and Artificial Intelligence Frameworks and Applications using a common Threat Intelligence approach and to answer the following questions:
 
-* How to detect AI/ML backed systems in the Internet and Entreprise network? 
-* Is AI/ML apps secure at Internet scale? 
-* What is AI/ML apps security level in a general sense at the present time? 
+* How to detect AI/ML backed systems in the Internet and Enterprise network? 
+* Are AI/ML apps secure at Internet scale? 
+* What is AI/ML apps security level in a general sense at present? 
 
 ## This Lab Contains
 1. This document with additional information and description
@@ -22,7 +22,7 @@ The goal of this lab is to reproduce the results of passive and active fingerpri
 
 ## Prerequisites and Requirements
 ### TL;DR
-:bulb: **Note #1:** The fastest and recommended  way
+:bulb: **Note #1:** The fastest and recommended way
   
 1. Install [Docker](https://docs.docker.com/engine/install/ubuntu/)  
 1. Install [Docker Compose](https://docs.docker.com/compose/install/)  
@@ -43,8 +43,8 @@ CONTAINER ID        IMAGE                           COMMAND                  CRE
 ![Running Services](/docs/labs/1-aisec-scan-example/assets/services_up.png?raw=true "Running services")
 
   
-If everything is okay here - **congratulations!** :sparkles: Continue with steps 5-7.  
-If something is wrong, see the :point_right: [Troubleshooting](#troubleshooting) notes below. If you want to try different possible options of the installation, see the :point_right: [Installation and Running Options](#installation-and-running-options) part below.
+If everything is okay there - **congratulations!** :sparkles: Continue with steps 5-7.  
+If something is wrong, see the :point_right: [Troubleshooting](#troubleshooting) notes below. If you want to try different possible options for the installation, see the :point_right: [Installation and Running Options](#installation-and-running-options) part below.
   
 5. _(Additional)_ Copy scripts to the container from the other terminal window (or you can copy-paste commands from them, that will be fine too)
 ```bash
@@ -78,15 +78,15 @@ Log out and log in to activate the group changes, and try to run the scripts aga
 ./docker_run.sh
 ```
 ### Installation and Running Options
-To run the scan with the Grinder Framework you need to have the computer or virtual machine with installed Linux-flavoured system like Kali Linux or Ubuntu. MacOS is also ok and fully supported.
+To run the scan with the Grinder Framework you need to have the computer or virtual machine with installed Linux-flavoured systems like Kali Linux or Ubuntu. MacOS is also ok and fully supported.
 
-The prefered way to run the Grinder Framework in case of the lab environment (or if you don't want to install all the dependencies and other things directly into your system) is to build it with Docker - for more information about this method you can follow the next section of the documentation: :point_right: [Building and Running in Docker](https://github.com/sdnewhop/grinder/tree/add_labs#building-and-running-in-docker)
+The preferred way to run the Grinder Framework in case of the lab environment (or if you don't want to install all the dependencies and other things directly into your system) is to build it with Docker - for more information about this method you can follow the next section of the documentation: :point_right: [Building and Running in Docker](https://github.com/sdnewhop/grinder/tree/add_labs#building-and-running-in-docker)
 
 To install the Grinder framework with all the dependencies directly, you can follow the next section of the documentation: :point_right: [Grinder Installing](https://github.com/sdnewhop/grinder/tree/add_labs#grinder-installing)
 
 ## Running and Scanning
 ### Basic Scan
-:bulb: **Note #4 (Speed):** This is the most basic scan, so depends on different reasons it might be **slow** (30-45 minutes for all 50+ products from AI-Finger). If you want to try the basic idea faster with less results, you can go to the next part below (see :point_right: [Faster Scan with Less Results](#faster-scan-with-less-results))
+:bulb: **Note #4 (Speed):** This is the most basic scan, so depends on different reasons it might be **slow** (30-45 minutes for all 50+ products from AI-Finger). If you want to try the basic idea faster with fewer results, you can go to the next part below (see :point_right: [Faster Scan with Fewer Results](#faster-scan-with-fewer-results))
 
 To get the basic scanning results with different ML/AI solutions from the Grinder Framework you can run the following command inside the running Docker container shell (which you will get after `./docker_run.sh` running):
 ```bash
@@ -101,7 +101,7 @@ This command will do the following:
 1. `-cp` - create graphical plots to visualize the unique data
 1. `-ni` - not increment any previous results (because for now we don't have any earlier results)
   
-:bulb: **Note #5 (Censys Scan):** If you also have Censys API keys with paid plan, you can add it with the following keys:
+:bulb: **Note #5 (Censys Scan):** If you also have Censys API account with a paid plan, you can add it with the following keys:
 ```
   -ci CENSYS_ID, --censys-id CENSYS_ID
                         Censys API ID key
@@ -116,7 +116,7 @@ This command will do the following:
                         Shodan default maximum results quantity (for example, --shodan-max 50)
 ```
   
-### Faster Scan with Less Results
+### Faster Scan with Fewer Results
 To get the faster scanning process with different ML/AI solutions from the Grinder Framework you can run the following command inside the running Docker container shell (which you will get after `./docker_run.sh` running):
 ```bash
 ./grinder.py -r -u -q queries/aisec_aifinger_all.json -sk YOUR_SHODAN_API_KEY_HERE -cu -cp -ni -sm 50 -cm 50 -vc certain -qc certain
@@ -151,7 +151,7 @@ So the Grinder Framework scanning command can be the following:
 
 ## Results
 ### Framework Output
-After running any of the commands from above, you will see the the following output (the quantity and queries is just an example, your results and output may be slightly different):
+After running any of the commands from above, you will see the following output (the quantity and queries are just an example, your results and console output may be slightly different):
 ```
   .,-:::::/ :::::::..   ::::::.    :::.:::::::-.  .,:::::: :::::::..
 ,;;-'````'  ;;;;``;;;;  ;;;`;;;;,  `;;; ;;,   `';,;;;;'''' ;;;;``;;;;
@@ -182,10 +182,10 @@ File with queries: queries/aisec_aifinger_all.json
 
 ...
 ```
-Wait until scanning process will finish (it will take some time, which is depends on your network connection, API plan, Shodan API endpoint load etc.).
+Wait until the scanning process will finish (it will take some time, which depends on your network connection, API plan, Shodan API endpoint load, etc.).
 
 ### Results Structure
-When scanning process is finished, you can see the results in `grinder/results/` directory. The structure of the results is:  
+When the scanning process is finished, you can see the results in `grinder/results/` directory. The structure of the results is:  
 ```bash
 results
 ├── csv
@@ -196,9 +196,9 @@ results
 
 5 directories
 ```
-:bulb: **Note #7 (Recommended Representation):** `JSON` format is prefereble representation for the results. Main file that include all the results is `results/json/all_results.json`
+:bulb: **Note #7 (Recommended Representation):** `JSON` format is a preferable representation for the results. The main file that includes all the results is `results/json/all_results.json`
 
-Structure can be described as:
+The structure can be described as:
 1. `csv` - all results in `CSV` format representation
 1. `json` - all results in `JSON` format representation
 1. `png` - different plots and graphics
@@ -236,14 +236,14 @@ The plots example from the `results/png/limited_results/`. This plots were based
 ![Results by Organizations](/docs/labs/1-aisec-scan-example/assets/results_organizations.png?raw=true "Results by Organizations")
 
 ## Interactive Map
-Map starts automatically with the container. Container will expose port 5000 to the host machine, so you can get access to the map via [http://localhost:5000/](http://localhost:5000/) when scanning is finished. 
+The map service starts automatically with the container. The container will expose port 5000 to the host machine, so you can get access to the map via [http://localhost:5000/](http://localhost:5000/) when scanning is finished. 
 
-Map allows you to find and sort results by vendor, products, CVEs and many other things. To do it, try to use search field in the right upper corner of the map. Also, map provides basic information about the hosts.
+The map service allows you to find and sort results by a vendor, products, CVEs, and many other things. To do it, try to use the search field in the right upper corner of the map. Also, the map service provides basic information about the hosts.
 
 For example:  
 1. To show only American Megatrends Megarac SP product on the map, search for it with "Megarac SP" phrase:  
 :point_right: [http://localhost:5000/search?query=Megarac+SP](http://localhost:5000/search?query=Megarac+SP)
-1. To find host by ip, you can search for it directly:  
+1. To find a host by IP, you can search for it directly:  
 :point_right: [http://localhost:5000/search?query=180.150.54.99](http://localhost:5000/search?query=180.150.54.99)
 1. To search for some particular protocol, for example, `https-simple-new`:  
 :point_right: [http://localhost:5000/search?query=https-simple-new](http://localhost:5000/search?query=https-simple-new)

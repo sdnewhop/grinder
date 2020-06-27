@@ -82,6 +82,10 @@ To visualize gained data, the Grinder Framework provides an interactive world ma
   
 For example, the hosts will be automatically checked for availability with ping from back-end, also for every host many additional features are available: current host can be directly opened in Shodan, Censys, and ZoomEye web interfaces, the host can be shown on Google Maps with all available information about geolocation. Also, it is possible to make an IP lookup or open raw information in JSON directly in a browser or from your application with provided API methods.
   
+## Slides
+1. One framework to rule them all: a framework for Internet-connected device census. PHDays 2019. ([Talk Page](http://2019.phdays.com/en/program/reports/one-framework-to-rule-them-all-a-framework-for-internet-connected-device-census/), [Video](https://www.youtube.com/watch?v=YY9lmk7gaTU&feature=youtu.be), [Slides](https://static.ptsecurity.com/phdays/presentations/phdays-9-one-framework-to-rule-them-all-a-framework-for-internet-connected-device-census.pdf))
+1. One Framework to rule them all: A framework for Internet-connected Device Census. OFFZONE 2019. ([Talk Page](https://2019.offzone.moscow/report/one-framework-to-rule-them-all-a-framework-for-internet-connected-device-census/), [Slides](...))
+  
 ## Requirements
 ### Legend
 :heavy_exclamation_mark: required  

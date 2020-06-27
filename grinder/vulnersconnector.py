@@ -292,7 +292,7 @@ class VulnersConnector:
                 continue
             print(
                 f" - Found {len(cve_references)} exploits for {cve_without_filter} "
-                f"({index}/{length_of_right_filters}, total CVEs: {len(exploits.keys())})"
+                f"({index + 1}/{length_of_right_filters}, total CVEs: {len(exploits.keys())})"
             )
             if not cve_references:
                 continue

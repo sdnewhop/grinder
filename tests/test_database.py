@@ -106,6 +106,7 @@ def test_database_existing_tables(connection: Connection_instance) -> None:
             ("scan_data",),
             ("shodan_results",),
             ("censys_results",),
+            ("masscan_results",),
         ]
     )
 
@@ -187,6 +188,29 @@ def test_database_existing_censys_results_columns(
     """
     assert sorted(
         connection.execute("PRAGMA table_info(censys_results)").fetchall()
+    ) == sorted(
+        [
+            (0, "id", "INTEGER", 0, None, 1),
+            (1, "scan_data_id", "INTEGER", 0, None, 0),
+            (2, "scan_information_id", "INTEGER", 0, None, 0),
+            (3, "query", "TEXT", 0, None, 0),
+            (4, "query_confidence", "TEXT", 0, None, 0),
+            (5, "results_count", "INTEGER", 0, None, 0),
+            (6, "results", "TEXT", 0, None, 0),
+        ]
+    )
+
+
+def test_database_existing_masscan_results_columns(
+    connection: Connection_instance
+) -> None:
+    """
+    Check column names of 'masscan_results' table
+    :param connection: sqlite3.Connection object
+    :return: None
+    """
+    assert sorted(
+        connection.execute("PRAGMA table_info(masscan_results)").fetchall()
     ) == sorted(
         [
             (0, "id", "INTEGER", 0, None, 1),
@@ -536,6 +560,76 @@ def test_add_censys_scan_data_success(connection: Connection_instance) -> None:
     assert loads(censys_data_results[6]) == [{"ip": "66.66.66.66"}]
 
 
+def test_add_masscan_scan_data_error(connection: Connection_instance) -> None:
+    """
+    Check if we can properly handle errors that will be raised
+    with add scan data method
+    :param connection: sqlite3.Connection object
+    :return: None
+    """
+    connection_backup = db.connection
+    db.connection = None
+
+    def add_scan_data():
+        db.add_masscan_scan_data(
+            query={},
+            results_count=0,
+            results=[],
+        )
+
+    with raises(GrinderDatabaseAddScanDataError):
+        add_scan_data()
+    with raises(GrinderDatabaseException):
+        add_scan_data()
+    db.connection = connection_backup
+
+
+def test_add_masscan_scan_data_success(connection: Connection_instance) -> None:
+    """
+    This test checks if we can successfully put scan data
+    results into database (for Masscan in this case)
+    :param connection: sqlite3.Connection object
+    :return: None
+    """
+    scan_data_values = [
+        {
+            "query": {"hosts": "88.88.88.88"},
+            "results_count": 1,
+            "results": [{"ip": "88.88.88.88"}]
+        },
+        {
+            "query": {"hosts": "99.99.99.99"},
+            "results_count": 2,
+            "results": [{"ip": "99.99.99.99"}]
+        },
+        {
+            "query": {"hosts": "10.10.10.10"},
+            "results_count": 3,
+            "results": [{"ip": "10.10.10.10"}]
+        }
+    ]
+    for scan_data_value in scan_data_values:
+        db.add_masscan_scan_data(
+            **scan_data_value
+        )
+    masscan_data_results = connection.execute(
+        """
+        SELECT * FROM masscan_results 
+        WHERE id = (
+            SELECT max(id) 
+            FROM masscan_results
+        )
+        """
+    ).fetchall()[0]
+    assert isinstance(masscan_data_results[0], int)
+    assert isinstance(masscan_data_results[1], int)
+    assert isinstance(masscan_data_results[2], int)
+    assert masscan_data_results[3] == "10.10.10.10"
+    assert masscan_data_results[4] is None
+    assert masscan_data_results[5] == 3
+    assert loads(masscan_data_results[6]) == [{"ip": "10.10.10.10"}]
+
+
 def test_load_last_results_error() -> None:
     """
     Check if we can correctly catch exceptions
@@ -565,7 +659,10 @@ def test_load_last_results_success() -> None:
         "33.33.33.33": {"ip": "33.33.33.33"},
         "44.44.44.44": {"ip": "44.44.44.44"},
         "55.55.55.55": {"ip": "55.55.55.55"},
-        "66.66.66.66": {"ip": "66.66.66.66"}
+        "66.66.66.66": {"ip": "66.66.66.66"},
+        "88.88.88.88": {"ip": "88.88.88.88"},
+        "99.99.99.99": {"ip": "99.99.99.99"},
+        "10.10.10.10": {"ip": "10.10.10.10"},
     }
 
 
@@ -589,7 +686,7 @@ def test_load_last_results_by_name_error() -> None:
 def test_load_last_results_by_name_success() -> None:
     """
     Check if we can successfully load all last results
-    by name from different backend engines (Shodan, Censys)
+    by name from different backend engines (Shodan, Censys, Masscan)
     :return: None
     """
     assert db.load_last_results_by_name(
@@ -605,6 +702,13 @@ def test_load_last_results_by_name_success() -> None:
         "44.44.44.44": {"ip": "44.44.44.44"},
         "55.55.55.55": {"ip": "55.55.55.55"},
         "66.66.66.66": {"ip": "66.66.66.66"}
+    }
+    assert db.load_last_results_by_name(
+        scan_name="pytest", engine_table="masscan_results"
+    ) == {
+        "88.88.88.88": {"ip": "88.88.88.88"},
+        "99.99.99.99": {"ip": "99.99.99.99"},
+        "10.10.10.10": {"ip": "10.10.10.10"}
     }
     assert (
         db.load_last_results_by_name(
@@ -665,6 +769,22 @@ def test_load_all_results_by_name_censys_success() -> None:
     }
 
 
+def test_load_all_results_by_name_masscan_success() -> None:
+    """
+    This test checks if we can successfully
+    load latest scan results from Masscan
+    :return: None
+    """
+    assert db.load_all_results_by_name(
+        scan_name="pytest", engine_table="masscan_results"
+    ) == {
+        "88.88.88.88": {"ip": "88.88.88.88"},
+        "99.99.99.99": {"ip": "99.99.99.99"},
+        "10.10.10.10": {"ip": "10.10.10.10"}
+    }
+
+
+
 def test_load_multiple_last_results_by_name_error() -> None:
     """
     This test checks if we will catch proper
@@ -684,7 +804,7 @@ def test_load_multiple_last_results_by_name_error() -> None:
 def test_load_multiple_last_resuls_by_name_success() -> None:
     """
     This test checks if we can successfully load
-    _all_ latest results from Shodan and Censys
+    _all_ latest results from Shodan, Censys and Masscan
     that connected with last scan.
     :return: None
     """
@@ -694,7 +814,10 @@ def test_load_multiple_last_resuls_by_name_success() -> None:
         "33.33.33.33": {"ip": "33.33.33.33"},
         "44.44.44.44": {"ip": "44.44.44.44"},
         "55.55.55.55": {"ip": "55.55.55.55"},
-        "66.66.66.66": {"ip": "66.66.66.66"}
+        "66.66.66.66": {"ip": "66.66.66.66"},
+        "88.88.88.88": {"ip": "88.88.88.88"},
+        "99.99.99.99": {"ip": "99.99.99.99"},
+        "10.10.10.10": {"ip": "10.10.10.10"}
     }
 
 
@@ -708,10 +831,13 @@ def test_custom_database_getters_handlers_error() -> None:
     possible_functions = [
         db.load_last_shodan_results,
         db.load_last_censys_results,
+        db.load_last_masscan_results,
         db.load_last_shodan_results_by_scan_name,
         db.load_last_censys_results_by_scan_name,
+        db.load_last_masscan_results_by_scan_name,
         db.load_all_shodan_results_by_scan_name,
         db.load_all_censys_results_by_scan_name,
+        db.load_all_masscan_results_by_scan_name,
     ]
     for function in possible_functions:
         connection_backup = db.connection
@@ -744,6 +870,11 @@ def test_custom_database_getters_handlers_success() -> None:
         "55.55.55.55": {"ip": "55.55.55.55"},
         "66.66.66.66": {"ip": "66.66.66.66"}
     }
+    assert db.load_last_masscan_results() == {
+        "88.88.88.88": {"ip": "88.88.88.88"},
+        "99.99.99.99": {"ip": "99.99.99.99"},
+        "10.10.10.10": {"ip": "10.10.10.10"}
+    }
 
 
 def test_initiate_one_more_scan_results() -> None:
@@ -767,6 +898,7 @@ def test_initiate_one_more_scan_results() -> None:
     )
     db.add_shodan_scan_data(**another_results)
     db.add_censys_scan_data(**another_results)
+    db.add_masscan_scan_data(**another_results)
     db.update_results_count(total_products=42, total_results=1337)
     db.update_end_time()
     assert db.load_last_shodan_results_by_scan_name() == {
@@ -775,10 +907,16 @@ def test_initiate_one_more_scan_results() -> None:
     assert db.load_last_censys_results_by_scan_name() == {
         "77.77.77.77": {"ip": "77.77.77.77"}
     }
+    assert db.load_last_masscan_results_by_scan_name() == {
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
     assert db.load_all_shodan_results_by_scan_name() == {
         "77.77.77.77": {"ip": "77.77.77.77"}
     }
     assert db.load_all_censys_results_by_scan_name() == {
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+    assert db.load_all_masscan_results_by_scan_name() == {
         "77.77.77.77": {"ip": "77.77.77.77"}
     }
     assert db.load_all_results_by_name(engine_table="censys_results") == {
@@ -791,6 +929,12 @@ def test_initiate_one_more_scan_results() -> None:
         "11.11.11.11": {"ip": "11.11.11.11"},
         "22.22.22.22": {"ip": "22.22.22.22"},
         "33.33.33.33": {"ip": "33.33.33.33"},
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
+    assert db.load_all_results_by_name(engine_table="masscan_results") == {
+        "88.88.88.88": {"ip": "88.88.88.88"},
+        "99.99.99.99": {"ip": "99.99.99.99"},
+        "10.10.10.10": {"ip": "10.10.10.10"},
         "77.77.77.77": {"ip": "77.77.77.77"}
     }
 
@@ -810,6 +954,9 @@ def test_change_scan_name_results() -> None:
     assert db.load_all_results_by_name(engine_table="shodan_results", scan_name="another_test") == {
         "77.77.77.77": {"ip": "77.77.77.77"}
     }
+    assert db.load_all_results_by_name(engine_table="masscan_results", scan_name="another_test") == {
+        "77.77.77.77": {"ip": "77.77.77.77"}
+    }
     assert db.load_all_results_by_name(engine_table="censys_results", scan_name="pytest") == {
         "44.44.44.44": {"ip": "44.44.44.44"},
         "55.55.55.55": {"ip": "55.55.55.55"},
@@ -819,4 +966,9 @@ def test_change_scan_name_results() -> None:
         "11.11.11.11": {"ip": "11.11.11.11"},
         "22.22.22.22": {"ip": "22.22.22.22"},
         "33.33.33.33": {"ip": "33.33.33.33"}
+    }
+    assert db.load_all_results_by_name(engine_table="masscan_results", scan_name="pytest") == {
+        "88.88.88.88": {"ip": "88.88.88.88"},
+        "99.99.99.99": {"ip": "99.99.99.99"},
+        "10.10.10.10": {"ip": "10.10.10.10"}
     }

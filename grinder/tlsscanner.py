@@ -125,7 +125,7 @@ class TlsScanner:
         groups_len = len(groups)
 
         for index, group in enumerate(groups):
-            print(f"│ Do pingscan for {self.n} hosts ({index}/{groups_len})")
+            print(f"│ Do pingscan for {self.n} hosts ({index + 1}/{groups_len})")
             group_ips = [ip for ip in group if ip]
             hosts_in_nmap_format = " ".join(group_ips)
             nm.scan(
@@ -327,7 +327,7 @@ class TlsScanner:
         for index, host_port in enumerate(self.alive_hosts_with_ports.items()):
             host, port = host_port
             cprint(
-                f"Start TLS scan for {index} from {alive_hosts_quantity} hosts",
+                f"Start TLS scan for {index + 1} from {alive_hosts_quantity} hosts",
                 "blue",
                 attrs=["bold"],
             )

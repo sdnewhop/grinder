@@ -27,6 +27,19 @@ class CensysConnectorException(Exception):
         return f"Error occured in Censys Connector module: {self._error_args}"
 
 
+class MasscanConnectorException(Exception):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(self)
+        self._error_args = error_args
+
+    @property
+    def error_args(self):
+        return self._error_args
+
+    def __str__(self):
+        return f"Error occured in Masscan Connector module: {self._error_args}"
+
+
 class NmapConnectorException(Exception):
     def __init__(self, error_args: Exception or str):
         super().__init__(self)
@@ -175,7 +188,9 @@ class PyScriptExecutorRunProcessError(PyScriptExecutoryProcessingManagerExceptio
         super().__init__(error_args)
 
 
-class PyScriptExecutorOrganizeProcessesError(PyScriptExecutoryProcessingManagerException):
+class PyScriptExecutorOrganizeProcessesError(
+    PyScriptExecutoryProcessingManagerException
+):
     def __init__(self, error_args: Exception or str):
         super().__init__(error_args)
 
@@ -267,6 +282,26 @@ class CensysConnectorGetResultsError(CensysConnectorException):
         super().__init__(error_args)
 
 
+class MasscanConnectorInitError(MasscanConnectorException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
+
+
+class MasscanConnectorScanError(MasscanConnectorException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
+
+
+class MasscanConnectorGetResultsCountError(MasscanConnectorException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
+
+
+class MasscanConnectorGetResultsError(MasscanConnectorException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
+
+
 class NmapConnectorInitError(NmapConnectorException):
     def __init__(self, error_args: Exception or str):
         super().__init__(error_args)
@@ -333,6 +368,11 @@ class GrinderCoreHostShodanResultsError(GrinderCoreException):
 
 
 class GrinderCoreHostCensysResultsError(GrinderCoreException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
+
+
+class GrinderCoreHostMasscanResultsError(GrinderCoreException):
     def __init__(self, error_args: Exception or str):
         super().__init__(error_args)
 
@@ -447,12 +487,22 @@ class GrinderCoreCensysSaveToDatabaseError(GrinderCoreException):
         super().__init__(error_args)
 
 
+class GrinderCoreMasscanSaveToDatabaseError(GrinderCoreException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
+
+
 class GrinderCoreSaveResultsToDatabaseError(GrinderCoreException):
     def __init__(self, error_args: Exception or str):
         super().__init__(error_args)
 
 
 class GrinderCoreNmapScanError(GrinderCoreException):
+    def __init__(self, error_args: Exception or str):
+        super().__init__(error_args)
+
+
+class GrinderCoreMasscanScanError(GrinderCoreException):
     def __init__(self, error_args: Exception or str):
         super().__init__(error_args)
 

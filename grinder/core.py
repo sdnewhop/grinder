@@ -10,6 +10,7 @@ from re import findall
 from ntpath import basename
 import dns.resolver
 import nmap
+import os
 
 # from enforce import runtime_validation
 
@@ -142,20 +143,20 @@ class GrinderCore:
         shodan.get_host_info(host_address)
         shodan_raw_results = shodan.get_one_host_result()
 
-        with open("results_shodan.json", "a") as write_file:
+        with open("./one-host-results/reresults_shodan.json", "a") as write_file:
             json.dump(shodan_raw_results, write_file, indent=2)
 
         censys = CensysConnector(api_id=self.censys_api_id, api_secret=self.censys_api_secret)
         censys.get_host_info(host_address)
         censys_raw_results = censys.get_one_host_result()
 
-        with open("results_censys.json", "a") as write_file:
+        with open("./one-host-results/results_censys.json", "a") as write_file:
             json.dump(censys_raw_results, write_file, indent=2)
 
         nmScan = nmap.PortScanner()
         ans = nmScan.scan(host_address, '22-443')
         
-        with open("results_nmap.json", "a") as write_file:
+        with open("./one-host-results/results_nmap.json", "a") as write_file:
             json.dump(ans, write_file, indent=2)
 
     def one_host(self, host_address: str) -> List[dict]:
@@ -175,6 +176,13 @@ class GrinderCore:
             print(f"│ Censys key is not defined. Skip scan.")
             print(f"└ ", end="")
             return []
+
+        try:
+            os.mkdir("one-host-results")
+        except OSError:
+            print("error")
+        except FileExistsError:
+            pass
 
         print(host_address)
 

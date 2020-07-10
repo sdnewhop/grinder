@@ -477,21 +477,32 @@ class GrinderCore:
         }
 
     @exception_handler(expected_exception=GrinderCoreLoadResultsFromDbError)
-    def load_results_from_db(self) -> list or dict:
+    def load_results_from_db(self, queries_filename: str) -> list or dict:
         """
         Load saved results of latest previous scan from database
-
+        :param queries_filename: name of file with queries to load
         :return: processed search results
         """
-        try:
-            self.combined_results = self.db.load_last_results()
-            self.shodan_processed_results = self.db.load_last_shodan_results()
-            self.censys_processed_results = self.db.load_last_censys_results()
-
-            print("Results of latest scan was successfully loaded from database.")
-            return self.combined_results
-        except GrinderDatabaseLoadResultsError:
-            print("Database empty or latest scan data was not found. Abort.")
+        if queries_filename:
+            try:
+                self.db.set_scan_name(self.__separate_filename_wo_extension(queries_filename))
+                self.__increment_prev_scan_results()
+            except GrinderCoreLoadResultsFromDbError:
+                self.combined_results = {}
+                self.shodan_processed_results = {}
+                self.censys_processed_results = {}
+            else:
+                print("Previous scan for this queries list was successfully loaded from database.")
+                return self.combined_results
+        else:
+            try:
+                self.combined_results = self.db.load_last_results()
+                self.shodan_processed_results = self.db.load_last_shodan_results()
+                self.censys_processed_results = self.db.load_last_censys_results()
+                print("Results of latest scan was successfully loaded from database.")
+                return self.combined_results
+            except GrinderDatabaseLoadResultsError:
+                print("Database empty or latest scan data was not found. Abort.")
 
     @exception_handler(expected_exception=GrinderCoreLoadResultsError)
     def load_results(self) -> list:

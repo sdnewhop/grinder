@@ -144,6 +144,10 @@ class GrinderFileManager:
             writer = DictWriter(result_csv_file, fieldnames=maximum_fields.keys())
             writer.writeheader()
             for row in results_to_write:
+                try:
+                    del row["additional_info"]
+                except:
+                    pass
                 writer.writerow(row)
 
     @exception_handler(expected_exception=GrinderFileManagerOpenError)

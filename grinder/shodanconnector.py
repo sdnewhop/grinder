@@ -2,6 +2,7 @@
 
 from shodan import Shodan
 from shodan.exception import APIError, APITimeout
+from itertools import islice
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultValues
@@ -47,7 +48,8 @@ class ShodanConnector:
         :return: None
         """
         try:
-            self.results = list(self.api.search_cursor(query))[:max_records]
+            results_generator = self.api.search_cursor(query, minify=True)
+            self.results = list(islice(results_generator, max_records))
             self._remove_unused_fields_in_vulns()
             self.shodan_results_count = self.api.count(query).get("total")
         except (APIError, APITimeout) as api_error:

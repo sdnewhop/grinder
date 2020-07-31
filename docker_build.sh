@@ -1,2 +1,3 @@
-mkdir results/
-docker build -t grinder-framework .
+#!/usr/bin/env sh
+
+docker-compose build

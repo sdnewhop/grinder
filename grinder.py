@@ -2,11 +2,28 @@
 
 import sys
 
+from multiprocessing import freeze_support
+
 from grinder.asciiart import AsciiOpener
-from grinder.core import GrinderCore
 from grinder.interface import GrinderInterface
 
+
+class GrinderProcessWrap:
+    """
+    Fix Processes "RuntimeError" related
+    to bootstrapping phase (MacOS case)
+    """
+
+    @staticmethod
+    def import_core():
+        freeze_support()
+        from grinder.core import GrinderCore as _core
+
+        return _core
+
+
 if __name__ == "__main__":
+    GrinderCore = GrinderProcessWrap.import_core()
     AsciiOpener.print_opener()
     interface = GrinderInterface()
     interface.check_python_version()
@@ -36,11 +53,10 @@ if __name__ == "__main__":
 
     search_results = (
         core.batch_search(
-            queries_filename=args.queries_file,
-            not_incremental=args.not_incremental
+            queries_filename=args.queries_file, not_incremental=args.not_incremental
         )
         if args.run
-        else core.load_results()
+        else core.load_results(queries_filename=args.queries_file)
     )
 
     if not search_results:
@@ -48,6 +64,12 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print(f"Total results: {len(search_results)}")
+
+    # Save checkpoint
+    if args.run:
+        core.save_results_to_database(close=False)
+        core.save_results()
+
     if args.vulners_scan:
         core.vulners_scan(
             top_ports=args.top_ports,
@@ -63,7 +85,11 @@ if __name__ == "__main__":
     if args.tls_scan:
         core.tls_scan(args.tls_scan_path)
     if args.script_check:
-        core.run_scripts(queries_filename=args.queries_file)
+        core.run_scripts(
+            queries_filename=args.queries_file,
+            workers=args.script_workers,
+            mute=args.script_mute,
+        )
     if args.count_unique:
         core.count_unique_entities("product")
         core.count_unique_entities("vendor")

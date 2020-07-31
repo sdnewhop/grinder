@@ -52,6 +52,13 @@ class DefaultValues:
     PNG_TLS_PRODUCTS_BY_BUGS: str = "tls_products_by_bugs"
 
 
+class DefaultScriptCheckerValues:
+    """
+    Default values for script scanners
+    """
+    WORKERS = 50
+
+
 class DefaultTlsParserValues:
     """
     Default values for TLS-Parser
@@ -108,7 +115,7 @@ class DefaultNmapScanValues:
     TOP_PORTS = None
     SUDO = False
     HOST_TIMEOUT = 30
-    ARGUMENTS = "-Pn -T4 -A"
+    ARGUMENTS = "-Pn -T4 -A --open"
     WORKERS = 10
 
 
@@ -118,7 +125,7 @@ class DefaultProcessManagerValues:
     """
     PORTS = None
     SUDO = False
-    ARGUMENTS = "-Pn -A"
+    ARGUMENTS = "-Pn -A --open"
     WORKERS = 10
 
 

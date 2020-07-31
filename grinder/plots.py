@@ -1,24 +1,34 @@
 #!/usr/bin/env python3
 
-from matplotlib import use as mpl_use
 from sys import platform
 from os import environ
-
-# Fix possible problems with Mac OS X venv backend
-if platform == "darwin":
-    mpl_use("TkAgg")
-    environ.update({"TK_SILENCE_DEPRECATION": "1"})
-
-from matplotlib import pyplot as plot
 
 from grinder.decorators import exception_handler
 from grinder.defaultvalues import DefaultPlotValues, DefaultValues
 from grinder.errors import (
-    GrinderPlotsAdjustAutopctError,
     GrinderPlotsCreatePieChartError,
     GrinderPlotsSavePieChartError,
 )
 from grinder.filemanager import GrinderFileManager
+
+
+class MatplotWrap:
+    """
+    Fork lock bypass for mac OS systems.
+    We try to import the matplot library only when it is really used.
+    """
+    @staticmethod
+    def use_matplot():
+        from matplotlib import use as mpl_use
+
+        # Fix possible problems with Mac OS X venv backend
+        if platform == "darwin":
+            mpl_use("TkAgg")
+            environ.update({"TK_SILENCE_DEPRECATION": "1"})
+
+        from matplotlib import pyplot as _plot
+        global plot
+        plot = _plot
 
 
 class GrinderPlots:
@@ -48,21 +58,6 @@ class GrinderPlots:
             )
             self.plot.close()
 
-    @exception_handler(expected_exception=GrinderPlotsAdjustAutopctError)
-    def __adjust_autopct(self, values: list):
-        """
-        Percents adjuster to show on plot
-        :param values: values to adjust
-        :return: function of adjustment
-        """
-
-        def percent_and_count(pct):
-            total = sum(values)
-            val = int(round(pct * total / 100.0))
-            return f"{pct:1.1f}%\n({val:d})"
-
-        return percent_and_count
-
     @exception_handler(expected_exception=GrinderPlotsCreatePieChartError)
     def create_pie_chart(self, results: dict, suptitle: str) -> None:
         """
@@ -72,6 +67,9 @@ class GrinderPlots:
         :param suptitle: suptitle of plot
         :return: None
         """
+        # Import and initialize matplot on-the-go
+        MatplotWrap.use_matplot()
+
         if not results.values():
             return
         values = [value for value in results.values()]

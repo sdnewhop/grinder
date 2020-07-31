@@ -2,7 +2,7 @@
 
 import sys
 from functools import wraps
-from os import path, makedirs, system
+from os import system
 from time import time, strftime, gmtime
 
 

@@ -1,1 +1,19 @@
-docker run -it --rm --volume $(pwd)/results:/code/results --volume $(pwd)/map:/code/map grinder-framework -h
+#!/usr/bin/env sh
+
+# Create markers file if it not exists
+if [ ! -e ./map/static/data/markers.json ]; then
+  echo "[]" > ./map/static/data/markers.json
+fi
+
+# Create database file if it not exists
+if [ ! -e database.db ]; then
+	touch ./database.db
+fi
+
+# Create required directories
+mkdir -p ./results/
+mkdir -p ./map/static/data/
+
+# Run it all
+docker-compose up -d map
+docker-compose run --rm --name grinder_framework grinder

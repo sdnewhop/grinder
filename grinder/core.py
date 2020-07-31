@@ -23,6 +23,7 @@ from grinder.defaultvalues import (
     DefaultValues,
     DefaultNmapScanValues,
     DefaultVulnersScanValues,
+    DefaultScriptCheckerValues,
 )
 from grinder.errors import (
     GrinderCoreSearchError,
@@ -68,7 +69,7 @@ from grinder.nmapprocessmanager import NmapProcessingManager
 from grinder.plots import GrinderPlots
 from grinder.shodanconnector import ShodanConnector
 from grinder.utils import GrinderUtils
-from grinder.pyscriptexecutor import PyScriptExecutor
+from grinder.pyscriptexecutor import PyProcessingManager
 from grinder.nmapscriptexecutor import NmapScriptExecutor
 from grinder.tlsscanner import TlsScanner
 from grinder.tlsparser import TlsParser
@@ -390,13 +391,19 @@ class GrinderCore:
             if not vulnerabilities:
                 continue
 
-            shodan_vulnerabilities = vulnerabilities.get("shodan_vulnerabilities")
-            if shodan_vulnerabilities:
-                shodan_cve_list = list(shodan_vulnerabilities.keys())
+            try:
+                shodan_vulnerabilities = vulnerabilities.get("shodan_vulnerabilities")
+                if shodan_vulnerabilities:
+                    shodan_cve_list = list(shodan_vulnerabilities.keys())
+            except:
+                pass
 
-            vulners_vulnerabilities = vulnerabilities.get("vulners_vulnerabilities")
-            if vulners_vulnerabilities:
-                vulners_cve_list = list(vulners_vulnerabilities.keys())
+            try:
+                vulners_vulnerabilities = vulnerabilities.get("vulners_vulnerabilities")
+                if vulners_vulnerabilities:
+                    vulners_cve_list = list(vulners_vulnerabilities.keys())
+            except:
+                pass
 
             # If nothing was found from Shodan or Vulners for current host
             if not (shodan_cve_list or vulners_cve_list):
@@ -472,8 +479,9 @@ class GrinderCore:
         #     ...
         # }
         self.combined_results = {
-            **self.shodan_processed_results,
+            **self.combined_results,
             **self.censys_processed_results,
+            **self.shodan_processed_results,
         }
 
     @exception_handler(expected_exception=GrinderCoreLoadResultsFromDbError)
@@ -505,13 +513,14 @@ class GrinderCore:
                 print("Database empty or latest scan data was not found. Abort.")
 
     @exception_handler(expected_exception=GrinderCoreLoadResultsError)
-    def load_results(self) -> list:
+    def load_results(self, queries_filename: str = "") -> list:
         """
         Load saved results from file or from database (any)
 
+        :param queries_filename: name of file with queries to load
         :return: processed search results
         """
-        return self.load_results_from_file() or self.load_results_from_db()
+        return self.load_results_from_file() or self.load_results_from_db(queries_filename)
 
     @exception_handler(expected_exception=GrinderCoreSaveVulnersResultsError)
     def save_vulners_results(self,
@@ -767,9 +776,11 @@ class GrinderCore:
         :param ip: host ip
         :return: answer to question "Is current host already scanned?"
         """
-        return self.shodan_processed_results.get(
-            ip
-        ) or self.censys_processed_results.get(ip)
+        return (
+            ip in self.shodan_processed_results.keys()
+            or ip in self.censys_processed_results.keys()
+            or ip in self.combined_results.keys()
+        )
 
     def set_unique_entities_quantity(self, max_entities: int) -> None:
         """
@@ -999,10 +1010,11 @@ class GrinderCore:
         )
 
     @exception_handler(expected_exception=GrinderCoreSaveResultsToDatabaseError)
-    def save_results_to_database(self):
+    def save_results_to_database(self, close: bool = True):
         """
         Save all results to database
 
+        :param close: Should we close current database connection or not
         :return: None
         """
         cprint("Save all results to database...", "blue", attrs=["bold"])
@@ -1017,7 +1029,8 @@ class GrinderCore:
             total_products=len(self.queries_file),
             total_results=len(self.combined_results),
         )
-        self.__close_database()
+        if close is True:
+            self.__close_database()
 
     def __is_query_confidence_valid(self, query_confidence: str) -> bool:
         """
@@ -1220,6 +1233,9 @@ class GrinderCore:
             self.shodan_processed_results[host]["nmap_scan"] = nmap_results.get(host)
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["nmap_scan"] = nmap_results.get(host)
+        # Trigger to update overall results (shodan + censys as combined results)
+        for host in self.combined_results.keys():
+            self.combined_results[host]["nmap_scan"] = nmap_results.get(host)
 
     @exception_handler(expected_exception=GrinderCoreVulnersScanError)
     def vulners_scan(
@@ -1252,7 +1268,7 @@ class GrinderCore:
 
         # Check for top-ports if defined
         arguments = (
-            f"-Pn -sV --script=.{vulners_path} --host-timeout {str(host_timeout)}s"
+            f"-Pn -sV --open --script=.{vulners_path} --host-timeout {str(host_timeout)}s"
         )
         if top_ports:
             arguments = f"{arguments} --top-ports {str(top_ports)}"
@@ -1296,6 +1312,12 @@ class GrinderCore:
             )
         for host in self.censys_processed_results.keys():
             self.censys_processed_results[host]["vulnerabilities"].update(
+                {"vulners_vulnerabilities": hosts_vulners.get(host)}
+            )
+        # Trigger to update combined results, for example, when shodan and censys results
+        # are empty
+        for host in self.combined_results.keys():
+            self.combined_results[host]["vulnerabilities"].update(
                 {"vulners_vulnerabilities": hosts_vulners.get(host)}
             )
 
@@ -1406,27 +1428,14 @@ class GrinderCore:
             )
         )
 
-    @exception_handler(expected_exception=GrinderCoreRunScriptsError)
-    def run_scripts(self, queries_filename: str):
+    def __run_nse_scripts(self, workers: int, mute: bool) -> None:
         """
-        Initiate script execution
+        Run Nmap scripts per host
 
-        :param queries_filename: name of json file with input data
-            such as queries (shodan_queries, censys_queries, etc.)
-        :return None
+        :param workers: quantity of processes to scan with (placeholder for now)
+        :param mute: suppress stdout/stderr output or not (placeholder for now)
+        :return: None
         """
-        cprint("Start Custom Scripts scanning", "blue", attrs=["bold"])
-        if not self.queries_file:
-            try:
-                self.queries_file = self.filemanager.get_queries(
-                    queries_file=queries_filename
-                )
-            except GrinderFileManagerOpenError:
-                print(
-                    "Oops! File with queries was not found. Create it or set name properly."
-                )
-                return
-
         # Search for compatible script
         results_len = len(self.combined_results.keys())
         for index, (ip, host_info) in enumerate(self.combined_results.items()):
@@ -1442,18 +1451,6 @@ class GrinderCore:
                 continue
 
             cur_position = f"{index}/{results_len}"
-            py_script = scripts.get("py_script")
-            if py_script:
-                py_script_res = PyScriptExecutor.run_script(host_info, py_script)
-                if not py_script_res:
-                    print(f"[{cur_position}] [PyExecutor: Empty output] Script {py_script} done for {ip}")
-                else:
-                    print(f"[{cur_position}] [PyExecutor: Successful] Script {py_script} done for {ip}")
-                    if py_script_res:
-                        self.combined_results[ip]["scripts"][
-                            "py_script"
-                        ] = py_script_res
-
             nse_script = scripts.get("nse_script")
             if nse_script:
                 nse_script_res = NmapScriptExecutor.run_script(host_info, nse_script)
@@ -1467,6 +1464,83 @@ class GrinderCore:
                         self.combined_results[ip]["scripts"][
                             "nse_script"
                         ] = nse_script_res
+
+    def __run_py_scripts(self, workers: int, mute: bool) -> None:
+        """
+        Run python scripts in batch mode
+
+        :param workers: quantity of processes to scan with
+        :param mute: suppress stdout/stderr output or not
+        :return: None
+        """
+        # Reduce original queries to smaller dict with scripts
+        py_scripts_per_product = {f"{product.get('vendor', 'unknown')}:{product.get('product', 'unknown')}":
+                                  product.get('scripts', {}).get('py_script')
+                                  for product in self.queries_file
+                                  if product.get('scripts', {}).get('py_script')}
+
+        # Compare ips to required scripts
+        py_ip_script_mapping = dict()
+        for ip, host_info in self.combined_results.items():
+            compatible_script = py_scripts_per_product.get(f"{host_info.get('vendor')}:{host_info.get('product')}")
+            if not compatible_script:
+                continue
+            py_ip_script_mapping.update({ip: compatible_script})
+
+        # Run scripts
+        py_runner = PyProcessingManager(ip_script_mapping=py_ip_script_mapping,
+                                        hosts_info=self.combined_results,
+                                        workers=workers,
+                                        mute=mute)
+        py_runner.start()
+        scripts_results = py_runner.get_results()
+
+        # Store retrieved results
+        for ip, result in scripts_results.items():
+            try:
+                self.combined_results[ip]["scripts"]["py_script"] = result
+            except:
+                # In case if we can't index like that in combined_results
+                # or our in-results are too old and not fully correct
+                continue
+
+    @exception_handler(expected_exception=GrinderCoreRunScriptsError)
+    def run_scripts(self,
+                    queries_filename: str,
+                    workers: int = DefaultScriptCheckerValues.WORKERS,
+                    mute: bool = False) -> None:
+        """
+        Initiate script execution
+
+        :param queries_filename: name of json file with input data
+            such as queries (shodan_queries, censys_queries, etc.)
+        :param workers: quantity of workers to use with scripts
+        :param mute: suppress stdout/stderr output or not
+        :return None
+        """
+        cprint("Start Custom Scripts scanning", "blue", attrs=["bold"])
+        self.__check_if_queryfile_loaded(queries_filename)
+        self.__run_nse_scripts(workers, mute)
+        self.__run_py_scripts(workers, mute)
+
+    def __check_if_queryfile_loaded(self, queries_filename: str) -> None:
+        """
+        Check if file with queries successfully loaded
+
+        :param queries_filename: name of file with queries to load if
+            current is empty
+        :return: None
+        """
+        if not self.queries_file:
+            try:
+                self.queries_file = self.filemanager.get_queries(
+                    queries_file=queries_filename
+                )
+            except GrinderFileManagerOpenError:
+                print(
+                    "Oops! File with queries was not found. Create it or set name properly."
+                )
+                return
 
     @staticmethod
     def __separate_filename_wo_extension(original_filepath: str) -> str:
@@ -1525,7 +1599,6 @@ class GrinderCore:
             )
             print(f"Error message: {open_err.error_args}")
             return self.combined_results
-
         self.__filter_queries_by_vendor_confidence()
         self.__filter_queries_by_vendors()
         if not self.queries_file:

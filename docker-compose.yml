@@ -2,20 +2,27 @@ version: "3.7"
 
 services:
   tls-scanner:
+    image: grinder/tls-scanner:2.9
     build:
       context: docker/grinder
       target: tls-scanner-build
-    image: grinder/tls-scanner:2.9
   grinder:
+    image: grinder/grinder-framework:1.0
+    container_name: grinder_framework
     build:
       context: .
       target: grinder-framework-build
       dockerfile: docker/grinder/Dockerfile
-    image: grinder/grinder-framework:1.0
-    container_name: grinder_framework
+    environment:
+      OBJC_DISABLE_INITIALIZE_FORK_SAFETY: "YES"
+      SHODAN_API_KEY: ${SHODAN_API_KEY:-YOUR_SHODAN_API_KEY_HERE}
+      CENSYS_API_ID: ${CENSYS_API_ID:-YOUR_CENSYS_API_ID_HERE}
+      CENSYS_API_SECRET: ${CENSYS_API_SECRET:-YOUR_CENSYS_API_SECRET_HERE}
+      VULNERS_API_KEY: ${VULNERS_API_KEY:-YOUR_VULNERS_API_KEY_HERE}
     volumes:
       - "./database.db:/app/database.db"
       - "./results:/app/results"
+      - "./tests:/app/tests"
       - "./queries:/app/queries"
       - "./custom_scripts:/app/custom_scripts"
       - "./map/static/data:/app/map/static/data"
@@ -25,12 +32,12 @@ services:
       - 1.1.1.1
       - 1.0.0.1
   map:
+    image: grinder/grinder-map:1.0
+    container_name: grinder_map
     build:
       context: .
       target: grinder-map-build
       dockerfile: docker/map/Dockerfile
-    image: grinder/grinder-map:1.0
-    container_name: grinder_map
     volumes:
       - "./map/static/data:/app/static/data"
     ports:

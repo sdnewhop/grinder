@@ -45,17 +45,17 @@ def test_censysconnector_init_invalid_api(capsys) -> None:
         assert expected_output in output
 
 
-def test_censysconnector_init_not_configured_api(capsys) -> None:
-    """
-    Check that user will be noticed in case when
-    censys API ID or API SECRET is totally empty
-    :param capsys: catch output of the function
-    :return: None
-    """
-    CensysConnector(api_id=None, api_secret=None)
-    output = capsys.readouterr().out
-    for expected_output in ["Censys API error", "401 (None)"]:
-        assert expected_output in output
+# def test_censysconnector_init_not_configured_api(capsys) -> None:
+#     """
+#     Check that user will be noticed in case when
+#     censys API ID or API SECRET is totally empty
+#     :param capsys: catch output of the function
+#     :return: None
+#     """
+#     CensysConnector(api_id=None, api_secret=None)
+#     output = capsys.readouterr().out
+#     for expected_output in ["Censys API error", "401 (None)"]:
+#         assert expected_output in output
 
 
 def test_censysconnector_init_valid_api(

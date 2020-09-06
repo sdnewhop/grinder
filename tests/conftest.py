@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+from os import environ
+
 
 def pytest_addoption(parser):
-    parser.addoption("--censys_id", action="store", default="YOUR_CENSYS_ID")
-    parser.addoption("--censys_secret", action="store", default="YOUR_CENSYS_SECRET")
-    parser.addoption("--shodan_key", action="store", default="YOUR_SHODAN_KEY")
-    parser.addoption("--vulners_key", action="store", default="YOUR_VULNERS_KEY")
+    parser.addoption("--censys_id", action="store", default=environ.get("CENSYS_API_ID", "YOUR_CENSYS_ID"))
+    parser.addoption("--censys_secret", action="store", default=environ.get("CENSYS_API_SECRET", "YOUR_CENSYS_SECRET"))
+    parser.addoption("--shodan_key", action="store", default=environ.get("SHODAN_API_KEY", "YOUR_SHODAN_KEY"))
+    parser.addoption("--vulners_key", action="store", default=environ.get("VULNERS_API_KEY", "YOUR_VULNERS_KEY"))
 
 
 def pytest_generate_tests(metafunc):

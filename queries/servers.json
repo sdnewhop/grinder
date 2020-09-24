@@ -4,60 +4,71 @@
         "product":"Apache HTTP Server",
         "shodan_queries":[
             {
-                "query":"Apache",
+                "query":"\"Server: Apache/2.4.41 (Unix)\" \"200 OK\"",
                 "query_confidence":"certain"
+            },
+            {
+                "query":"\"Server: Apache/2.4.41\"",
+                "query_confidence":"firm"
+            },
+            {
+                "query":"\"Server: Apache\"",
+                "query_confidence":"tentative"
             }
         ],
         "censys_queries":[
             {
-                "query":"Apache",
+                "query":"(443.https.get.status_code: 200 or 80.http.get.status_code: 200) and (80.http.get.headers.server: \"Apache/2.4.41 (Unix)\" or 443.https.get.headers.server: \"Apache/2.4.41 (Unix)\")",
                 "query_confidence":"certain"
+            },
+            {
+                "query":"80.http.get.headers.server: \"Apache/2.4.41 (Unix)\" or 443.https.get.headers.server: \"Apache/2.4.41 (Unix)\"",
+                "query_confidence":"firm"
+            },
+            {
+                "query":"80.http.get.headers.server: \"Apache\" or 443.https.get.headers.server: \"Apache\"",
+                "query_confidence":"tentative"
             }
         ],
         "scripts":{
-            "py_script":"http_status/http_status.py",
+            "py_script":{
+                "grabber":"http_response_grabber/http_response_grabber.py",
+                "status":"http_status/http_status.py",
+                "test":"test/test.py"
+            },
             "nse_script":""
         },
         "vendor_confidence":"certain"
     },
     {
-        "vendor":"Nginx",
+        "vendor":"F5 Networks",
         "product":"Nginx",
         "shodan_queries":[
             {
-                "query":"Nginx",
+                "query":"\"Server: Nginx/1.16.1\" \"200 OK\"",
                 "query_confidence":"certain"
+            },
+            {
+                "query":"\"Server: Nginx/1.16.1\"",
+                "query_confidence":"firm"
+            },
+            {
+                "query":"Server: Nginx",
+                "query_confidence":"tentative"
             }
         ],
         "censys_queries":[
             {
-                "query":"Nginx",
+                "query":"(443.https.get.status_code: 200 or 80.http.get.status_code: 200) and (80.http.get.headers.server: \"Nginx/1.16.1\" or 443.https.get.headers.server: \"Nginx/1.16.1\")",
                 "query_confidence":"certain"
-            }
-        ],
-        "scripts":{
-            "py_script":[
-                "http_response_grabber/http_response_grabber.py",
-                "http_status/http_status.py",
-                "test/test.py"
-            ],
-            "nse_script":""
-        },
-        "vendor_confidence":"certain"
-    },
-    {
-        "vendor":"Flask",
-        "product":"Flask",
-        "shodan_queries":[
+            },
             {
-                "query":"Flask",
-                "query_confidence":"certain"
-            }
-        ],
-        "censys_queries":[
+                "query":"80.http.get.headers.server: \"Nginx/1.16.1\" or 443.https.get.headers.server: \"Nginx/1.16.1\"",
+                "query_confidence":"firm"
+            },
             {
-                "query":"Flask",
-                "query_confidence":"certain"
+                "query":"80.http.get.headers.server: \"Nginx\" or 443.https.get.headers.server: \"Nginx\"",
+                "query_confidence":"tentative"
             }
         ],
         "scripts":{

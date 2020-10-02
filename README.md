@@ -37,6 +37,7 @@
    - [Description](#description)
    - [Services and Images](#services-and-images)
    - [Provided Scripts and Preparations](#provided-scripts-and-preparations)
+   - [Environment](#environment)
    - :pushpin: [Building](#building)
    - :pushpin: [Running](#running)
 1. [Tests](#tests)
@@ -270,6 +271,24 @@ The Grinder Framework also supports building as a set of Docker images: one for 
 To make the building process simple and convenient, a set of scripts provided in the repository to simplify routine actions.
 - `docker_build.sh` script simply runs `docker-compose build`, so you can do it by yourself.
 - `docker_run.sh` prepare all the required files and directories to link your host files with the ones in containers.
+
+### Environment
+First of all, you need to provide all the required environment variables via the `.env` or `docker-compose` file itself.
+
+Required variables are (`docker-compose`):
+```
+SHODAN_API_KEY: ${SHODAN_API_KEY:-YOUR_SHODAN_API_KEY_HERE}
+CENSYS_API_ID: ${CENSYS_API_ID:-YOUR_CENSYS_API_ID_HERE}
+CENSYS_API_SECRET: ${CENSYS_API_SECRET:-YOUR_CENSYS_API_SECRET_HERE}
+VULNERS_API_KEY: ${VULNERS_API_KEY:-YOUR_VULNERS_API_KEY_HERE}
+```
+Or in the same way for the `.env` file:
+```
+SHODAN_API_KEY=...
+CENSYS_API_ID=...
+CENSYS_API_SECRET=...
+VULNERS_API_KEY=...
+```
   
 ### Building
 To build the Grinder Framework as an Alpine-based set of Docker images you can use the script `docker_build.sh`:
@@ -284,7 +303,7 @@ To run the Grinder Framework with all included services (Map, Framework and TLS-
 chmod +x docker_run.sh
 ./docker_run.sh
 ```
-After that, you can open map at `http://localhost:5000/`, shell of the Grinder Framework will be automatically open inside the container. All the data will be saved on your hosts directly via Docker volumes.
+After that, you can open map at `http://localhost:5000/`, shell of the Grinder Framework will be automatically open inside the container. All the data will be saved on your hosts directly via Docker volumes and mappings.
 
 ## Tests
 To run basic tests for different scanning and analytics modules, you need to change directory to `tests/`:

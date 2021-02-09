@@ -113,7 +113,7 @@ class DefaultNmapScanValues:
     PORTS = None
     TOP_PORTS = None
     SUDO = False
-    HOST_TIMEOUT = 30
+    HOST_TIMEOUT = 60
     ARGUMENTS = "-Pn -T4 -A --open"
     WORKERS = 10
 
